@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
-import { GoogleMap, useJsApiLoader, Marker } from "@react-google-maps/api";
+import { useJsApiLoader } from "@react-google-maps/api";
 import { Button } from "@/components/ui/button";
 import {
   Card,
