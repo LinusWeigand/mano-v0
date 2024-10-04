@@ -37,7 +37,10 @@ export default function Header() {
           </div>
           <div className="hidden md:block">
             <div className="flex items-center space-x-4">
-              <Link href="#" className="text-gray-600 hover:text-gray-900">
+              <Link
+                href="/profil"
+                className="text-gray-600 hover:text-gray-900"
+              >
                 Werde Handwerker
               </Link>
               <Link href="#" className="text-gray-600 hover:text-gray-900">

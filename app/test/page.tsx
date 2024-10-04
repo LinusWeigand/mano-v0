@@ -30,6 +30,7 @@ import {
   Globe,
   Instagram,
   MapPin,
+  Image as ImageIcon,
 } from "lucide-react";
 
 const mapContainerStyle = {
@@ -48,9 +49,9 @@ export default function CraftsmanProfile() {
     "personal"
   );
   const [skills, setSkills] = useState<string[]>([
-    "Holzmöbel",
-    "Küchen",
-    "Badezimmer",
+    "Woodworking",
+    "Metalwork",
+    "Leathercraft",
   ]);
   const [newSkill, setNewSkill] = useState("");
   const [location, setLocation] = useState(center);
@@ -110,7 +111,7 @@ export default function CraftsmanProfile() {
                 onClick={() => setProfileType("personal")}
                 className="rounded-full"
               >
-                Handwerker
+                Personal Profile
               </Button>
               <div className="w-px h-4 bg-border mx-2" />
               <Button
@@ -119,12 +120,14 @@ export default function CraftsmanProfile() {
                 onClick={() => setProfileType("professional")}
                 className="rounded-full"
               >
-                Gewerk
+                Professional Profile
               </Button>
             </div>
           </div>
           <CardTitle className="text-2xl font-bold text-center">
-            {profileType === "personal" ? "Profil" : "Profil"}
+            {profileType === "personal"
+              ? "Craftsman Profile"
+              : "Company Profile"}
           </CardTitle>
           <div className="flex justify-between mt-2">
             {Array.from({ length: totalSteps }).map((_, index) => (
@@ -143,76 +146,110 @@ export default function CraftsmanProfile() {
         <CardContent>
           {step === 1 && (
             <div className="space-y-4">
+              <div className="text-center">
+                <div className="w-32 h-32 rounded-full bg-gray-200 mx-auto mb-4 flex items-center justify-center">
+                  {profileType === "personal" ? (
+                    <Camera className="w-8 h-8 text-gray-400" />
+                  ) : (
+                    <Building2 className="w-8 h-8 text-gray-400" />
+                  )}
+                </div>
+                <Button variant="outline" size="sm">
+                  Add {profileType === "personal" ? "Profile" : "Company"} Photo
+                </Button>
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="name">
-                  {profileType === "personal" ? "Name" : "Gewerks Name"}
+                  {profileType === "personal" ? "Full Name" : "Company Name"}
                 </Label>
                 <Input
                   id="name"
                   placeholder={
-                    profileType === "personal"
-                      ? "Max Zimmer"
-                      : "Holzrausch GmbH."
+                    profileType === "personal" ? "John Doe" : "Crafts Co. Ltd."
                   }
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="profession">
-                  {profileType === "personal" ? "Handwerk" : "Handwerk"}
+                  {profileType === "personal" ? "Profession" : "Industry"}
                 </Label>
                 <Input
                   id="profession"
                   placeholder={
                     profileType === "personal"
-                      ? "e.g. Schreiner, Zimmerer"
-                      : "e.g. Schreinerei, Zimmerei"
+                      ? "e.g. Carpenter, Blacksmith"
+                      : "e.g. Furniture Manufacturing, Metalworking"
                   }
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="website">Webseite (Optional)</Label>
+                <Label htmlFor="website">Website (Optional)</Label>
                 <div className="relative">
-                  <Globe className="absolute left-1 top-1 h-4 w-4 text-muted-foreground" />
+                  <Globe className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="website"
                     className="pl-8"
-                    placeholder="https://deine-webseite.de"
+                    placeholder="https://yourwebsite.com"
                   />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="instagram">Instagram (Optional)</Label>
                 <div className="relative">
-                  <Instagram className="absolute left-1 top-1 h-4 w-4 text-muted-foreground" />
+                  <Instagram className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="instagram"
                     className="pl-8"
-                    placeholder="@nutzername"
+                    placeholder="@yourusername"
                   />
                 </div>
               </div>
+              {profileType === "professional" && (
+                <div className="space-y-2">
+                  <Label htmlFor="location">Company Location</Label>
+                  {isLoaded ? (
+                    <GoogleMap
+                      mapContainerStyle={mapContainerStyle}
+                      center={location}
+                      zoom={10}
+                      onClick={onMapClick}
+                    >
+                      <Marker position={location} />
+                    </GoogleMap>
+                  ) : (
+                    <div className="h-[200px] bg-gray-200 flex items-center justify-center">
+                      <MapPin className="w-8 h-8 text-gray-400" />
+                    </div>
+                  )}
+                  <p className="text-sm text-muted-foreground">
+                    Click on the map to set your company's location
+                  </p>
+                </div>
+              )}
             </div>
           )}
           {step === 2 && (
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="bio">
-                  {profileType === "personal" ? "Über mich" : "Über das Gewerk"}
+                  {profileType === "personal"
+                    ? "About Me"
+                    : "About the Company"}
                 </Label>
                 <Textarea
                   id="bio"
                   placeholder={
                     profileType === "personal"
-                      ? "Erzähl uns über dich und dein Handwerk..."
-                      : "Erzähl uns über dein Gewerk und dessen Spezialitäten..."
+                      ? "Tell us about yourself and your craft..."
+                      : "Tell us about your company and its specialties..."
                   }
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="experience">
                   {profileType === "personal"
-                    ? "Erfahrungsjahre"
-                    : "Geschäftsjahre"}
+                    ? "Years of Experience"
+                    : "Years in Business"}
                 </Label>
                 <Input id="experience" type="number" placeholder="10" />
               </div>
@@ -244,14 +281,14 @@ export default function CraftsmanProfile() {
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button variant="outline" size="sm">
-                      <Plus className="w-4 h-4 mr-1" /> Hinzufügen{" "}
+                      <Plus className="w-4 h-4 mr-1" /> Add{" "}
+                      {profileType === "personal" ? "Skill" : "Service"}
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
                       <DialogTitle>
-                        Add{" "}
-                        {profileType === "personal" ? "Fähigkeit" : "Service"}
+                        Add {profileType === "personal" ? "Skill" : "Service"}
                       </DialogTitle>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
@@ -267,45 +304,25 @@ export default function CraftsmanProfile() {
                         />
                       </div>
                     </div>
-                    <Button onClick={addSkill}>Hinzufügen</Button>
+                    <Button onClick={addSkill}>Add</Button>
                   </DialogContent>
                 </Dialog>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="specialties">
-                  {profileType === "personal" ? "Spezialitäten" : "Kompetenzen"}
+                  {profileType === "personal"
+                    ? "Specialties"
+                    : "Core Competencies"}
                 </Label>
                 <Textarea
                   id="specialties"
                   placeholder={
                     profileType === "personal"
-                      ? "Beschreibe deine einzigartigen Fähigkeiten und Techniken..."
-                      : "Beschreibe die einzigarten Fähigkeiten und Angebotr deines Gewerks..."
+                      ? "Describe your unique skills or techniques..."
+                      : "Describe your company's unique capabilities or offerings..."
                   }
                 />
               </div>
-              {profileType === "professional" && (
-                <div className="space-y-2">
-                  <h3 className="font-semibold">Gewerks Standort</h3>
-                  {isLoaded ? (
-                    <GoogleMap
-                      mapContainerStyle={mapContainerStyle}
-                      center={location}
-                      zoom={10}
-                      onClick={onMapClick}
-                    >
-                      <Marker position={location} />
-                    </GoogleMap>
-                  ) : (
-                    <div className="h-[200px] bg-gray-200 flex items-center justify-center">
-                      <MapPin className="w-8 h-8 text-gray-400" />
-                    </div>
-                  )}
-                  <p className="text-sm text-muted-foreground">
-                    Klicke auf die Karte und setze dein Gewerks Standort
-                  </p>
-                </div>
-              )}
             </div>
           )}
           {step === 4 && (
@@ -334,7 +351,7 @@ export default function CraftsmanProfile() {
                     onClick={() => fileInputRef.current?.click()}
                   >
                     <Plus className="w-6 h-6 mb-1" />
-                    Foto hinzufügen
+                    Add Photo
                   </Button>
                 )}
               </div>
@@ -348,14 +365,14 @@ export default function CraftsmanProfile() {
               />
               <div className="space-y-2">
                 <Label htmlFor="portfolio-description">
-                  Portfolio Beschreibung
+                  Portfolio Description
                 </Label>
                 <Textarea
                   id="portfolio-description"
                   placeholder={
                     profileType === "personal"
-                      ? "Beschreibe dein bestes Projekt..."
-                      : "Beschreibe dein bestes Projekt..."
+                      ? "Describe your best works..."
+                      : "Showcase your company's notable projects..."
                   }
                 />
               </div>
@@ -365,15 +382,15 @@ export default function CraftsmanProfile() {
         <CardFooter className="flex justify-between">
           {step > 1 && (
             <Button onClick={prevStep} variant="outline">
-              <ChevronLeft className="w-4 h-4 mr-1" /> Zurück
+              <ChevronLeft className="w-4 h-4 mr-1" /> Back
             </Button>
           )}
           {step < totalSteps ? (
             <Button onClick={nextStep} className="ml-auto">
-              Weiter <ChevronRight className="w-4 h-4 ml-1" />
+              Next <ChevronRight className="w-4 h-4 ml-1" />
             </Button>
           ) : (
-            <Button className="ml-auto">Profil abschließen</Button>
+            <Button className="ml-auto">Complete Profile</Button>
           )}
         </CardFooter>
       </Card>
