@@ -105,7 +105,7 @@ export default function Profil({ onClose }: ProfilProps) {
   };
 
   const handleFinish = () => {
-    router.push("/");
+    onClose(false);
   };
 
   return (

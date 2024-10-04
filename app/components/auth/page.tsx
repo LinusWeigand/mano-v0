@@ -1,13 +1,17 @@
+"use client";
 import { X } from "lucide-react";
 import "./Auth.css";
+import { Card, CardHeader } from "@/components/ui/card";
+import { useState } from "react";
 
 interface AuthProps {
   onClose: any;
 }
 
 const Auth = ({ onClose }: AuthProps) => {
+  const [showPassword, setShowPassword] = useState(false);
   return (
-    <div className="relative w-[550px] py-6">
+    <Card className="relative w-[550px] py-6 ">
       <div className="flex justify-center font-bold pb-[15px] border-b border-[#ddd] w-full">
         <div className="absolute left-4 top-4 hover:cursor-pointer rounded-full hover:bg-gray-100 p-1">
           <X onClick={() => onClose(false)} />
@@ -32,9 +36,29 @@ const Auth = ({ onClose }: AuthProps) => {
             E-Mail
           </span>
         </label>
+        {showPassword && (
+          <label
+            htmlFor="UserPassword"
+            className="relative block overflow-hidden rounded-lg border border-gray-400 px-3 pt-8 mt-4 focus-within:border-gray-600 focus-within:ring-1 focus-within:ring-gray-600 peer-placeholder-shown:border-black"
+          >
+            <input
+              type="password"
+              id="UserPassword"
+              placeholder="Password"
+              className="peer h-8 w-full border-none bg-transparent p-0 placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0 text-lg"
+            />
 
-        <button className="flex items-center justify-center rounded-lg text-white p-4 mt-4 WeiterButton">
-          Weiter
+            <span className="absolute start-3 top-5 -translate-y-1/2 text-md text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-md peer-focus:top-5 peer-placeholder-shown:text-black text-gray-600">
+              Password
+            </span>
+          </label>
+        )}
+
+        <button
+          className="flex items-center justify-center rounded-lg text-white p-4 mt-4 WeiterButton"
+          onClick={() => setShowPassword(true)}
+        >
+          {showPassword ? "Anmelden" : "Weiter"}
         </button>
         <div className="LoginLineBreak">
           <div className="Line" />
@@ -71,7 +95,7 @@ const Auth = ({ onClose }: AuthProps) => {
           Weiter mit Google
         </button>
       </div>
-    </div>
+    </Card>
   );
 };
 

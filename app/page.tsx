@@ -3,9 +3,9 @@ import { Button } from "@/components/ui/button";
 import { CardContent, Card } from "@/components/ui/card";
 import { Globe, Menu, User, Star } from "lucide-react";
 import Link from "next/link";
-import SearchBar from "./components/header/search/search";
-import Header from "./components/header/header";
+import Header from "./components/header";
 import Footer from "./components/footer";
+import SearchBar from "./components/search";
 
 export default function ManoLandingPage() {
   return (

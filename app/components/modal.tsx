@@ -25,14 +25,22 @@ function Modal({
     };
 
     if (isOpen) {
+      document.body.classList.add("modal-open");
       document.body.style.overflow = "hidden";
+      document.body.style.height = "100vh";
+
       document.addEventListener("mousedown", handleClickOutside);
     } else {
-      document.body.style.overflow = "auto";
+      document.body.classList.remove("modal-open");
+      document.body.style.overflow = "";
+      document.body.style.height = "";
     }
 
     return () => {
-      document.body.style.overflow = "auto";
+      document.body.style.overflow = "";
+      document.body.style.height = "";
+      document.body.classList.remove("modal-open");
+
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen, onClose]);

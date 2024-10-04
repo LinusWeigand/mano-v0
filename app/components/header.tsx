@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Globe, Menu, User } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import Modal from "../modal";
-import Auth from "../auth/page";
-import Profil from "../profil/page";
+import Modal from "./modal";
+import Auth from "./auth/page";
+import Profil from "./profil";
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);

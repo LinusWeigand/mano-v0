@@ -76,3 +76,8 @@ body {
     @apply bg-background text-foreground;
   }
 }
+.modal-open {
+  overflow: hidden !important;
+  height: 100vh !important;
+  position: relative !important;
+}

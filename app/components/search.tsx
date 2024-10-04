@@ -22,17 +22,21 @@ export default function SearchBar({ isAbsolute }: SearchBarProps) {
 
   return (
     <section className={`pt-5 pb-8 border-b`}>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-4xl font-bold text-center mb-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 items-center justify-center">
+        <div className="max-w-3xl mx-auto items-center justify-center">
+          <h1 className="text-4xl font-bold text-center items-center justify-center mb-8">
             Finde erfahrene Handwerker
           </h1>
           <div
-            className={`mt-2 ${isAbsolute ? "absolute top-[200px] z-50" : ""}`}
+            className={`mt-2 ${
+              isAbsolute
+                ? "absolute top-[200px] z-50"
+                : "items-center justify-center"
+            }`}
           >
-            <Card className="w-full shadow-lg rounded-[4rem] overflow-hidden">
-              <CardContent className="p-0">
-                <form className="flex md:flex-row items-center">
+            <Card className="sm:w-full w-[300px] shadow-lg sm:rounded-[4rem] overflow-hidden items-center justify-center">
+              <CardContent className="p-0 items-center justify-center">
+                <form className="flex flex-col sm:flex-row sm:items-center">
                   <div
                     className={`flex-1 p-2 transition-colors py-4 pl-8
                 ${
