@@ -48,9 +48,9 @@ export default function CraftsmanProfile() {
     "personal"
   );
   const [skills, setSkills] = useState<string[]>([
-    "Woodworking",
-    "Metalwork",
-    "Leathercraft",
+    "Holzmöbel",
+    "Küchen",
+    "Badezimmer",
   ]);
   const [newSkill, setNewSkill] = useState("");
   const [location, setLocation] = useState(center);
@@ -181,24 +181,22 @@ export default function CraftsmanProfile() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="bio">
-                  {profileType === "personal"
-                    ? "About Me"
-                    : "About the Company"}
+                  {profileType === "personal" ? "Über mich" : "Über das Gewerk"}
                 </Label>
                 <Textarea
                   id="bio"
                   placeholder={
                     profileType === "personal"
-                      ? "Tell us about yourself and your craft..."
-                      : "Tell us about your company and its specialties..."
+                      ? "Erzähl uns über dich und dein Handwerk..."
+                      : "Erzähl uns über dein Gewerk und dessen Spezialitäten..."
                   }
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="experience">
                   {profileType === "personal"
-                    ? "Years of Experience"
-                    : "Years in Business"}
+                    ? "Erfahrungsjahre"
+                    : "Geschäftsjahre"}
                 </Label>
                 <Input id="experience" type="number" placeholder="10" />
               </div>
@@ -265,8 +263,8 @@ export default function CraftsmanProfile() {
                   id="specialties"
                   placeholder={
                     profileType === "personal"
-                      ? "Describe your unique skills or techniques..."
-                      : "Describe your company's unique capabilities or offerings..."
+                      ? "Beschreibe deine einzigartigen Fähigkeiten und Techniken..."
+                      : "Beschreibe die einzigarten Fähigkeiten und Angebotr deines Gewerks..."
                   }
                 />
               </div>
