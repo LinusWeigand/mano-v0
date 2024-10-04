@@ -5,7 +5,7 @@ import { Globe, Menu, User, Star } from "lucide-react";
 import Link from "next/link";
 import SearchBar from "./components/header/search/search";
 import Header from "./components/header/header";
-import Footer from "./components/footer/footer";
+import Footer from "./components/footer";
 
 export default function ManoLandingPage() {
   return (
