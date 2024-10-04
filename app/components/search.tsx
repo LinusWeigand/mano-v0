@@ -22,20 +22,14 @@ export default function SearchBar({ isAbsolute }: SearchBarProps) {
 
   return (
     <section className={`pt-5 pb-8 border-b`}>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 items-center justify-center">
-        <div className="max-w-3xl mx-auto items-center justify-center">
-          <h1 className="text-4xl font-bold text-center items-center justify-center mb-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 ">
+        <div className="flex flex-col lg:max-w-xl mx-auto items-center">
+          <h1 className="text-4xl font-bold text-center mb-8 w-[300px] sm:w-full">
             Finde erfahrene Handwerker
           </h1>
-          <div
-            className={`mt-2 ${
-              isAbsolute
-                ? "absolute top-[200px] z-50"
-                : "items-center justify-center"
-            }`}
-          >
-            <Card className="sm:w-full w-[300px] shadow-lg sm:rounded-[4rem] overflow-hidden items-center justify-center">
-              <CardContent className="p-0 items-center justify-center">
+          <div className="flex mt-2 justify-center ">
+            <Card className="self-center sm:w-full w-[300px] shadow-lg sm:rounded-[4rem] overflow-hidden r">
+              <CardContent className="p-0 items-center ">
                 <form className="flex flex-col sm:flex-row sm:items-center">
                   <div
                     className={`flex-1 p-2 transition-colors py-4 pl-8
@@ -58,7 +52,7 @@ export default function SearchBar({ isAbsolute }: SearchBarProps) {
                       id="craft"
                       type="text"
                       placeholder="Gewerke suchen"
-                      className="w-full border-none bg-transparent text-sm"
+                      className="w-full border-none bg-transparent text-[16px] mt-[1px]"
                       onFocus={() => setActiveField("craft")}
                     />
                   </div>
@@ -79,13 +73,13 @@ export default function SearchBar({ isAbsolute }: SearchBarProps) {
                     >
                       Standort
                     </label>
-                    <div className="flex items-center">
+                    <div className="flex items-center mt-[1px]">
                       <MapPin className="h-5 w-5 text-muted-foreground mr-2" />
                       <Input
                         id="location"
                         type="text"
                         placeholder="Ort suchen"
-                        className="w-full border-none bg-transparent focus:ring-0 text-sm"
+                        className="w-full border-none bg-transparent focus:ring-0 text-[16px]"
                         onFocus={() => setActiveField("location")}
                       />
                     </div>
@@ -109,7 +103,7 @@ export default function SearchBar({ isAbsolute }: SearchBarProps) {
                         Datum
                       </label>
                       <Select onOpenChange={() => setActiveField("date")}>
-                        <SelectTrigger className="w-full border-none bg-transparent focus:ring-0 text-sm">
+                        <SelectTrigger className="mt-[1px] w-full border-none bg-transparent focus:ring-0 text-[16px]">
                           <div className="flex items-center">
                             <Calendar className="h-5 w-5 text-muted-foreground mr-2" />
                             <SelectValue

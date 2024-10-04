@@ -61,7 +61,7 @@ export default function Profil({ onClose }: ProfilProps) {
   const [location, setLocation] = useState(center);
   const [photos, setPhotos] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const totalSteps = 4;
+  const totalSteps = 3;
   const router = useRouter();
 
   const { isLoaded } = useJsApiLoader({
@@ -109,7 +109,7 @@ export default function Profil({ onClose }: ProfilProps) {
   };
 
   return (
-    <Card className="w-[550px] relative">
+    <Card className="w-screen sm:w-[550px] relative">
       <div className="absolute left-4 top-4 hover:cursor-pointer rounded-full hover:bg-gray-100 p-1">
         <X onClick={() => onClose(false)} />
       </div>
@@ -172,6 +172,7 @@ export default function Profil({ onClose }: ProfilProps) {
               </Label>
               <Input
                 id="profession"
+                className="text-[16px]"
                 placeholder={
                   profileType === "personal"
                     ? "e.g. Schreiner, Zimmerer"
@@ -180,12 +181,23 @@ export default function Profil({ onClose }: ProfilProps) {
               />
             </div>
             <div className="space-y-2">
+              <Label htmlFor="standort">Standort</Label>
+              <div className="flex flex-row">
+                <MapPin className="h-5 w-5 text-muted-foreground mr-2" />
+                <Input
+                  id="standort"
+                  className="text-[16px]"
+                  placeholder="München"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="website">Webseite (Optional)</Label>
               <div className="relative">
                 <Globe className="absolute left-1 top-1 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="website"
-                  className="pl-8"
+                  className="pl-8 text-[16px]"
                   placeholder="https://deine-webseite.de"
                 />
               </div>
@@ -196,7 +208,7 @@ export default function Profil({ onClose }: ProfilProps) {
                 <Instagram className="absolute left-1 top-1 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="instagram"
-                  className="pl-8"
+                  className="pl-8 text-[16px]"
                   placeholder="@nutzername"
                 />
               </div>
@@ -205,33 +217,8 @@ export default function Profil({ onClose }: ProfilProps) {
         )}
         {step === 2 && (
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="bio">
-                {profileType === "personal" ? "Über mich" : "Über das Gewerk"}
-              </Label>
-              <Textarea
-                id="bio"
-                placeholder={
-                  profileType === "personal"
-                    ? "Erzähl uns über dich und dein Handwerk..."
-                    : "Erzähl uns über dein Gewerk und dessen Spezialitäten..."
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="experience">
-                {profileType === "personal"
-                  ? "Erfahrungsjahre"
-                  : "Geschäftsjahre"}
-              </Label>
-              <Input id="experience" type="number" placeholder="10" />
-            </div>
-          </div>
-        )}
-        {step === 3 && (
-          <div className="space-y-4">
             <h3 className="font-semibold">
-              {profileType === "personal" ? "Skills" : "Services"}
+              {profileType === "personal" ? "Fähigkeiten" : "Services"}
             </h3>
             <div className="flex flex-wrap gap-2">
               {skills.map((skill) => (
@@ -251,13 +238,21 @@ export default function Profil({ onClose }: ProfilProps) {
                   />
                 </Button>
               ))}
+
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button variant="outline" size="sm">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <Plus className="w-4 h-4 mr-1" /> Hinzufügen{" "}
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
+                <DialogContent
+                  className="sm:max-w-[425px] dialog-content absolute top-[200px] "
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <DialogHeader>
                     <DialogTitle>
                       Add {profileType === "personal" ? "Fähigkeit" : "Service"}
@@ -272,7 +267,7 @@ export default function Profil({ onClose }: ProfilProps) {
                         id="new-skill"
                         value={newSkill}
                         onChange={(e) => setNewSkill(e.target.value)}
-                        className="col-span-3"
+                        className="col-span-3 text-[16px]"
                       />
                     </div>
                   </div>
@@ -281,43 +276,36 @@ export default function Profil({ onClose }: ProfilProps) {
               </Dialog>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="specialties">
-                {profileType === "personal" ? "Spezialitäten" : "Kompetenzen"}
-              </Label>
+              <h3 className="font-semibold">
+                {profileType === "personal" ? "Über mich" : "Über das Gewerk"}
+              </h3>
               <Textarea
-                id="specialties"
+                id="bio"
+                className="text-[16px]"
                 placeholder={
                   profileType === "personal"
-                    ? "Beschreibe deine einzigartigen Fähigkeiten und Techniken..."
-                    : "Beschreibe die einzigarten Fähigkeiten und Angebotr deines Gewerks..."
+                    ? "Erzähl uns über dich und dein Handwerk..."
+                    : "Erzähl uns über dein Gewerk und dessen Spezialitäten..."
                 }
               />
             </div>
-            {profileType === "professional" && (
-              <div className="space-y-2">
-                <h3 className="font-semibold">Gewerks Standort</h3>
-                {isLoaded ? (
-                  <GoogleMap
-                    mapContainerStyle={mapContainerStyle}
-                    center={location}
-                    zoom={10}
-                    onClick={onMapClick}
-                  >
-                    <Marker position={location} />
-                  </GoogleMap>
-                ) : (
-                  <div className="h-[200px] bg-gray-200 flex items-center justify-center">
-                    <MapPin className="w-8 h-8 text-gray-400" />
-                  </div>
-                )}
-                <p className="text-sm text-muted-foreground">
-                  Klicke auf die Karte und setze dein Gewerks Standort
-                </p>
-              </div>
-            )}
+            <div className="space-y-2">
+              <h3 className="font-semibold">
+                {profileType === "personal"
+                  ? "Erfahrungsjahre"
+                  : "Geschäftsjahre"}
+              </h3>
+              <Input
+                id="experience"
+                type="number"
+                placeholder="10"
+                className="text-[16px]"
+              />
+            </div>
           </div>
         )}
-        {step === 4 && (
+
+        {step === 3 && (
           <div className="space-y-4">
             <h3 className="font-semibold">Portfolio</h3>
             <div className="grid grid-cols-3 gap-2">
@@ -343,7 +331,7 @@ export default function Profil({ onClose }: ProfilProps) {
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <Plus className="w-6 h-6 mb-1" />
-                  Foto hinzufügen
+                  Fotos hinzufügen
                 </Button>
               )}
             </div>
@@ -361,6 +349,7 @@ export default function Profil({ onClose }: ProfilProps) {
               </Label>
               <Textarea
                 id="portfolio-description"
+                className="text-[16px]"
                 placeholder={
                   profileType === "personal"
                     ? "Beschreibe dein bestes Projekt..."

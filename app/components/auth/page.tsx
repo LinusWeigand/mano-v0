@@ -11,7 +11,7 @@ interface AuthProps {
 const Auth = ({ onClose }: AuthProps) => {
   const [showPassword, setShowPassword] = useState(false);
   return (
-    <Card className="relative w-[550px] py-6 ">
+    <Card className="relative w-screen sm:w-[550px] py-6">
       <div className="flex justify-center font-bold pb-[15px] border-b border-[#ddd] w-full">
         <div className="absolute left-4 top-4 hover:cursor-pointer rounded-full hover:bg-gray-100 p-1">
           <X onClick={() => onClose(false)} />

@@ -61,18 +61,18 @@ export default function Header() {
       className={`sticky top-0 z-50 bg-white relative
     ${scrolled ? "border-b" : ""}`}
     >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <Link href="/" className="flex items-center">
               <span className="ml-2 text-xl font-semibold">Mano</span>
             </Link>
           </div>
-          <div className="hidden md:block">
+          <div className="">
             <div className="flex items-center space-x-4">
               <a
                 onClick={handleProfil}
-                className="text-gray-600 hover:text-gray-900 hover:cursor-pointer"
+                className="text-gray-600 hover:text-gray-900 hover:cursor-pointer hidden sm:block"
               >
                 Als Handwerker loslegen
               </a>
@@ -88,42 +88,42 @@ export default function Header() {
             </div>
           </div>
         </div>
+        {showMenu && (
+          <div
+            ref={menuRef}
+            className="absolute right-4 sm:right-6 top-12 z-10 mt-2 w-56 divide-y divide-gray-100 rounded-md border border-gray-100 bg-white shadow-lg"
+            role="menu"
+          >
+            <div className="p-2">
+              <a
+                onClick={handleAuth}
+                className="block rounded-lg px-4 py-2 text-sm text-black hover:bg-gray-50 hover:text-gray-900 font-medium hover:cursor-pointer"
+                role="menuitem"
+              >
+                Registrieren
+              </a>
+
+              <a
+                onClick={handleAuth}
+                className="block rounded-lg px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-700 hover:cursor-pointer"
+                role="menuitem"
+              >
+                Einloggen
+              </a>
+            </div>
+
+            <div className="p-2">
+              <a
+                onClick={handleProfil}
+                className="block rounded-lg px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-700 hover:cursor-pointer"
+                role="menuitem"
+              >
+                Als Handwerker loslegen
+              </a>
+            </div>
+          </div>
+        )}
       </div>
-      {showMenu && (
-        <div
-          ref={menuRef}
-          className="absolute right-16 top-12 z-10 mt-2 w-56 divide-y divide-gray-100 rounded-md border border-gray-100 bg-white shadow-lg"
-          role="menu"
-        >
-          <div className="p-2">
-            <a
-              onClick={handleAuth}
-              className="block rounded-lg px-4 py-2 text-sm text-black hover:bg-gray-50 hover:text-gray-900 font-medium hover:cursor-pointer"
-              role="menuitem"
-            >
-              Registrieren
-            </a>
-
-            <a
-              onClick={handleAuth}
-              className="block rounded-lg px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-700 hover:cursor-pointer"
-              role="menuitem"
-            >
-              Einloggen
-            </a>
-          </div>
-
-          <div className="p-2">
-            <a
-              onClick={handleProfil}
-              className="block rounded-lg px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-700 hover:cursor-pointer"
-              role="menuitem"
-            >
-              Als Handwerker loslegen
-            </a>
-          </div>
-        </div>
-      )}
       <Modal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)}>
         <Auth onClose={setIsAuthModalOpen} />
       </Modal>

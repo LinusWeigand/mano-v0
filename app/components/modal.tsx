@@ -20,6 +20,14 @@ function Modal({
         modalRef.current &&
         !modalRef.current.contains(event.target as Node)
       ) {
+        const dialogElements = Array.from(
+          document.querySelectorAll(".dialog-content")
+        );
+        for (const element of dialogElements) {
+          if (element.contains(event.target as Node)) {
+            return;
+          }
+        }
         onClose();
       }
     };
@@ -56,6 +64,7 @@ function Modal({
       <div
         ref={modalRef}
         className="relative bg-white rounded-2xl shadow-lg z-10"
+        onClick={(e) => e.stopPropagation()}
       >
         {children}
       </div>
