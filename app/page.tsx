@@ -3,26 +3,16 @@ import { Button } from "@/components/ui/button";
 import { CardContent, Card } from "@/components/ui/card";
 import { Globe, Menu, User, Star } from "lucide-react";
 import Link from "next/link";
-import SearchBar from "./components/search/search";
+import SearchBar from "./components/header/search/search";
 import Header from "./components/header/header";
 import Footer from "./components/footer/footer";
 
 export default function ManoLandingPage() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen relative">
       <Header />
+      <SearchBar isAbsolute={false} />
       <main className="flex-grow">
-        <section className="pt-5 pb-8 border-b">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl mx-auto">
-              <h1 className="text-4xl font-bold text-center mb-8">
-                Finden Sie erfahrene Handwerker
-              </h1>
-              <SearchBar />
-            </div>
-          </div>
-        </section>
-
         <section className="py-16">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
