@@ -7,16 +7,44 @@ import { useEffect, useRef, useState } from "react";
 import Modal from "./modal";
 import Auth from "./auth/page";
 import Profil from "./profil";
+import { useSearchParams } from "next/navigation";
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
-  const [showSearchBar, setShowSearchBar] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isProfilModalOpen, setIsProfilModalOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  const searchParams = useSearchParams();
+  const verification_code = decodeURIComponent(searchParams.get('vc') || '');
+  const email = decodeURIComponent(searchParams.get('e') || '');
+
+  const handle_email_verification = async () => {
+    try {
+      const response = await fetch("http://localhost/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, verification_code }),
+      });
+
+      if (!response.ok) {
+        console.error("Failed to verify email");
+      }
+      on_close();
+      console.log("E-Mail verified.")
+    } catch (error) {
+      console.error("Error occured in handle_email_verification: ", error);
+    }
+  }
+
   useEffect(() => {
+
+    if (verification_code !== '' && email != '') {
+      handle_email_verification();
+    }
     const handleScroll = () => {
       if (window.scrollY > 197.9) {
         setScrolled(true);
@@ -55,6 +83,10 @@ export default function Header() {
     setShowMenu(false);
     setIsProfilModalOpen(true);
   };
+
+  const on_close = () => {
+    setIsAuthModalOpen(false);
+  }
 
   return (
     <header
@@ -125,7 +157,7 @@ export default function Header() {
         )}
       </div>
       <Modal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)}>
-        <Auth onClose={setIsAuthModalOpen} />
+        <Auth on_close={on_close} />
       </Modal>
 
       <Modal

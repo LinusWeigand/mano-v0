@@ -13,11 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, MapPin, Calendar } from "lucide-react";
 
-interface SearchBarProps {
-  isAbsolute: boolean;
-}
-
-export default function SearchBar({ isAbsolute }: SearchBarProps) {
+export default function SearchBar() {
   const [activeField, setActiveField] = useState<string | null>(null);
 
   return (
@@ -32,14 +28,13 @@ export default function SearchBar({ isAbsolute }: SearchBarProps) {
               <CardContent className="p-0 items-center ">
                 <form className="flex flex-col sm:flex-row sm:items-center">
                   <div
-                    className={`flex-1 p-2 transition-colors py-4 pl-8
-                ${
-                  activeField === "craft"
-                    ? "bg-white hover:bg-white"
-                    : activeField === null
-                    ? "bg-white hover:bg-[#ebebeb]"
-                    : "bg-muted hover:bg-[#dddddd]"
-                }`}
+                    className={`flex-1 p-2 transition-colors py-4 pl-8 md:pl-10 lg:w-[300px]
+                ${activeField === "craft"
+                        ? "bg-white hover:bg-white"
+                        : activeField === null
+                          ? "bg-white hover:bg-[#ebebeb]"
+                          : "bg-muted hover:bg-[#dddddd]"
+                      }`}
                     onClick={() => setActiveField("craft")}
                   >
                     <label
@@ -57,14 +52,13 @@ export default function SearchBar({ isAbsolute }: SearchBarProps) {
                     />
                   </div>
                   <div
-                    className={`flex-1 p-2 transition-colors py-4 pl-8
-                 ${
-                   activeField === "location"
-                     ? "bg-white hover:bg-white"
-                     : activeField === null
-                     ? "bg-white hover:bg-[#ebebeb]"
-                     : "bg-muted hover:bg-[#dddddd]"
-                 }`}
+                    className={`flex-1 p-2 transition-colors py-4 pl-8 md:pr-12           
+                 ${activeField === "location"
+                        ? "bg-white hover:bg-white"
+                        : activeField === null
+                          ? "bg-white hover:bg-[#ebebeb]"
+                          : "bg-muted hover:bg-[#dddddd]"
+                      }`}
                     onClick={() => setActiveField("location")}
                   >
                     <label
@@ -73,7 +67,7 @@ export default function SearchBar({ isAbsolute }: SearchBarProps) {
                     >
                       Standort
                     </label>
-                    <div className="flex items-center mt-[1px]">
+                    <div className="flex items-center mt-[1px] w-full">
                       <MapPin className="h-5 w-5 text-muted-foreground mr-2" />
                       <Input
                         id="location"
@@ -86,16 +80,15 @@ export default function SearchBar({ isAbsolute }: SearchBarProps) {
                   </div>
                   <div
                     className={` flex flex-row items-center
-                ${
-                  activeField === "date"
-                    ? "bg-white hover:bg-white"
-                    : activeField === null
-                    ? "bg-white hover:bg-[#ebebeb]"
-                    : "bg-muted hover:bg-[#dddddd]"
-                }`}
+                ${activeField === "date"
+                        ? "bg-white hover:bg-white"
+                        : activeField === null
+                          ? "bg-white hover:bg-[#ebebeb]"
+                          : "bg-muted hover:bg-[#dddddd]"
+                      }`}
                     onClick={() => setActiveField("date")}
                   >
-                    <div className="flex-1 flex flex-col p-2 transition-colors py-4 pl-8">
+                    <div className="flex-1 flex flex-col p-2 transition-colors py-4 pl-8 md:pr-12 ">
                       <label
                         htmlFor="date"
                         className="block text-sm font-medium text-foreground h-full"
@@ -128,11 +121,10 @@ export default function SearchBar({ isAbsolute }: SearchBarProps) {
                       </Select>
                     </div>
                     <div
-                      className={`p-2 md:p-2 ${
-                        activeField === null
-                          ? "rounded-b-[4rem] md:rounded-r-[4rem] md:rounded-bl-none"
-                          : ""
-                      }`}
+                      className={`p-2 md:p-2 ${activeField === null
+                        ? "rounded-b-[4rem] md:rounded-r-[4rem] md:rounded-bl-none"
+                        : ""
+                        }`}
                     >
                       <Button className="mr-1 rounded-full bg-[#FF385C] hover:bg-[#FF385C]/90 text-white h-12 w-12 flex items-center justify-center">
                         <Search className="h-4 w-4" />
