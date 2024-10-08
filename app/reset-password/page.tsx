@@ -49,6 +49,12 @@ export default function ResetPassword({ on_close }: ResetPasswordProps) {
         }
     };
 
+    const handle_key_down = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            handle_reset_password();
+        }
+    };
+
     return (
         <div className="flex flex-col  min-h-screen relative">
             <div className="flex justify-center h-full items-center m-w-screen border-t border-[#ddd] flex-grow">
@@ -87,6 +93,7 @@ export default function ResetPassword({ on_close }: ResetPasswordProps) {
                                 placeholder="Password"
                                 className="peer h-8 w-full border-none bg-transparent p-0 placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0 text-lg"
                                 onChange={(e) => setPasswordVerify(e.target.value)}
+                                onKeyDown={handle_key_down}
 
                             />
 

@@ -34,6 +34,11 @@ const Start = ({ on_close, to_login, to_register }: StartProps) => {
             console.error("Error occured in handle_next: ", error);
         }
     }
+    const handle_key_down = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            handle_next();
+        }
+    };
 
     return (
         <Card className="relative w-screen sm:w-[550px] py-6">
@@ -56,6 +61,7 @@ const Start = ({ on_close, to_login, to_register }: StartProps) => {
                         placeholder="E-Mail"
                         className="peer h-8 w-full border-none bg-transparent p-0 placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0 text-lg"
                         onChange={(e) => setEmail(e.target.value)}
+                        onKeyDown={handle_key_down}
 
                     />
 

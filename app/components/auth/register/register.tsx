@@ -46,6 +46,12 @@ export default function Register({ to_start, on_close, email }: RegisterProps) {
         }
     }
 
+    const handle_key_down = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            handle_pre_register();
+        }
+    };
+
     return (
         <Card className="relative w-screen sm:w-[550px] py-6">
             <div className="flex justify-center font-bold pb-[15px] border-b border-[#ddd] w-full">
@@ -116,6 +122,7 @@ export default function Register({ to_start, on_close, email }: RegisterProps) {
                         placeholder="Password erneut eingeben"
                         className="peer h-8 w-full border-none bg-transparent p-0 placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0 text-lg"
                         onChange={(e) => setPasswordVerify(e.target.value)}
+                        onKeyDown={handle_key_down}
                     />
                     <span className="absolute start-3 top-5 -translate-y-1/2 text-md text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-md peer-focus:top-5 peer-placeholder-shown:text-black text-gray-600">
                         Password erneut eingeben

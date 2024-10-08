@@ -38,6 +38,12 @@ export default function Login({ to_start, to_forgot_password, on_close, email }:
         }
     };
 
+    const handle_key_down = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            handleLogin();
+        }
+    };
+
     return (
         <Card className="relative w-screen sm:w-[550px] py-6">
             <div className="flex justify-center font-bold pb-[15px] border-b border-[#ddd] w-full">
@@ -69,6 +75,7 @@ export default function Login({ to_start, to_forgot_password, on_close, email }:
                         placeholder="Passwort"
                         className="peer h-8 w-full border-none bg-transparent p-0 placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0 text-lg"
                         onChange={(e) => setPassword(e.target.value)}
+                        onKeyDown={handle_key_down}
 
                     />
 
