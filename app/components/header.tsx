@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Globe, Menu, User } from "lucide-react";
+import { Globe, Mail, Menu, User, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Modal from "./modal";
@@ -14,6 +14,8 @@ export default function Header() {
   const [showMenu, setShowMenu] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isProfilModalOpen, setIsProfilModalOpen] = useState(false);
+  const [show_email_banner, set_show_email_banner] = useState(false);
+  const [banner_email, set_banner_email] = useState("");
   const menuRef = useRef<HTMLDivElement>(null);
 
   const searchParams = useSearchParams();
@@ -88,6 +90,11 @@ export default function Header() {
     setIsAuthModalOpen(false);
   }
 
+  const show_email_sent_banner = (email: string) => {
+    set_show_email_banner(true);
+    set_banner_email(email);
+  }
+
   return (
     <header
       className={`sticky top-0 z-50 bg-white relative
@@ -157,7 +164,7 @@ export default function Header() {
         )}
       </div>
       <Modal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)}>
-        <Auth on_close={on_close} />
+        <Auth on_close={on_close} show_email_sent_banner={show_email_sent_banner} />
       </Modal>
 
       <Modal
@@ -166,6 +173,23 @@ export default function Header() {
       >
         <Profil onClose={setIsProfilModalOpen} />
       </Modal>
+      {show_email_banner && <div className="absolute top-0 w-full bg-[#c2e4e6] text-black p-4 flex items-center justify-center">
+        <div className="flex items-center space-x-3">
+          <Mail className="text-[#4bb0ba] h-7 w-7" />
+          <span>
+            Ein Link zum Zurücksetzen deines Passworts wurde an {banner_email || 'deine E-Mail'} gesendet.
+          </span>
+        </div>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="absolute right-4 text-[#4bb0ba] hover:text-[#1a8c96] hover:bg-transparent"
+          onClick={() => set_show_email_banner(false)}
+        >
+          <X className="h-5 w-5" />
+          <span className="sr-only">Close</span>
+        </Button>
+      </div>}
     </header>
   );
 }

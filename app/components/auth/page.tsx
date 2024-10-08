@@ -8,14 +8,15 @@ import ForgotPassword from "./forgot_password/forgot_password";
 
 interface AuthProps {
   on_close: () => void;
+  show_email_sent_banner: (email: string) => void;
 }
 
 enum AuthState {
   Start, Login, Register, ForgotPassword, ResetPassword
 }
 
-const Auth = ({ on_close }: AuthProps) => {
-  const [state, setState] = useState<AuthState>(AuthState.Start);
+const Auth = ({ on_close, show_email_sent_banner }: AuthProps) => {
+  const [state, setState] = useState<AuthState>(AuthState.ForgotPassword);
   const [email, setEmail] = useState<string>("");
 
 
@@ -53,7 +54,7 @@ const Auth = ({ on_close }: AuthProps) => {
       ) : state === AuthState.Register ? (
         <Register to_start={to_start} on_close={on_close} email={email} />
       ) : state === AuthState.ForgotPassword ? (
-        <ForgotPassword back_to_login={back_to_login} on_close={on_close} />
+        <ForgotPassword back_to_login={back_to_login} on_close={on_close} show_email_sent_banner={show_email_sent_banner} />
       ) : null}
     </>
   );
