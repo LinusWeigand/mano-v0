@@ -3,6 +3,8 @@
 import { ChevronLeft, X } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useState } from "react";
+import { useBanner } from "@/context/BannerContext";
+import { BannerType } from "@/types/BannerType";
 
 interface RegisterProps {
     to_start: () => void;
@@ -15,6 +17,8 @@ export default function Register({ to_start, on_close, email }: RegisterProps) {
     const [last_name, set_last_name] = useState("");
     const [password, setPassword] = useState("");
     const [passwordVerify, setPasswordVerify] = useState("");
+
+    const { setBanner, setBannerEmail } = useBanner();
 
     const handle_pre_register = async () => {
         console.log("E-Mail: ", email);
@@ -31,6 +35,9 @@ export default function Register({ to_start, on_close, email }: RegisterProps) {
             if (!response.ok) {
                 throw new Error("Failed to register");
             }
+
+            setBannerEmail(email);
+            setBanner(BannerType.VerifyEmail)
 
             console.log("E-Mail sent.");
             on_close();

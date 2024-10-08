@@ -3,8 +3,10 @@
 import { ChevronLeft, X } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useState } from "react";
-import Header from "../components/header";
 import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useBanner } from "@/context/BannerContext";
+import { BannerType } from "@/types/BannerType";
 
 interface ResetPasswordProps {
     on_close: () => void;
@@ -13,6 +15,8 @@ interface ResetPasswordProps {
 export default function ResetPassword({ on_close }: ResetPasswordProps) {
     const [password, setPassword] = useState("");
     const [passwordVerify, setPasswordVerify] = useState("");
+    const router = useRouter();
+    const { setBanner } = useBanner();
 
     const searchParams = useSearchParams();
     const reset_password_token = decodeURIComponent(searchParams.get('c') || '');
@@ -32,8 +36,13 @@ export default function ResetPassword({ on_close }: ResetPasswordProps) {
             });
 
             if (!response.ok) {
-                throw new Error("Failed to reset password.");
+                setBanner(BannerType.ResetPasswordExpired);
+                router.push('/forgot-password');
+                return;
             }
+
+            setBanner(BannerType.PasswordResetted);
+            router.push('/');
             console.log("Passwort resetted.")
         } catch (error) {
             console.error("Error occured in handleLogin: ", error);
@@ -42,7 +51,6 @@ export default function ResetPassword({ on_close }: ResetPasswordProps) {
 
     return (
         <div className="flex flex-col  min-h-screen relative">
-            <Header />
             <div className="flex justify-center h-full items-center m-w-screen border-t border-[#ddd] flex-grow">
                 <Card className="relative w-screen sm:w-[550px] py-6 border-gray-400">
                     <div className="flex justify-center font-bold pb-[15px] border-b border-[#ddd] w-full">

@@ -1,22 +1,24 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Globe, Mail, Menu, User, X } from "lucide-react";
+import { AlertCircle, Check, Globe, Mail, Menu, User, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Modal from "./modal";
 import Auth from "./auth/page";
 import Profil from "./profil";
 import { useSearchParams } from "next/navigation";
+import { useBanner } from "@/context/BannerContext";
+import { BannerType } from "@/types/BannerType";
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isProfilModalOpen, setIsProfilModalOpen] = useState(false);
-  const [show_email_banner, set_show_email_banner] = useState(false);
-  const [banner_email, set_banner_email] = useState("");
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const { banner, clearBanner, setBanner, bannerEmail, setBannerEmail } = useBanner();
 
   const searchParams = useSearchParams();
   const verification_code = decodeURIComponent(searchParams.get('vc') || '');
@@ -34,8 +36,11 @@ export default function Header() {
 
       if (!response.ok) {
         console.error("Failed to verify email");
+        setBanner(BannerType.VerifyEmailExpired);
+        return;
       }
       on_close();
+      setBanner(BannerType.EmailVerified)
       console.log("E-Mail verified.")
     } catch (error) {
       console.error("Error occured in handle_email_verification: ", error);
@@ -88,11 +93,6 @@ export default function Header() {
 
   const on_close = () => {
     setIsAuthModalOpen(false);
-  }
-
-  const show_email_sent_banner = (email: string) => {
-    set_show_email_banner(true);
-    set_banner_email(email);
   }
 
   return (
@@ -164,7 +164,7 @@ export default function Header() {
         )}
       </div>
       <Modal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)}>
-        <Auth on_close={on_close} show_email_sent_banner={show_email_sent_banner} />
+        <Auth on_close={on_close} />
       </Modal>
 
       <Modal
@@ -173,21 +173,100 @@ export default function Header() {
       >
         <Profil onClose={setIsProfilModalOpen} />
       </Modal>
-      {show_email_banner && <div className="absolute top-0 w-full bg-[#c2e4e6] text-black p-4 flex items-center justify-center">
+      {banner === BannerType.ResetPassword && <div className="absolute top-0 w-full bg-[#c2e4e6] text-black p-4 flex items-center justify-center">
         <div className="flex items-center space-x-3">
           <Mail className="text-[#4bb0ba] h-7 w-7" />
           <span>
-            Ein Link zum Zurücksetzen deines Passworts wurde an {banner_email || 'deine E-Mail'} gesendet.
+            Ein Link zum Zurücksetzen deines Passworts wurde an {bannerEmail || 'deine E-Mail'} gesendet.
           </span>
         </div>
         <Button
           size="icon"
           variant="ghost"
           className="absolute right-4 text-[#4bb0ba] hover:text-[#1a8c96] hover:bg-transparent"
-          onClick={() => set_show_email_banner(false)}
+          onClick={() => clearBanner()}
         >
           <X className="h-5 w-5" />
-          <span className="sr-only">Close</span>
+        </Button>
+      </div>}
+      {banner === BannerType.VerifyEmail && <div className="absolute top-0 w-full bg-[#c2e4e6] text-black p-4 flex items-center justify-center">
+        <div className="flex items-center space-x-3">
+          <Mail className="text-[#4bb0ba] h-7 w-7" />
+          <span>
+            Ein Verifizierungslink wurde an {bannerEmail || 'deine E-Mail'} gesendet.
+          </span>
+        </div>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="absolute right-4 text-[#4bb0ba] hover:text-[#1a8c96] hover:bg-transparent"
+          onClick={() => clearBanner()}
+        >
+          <X className="h-5 w-5" />
+        </Button>
+      </div>}
+      {banner === BannerType.VerifyEmailExpired && <div className="absolute top-0 w-full bg-[#c2e4e6] text-black p-4 flex items-center justify-center">
+        <div className="flex items-center space-x-3">
+          <Mail className="text-[#4bb0ba] h-7 w-7" />
+          <span>
+            Der Verifizierungslink für {bannerEmail || 'deine E-Mail'} ist abgelaufen.
+          </span>
+        </div>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="absolute right-4 text-[#4bb0ba] hover:text-[#1a8c96] hover:bg-transparent"
+          onClick={() => clearBanner()}
+        >
+          <X className="h-5 w-5" />
+        </Button>
+      </div>}
+      {banner === BannerType.EmailVerified && <div className="absolute top-0 w-full bg-[#c2e4e6] text-black p-4 flex items-center justify-center">
+        <div className="flex items-center space-x-3">
+          <Mail className="text-[#4bb0ba] h-7 w-7" />
+          <span>
+            Deine E-Mail {bannerEmail || ''} wurde verifiziert.
+          </span>
+        </div>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="absolute right-4 text-[#4bb0ba] hover:text-[#1a8c96] hover:bg-transparent"
+          onClick={() => clearBanner()}
+        >
+          <X className="h-5 w-5" />
+        </Button>
+      </div>}
+      {banner === BannerType.PasswordResetted && <div className="absolute top-0 w-full bg-[#ffd1c4] text-black p-4 flex items-center justify-center">
+        <div className="flex items-center space-x-3">
+          <Check className="text-[#e4a593] h-7 w-7" />
+          <span>
+            Passwort wurde aktualisiert.
+          </span>
+        </div>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="absolute right-4 text-[#b3725e] hover:text-[#612a1b] hover:bg-transparent"
+          onClick={() => clearBanner()}
+        >
+          <X className="h-5 w-5" />
+        </Button>
+      </div>}
+      {banner === BannerType.ResetPasswordExpired && <div className="absolute top-0 w-full bg-[#ffd1c4] text-black p-4 flex items-center justify-center">
+        <div className="flex items-center space-x-3">
+          <AlertCircle className="text-[#e4a593] h-7 w-7" />
+          <span>
+            Ihre Anfrage zum Zurücksetzen des Passworts ist bereits abgelaufen. Bitte versuchen Sie es erneut.
+          </span>
+        </div>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="absolute right-4 text-[#b3725e] hover:text-[#612a1b] hover:bg-transparent"
+          onClick={() => clearBanner()}
+        >
+          <X className="h-5 w-5" />
         </Button>
       </div>}
     </header>

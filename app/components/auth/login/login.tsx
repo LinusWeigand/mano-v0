@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, X } from "lucide-react";
+import { AlertCircle, ChevronLeft, X } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useState } from "react";
 
@@ -13,6 +13,7 @@ interface LoginProps {
 
 export default function Login({ to_start, to_forgot_password, on_close, email }: LoginProps) {
     const [password, setPassword] = useState("");
+    const [show_password_incorrect_alert, set_show_password_incorrect_alert] = useState(false);
 
     const handleLogin = async () => {
         console.log("E-Mail: ", email);
@@ -27,7 +28,8 @@ export default function Login({ to_start, to_forgot_password, on_close, email }:
             });
 
             if (!response.ok) {
-                throw new Error("Failed to login");
+                set_show_password_incorrect_alert(true);
+                return;
             }
             on_close();
             console.log("Logged in")
@@ -42,9 +44,21 @@ export default function Login({ to_start, to_forgot_password, on_close, email }:
                 <div onClick={to_start} className="absolute left-4 top-4 hover:cursor-pointer rounded-full hover:bg-gray-100 p-1">
                     <ChevronLeft />
                 </div>
-                <p>Log in</p>
+                <p>Anmelden</p>
             </div>
             <div className="flex flex-col items-stretch mt-[25px] mx-6 mb-[15px]">
+
+                {show_password_incorrect_alert && (
+                    <div className="bg-white rounded-lg shadow-md p-4 mb-4 flex items-start">
+                        <div className="bg-red-400 rounded-full mr-3 flex-shrink-0 border-transparent">
+                            <AlertCircle className="h-12 w-12 text-white" />
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-gray-800">Lass uns das nochmal versuchen</h4>
+                            <p className="text-gray-600">Passwort ist inkorrekt.</p>
+                        </div>
+                    </div>
+                )}
                 <label
                     htmlFor="UserPassword"
                     className="relative block overflow-hidden rounded-lg border border-gray-400 px-3 pt-8  focus-within:border-gray-600 focus-within:ring-1 focus-within:ring-gray-600 peer-placeholder-shown:border-black"
@@ -52,14 +66,14 @@ export default function Login({ to_start, to_forgot_password, on_close, email }:
                     <input
                         type="password"
                         id="UserPassword"
-                        placeholder="Password"
+                        placeholder="Passwort"
                         className="peer h-8 w-full border-none bg-transparent p-0 placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0 text-lg"
                         onChange={(e) => setPassword(e.target.value)}
 
                     />
 
                     <span className="absolute start-3 top-5 -translate-y-1/2 text-md text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-md peer-focus:top-5 peer-placeholder-shown:text-black text-gray-600">
-                        Password
+                        Passwort
                     </span>
                 </label>
 
@@ -71,7 +85,7 @@ export default function Login({ to_start, to_forgot_password, on_close, email }:
                 </button>
 
                 <p className="text-md text-left underline mt-4 text-black hover:underline cursor-pointer" onClick={to_forgot_password}>
-                    Forgot password?
+                    Passwort vergessen?
                 </p>
             </div>
         </Card>

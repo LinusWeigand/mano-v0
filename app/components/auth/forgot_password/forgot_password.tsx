@@ -4,17 +4,18 @@
 import { AlertCircle, ChevronLeft, X } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useState } from "react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useBanner } from "@/context/BannerContext";
+import { BannerType } from "@/types/BannerType";
 
 interface LoginProps {
     back_to_login: () => void;
     on_close: () => void;
-    show_email_sent_banner: (email: string) => void;
 }
 
-export default function ForgotPassword({ back_to_login, on_close, show_email_sent_banner }: LoginProps) {
+export default function ForgotPassword({ back_to_login, on_close }: LoginProps) {
     const [email, setEmail] = useState("");
-    const [show_email_not_found_alert, set_show_email_not_found_alert] = useState(true);
+    const [show_email_not_found_alert, set_show_email_not_found_alert] = useState(false);
+    const { setBanner, setBannerEmail } = useBanner();
 
     const handle_send_reset_link = async () => {
         console.log("forgot_password email: ", email);
@@ -32,7 +33,8 @@ export default function ForgotPassword({ back_to_login, on_close, show_email_sen
                 return;
             }
             on_close();
-            show_email_sent_banner(email);
+            setBanner(BannerType.ResetPassword);
+            setBannerEmail(email);
         } catch (error) {
             console.error("Error occured in handle_send_reset_link: ", error);
         }
@@ -50,12 +52,12 @@ export default function ForgotPassword({ back_to_login, on_close, show_email_sen
                 <p className="mb-4">Gib die E-Mail Addresse ein, welche mit deinem Konto verbunden ist und wir schicken dir eine E-Mail um dein Passwort zurückzusetzen. </p>
                 {show_email_not_found_alert && (
                     <div className="bg-white rounded-lg shadow-md p-4 mb-4 flex items-start">
-                        <div className="bg-red-500 rounded-full p-2 mr-3 flex-shrink-0">
-                            <AlertCircle className="h-5 w-5 text-white" />
+                        <div className="bg-red-400 rounded-full mr-3 flex-shrink-0 border-transparent">
+                            <AlertCircle className="h-12 w-12 text-white" />
                         </div>
                         <div>
-                            <h4 className="font-bold text-gray-800">Let's try that again</h4>
-                            <p className="text-gray-600">No account exists for the requested email address</p>
+                            <h4 className="font-bold text-gray-800">Lass uns das nochmal versuchen</h4>
+                            <p className="text-gray-600">Es existiert kein Konto für die angeforderte E-Mail-Adresse</p>
                         </div>
                     </div>
                 )}
