@@ -14,10 +14,13 @@ interface LoginProps {
 export default function Login({ to_start, to_forgot_password, on_close, email }: LoginProps) {
     const [password, setPassword] = useState("");
     const [show_password_incorrect_alert, set_show_password_incorrect_alert] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [showInternalError, setShowInternalError] = useState(false);
 
     const handleLogin = async () => {
         console.log("E-Mail: ", email);
         console.log("Password: ", password);
+        setIsLoading(true);
         try {
             const response = await fetch("http://localhost/api/login", {
                 method: "POST",
@@ -29,16 +32,21 @@ export default function Login({ to_start, to_forgot_password, on_close, email }:
 
             if (!response.ok) {
                 set_show_password_incorrect_alert(true);
+                setIsLoading(false);
                 return;
             }
             on_close();
+            setIsLoading(false);
             console.log("Logged in")
         } catch (error) {
+            setShowInternalError(true);
+            setIsLoading(false);
             console.error("Error occured in handleLogin: ", error);
         }
     };
 
     const handle_key_down = (e: React.KeyboardEvent) => {
+        set_show_password_incorrect_alert(false);
         if (e.key === 'Enter') {
             handleLogin();
         }
@@ -83,13 +91,34 @@ export default function Login({ to_start, to_forgot_password, on_close, email }:
                         Passwort
                     </span>
                 </label>
+                {showInternalError && (
+                    <div className="bg-white rounded-lg shadow-md p-4 mb-4 flex items-start">
+                        <div className="bg-red-400 rounded-full mr-3 flex-shrink-0 border-transparent">
+                            <AlertCircle className="h-12 w-12 text-white" />
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-gray-800">Irgendwas ist schiefgelaufen.</h4>
+                            <p className="text-gray-600">Versuche es später noch einmal.</p>
+                        </div>
+                    </div>
+                )}
 
-                <button
-                    className="flex items-center justify-center rounded-lg text-white p-4 mt-4 WeiterButton"
-                    onClick={handleLogin}
-                >
-                    Anmelden
-                </button>
+                {isLoading ?
+                    <button
+                        className="flex flex items-center justify-center gap-[6px] rounded-lg text-white p-4 mt-4 bg-gray-300 h-[56px]"
+                    >
+                        <div className="h-2 w-2 bg-white rounded-full animate-bounce [animation-delay:-0.3s] -m-"></div>
+                        <div className="h-2 w-2 bg-white rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                        <div className="h-2 w-2 bg-white rounded-full animate-bounce"></div>
+                    </button>
+                    :
+                    <button
+                        className="flex items-center justify-center rounded-lg text-white p-4 mt-4 WeiterButton"
+                        onClick={handleLogin}
+                    >
+                        Anmelden
+                    </button>
+                }
 
                 <p className="text-md text-left underline mt-4 text-black hover:underline cursor-pointer" onClick={to_forgot_password}>
                     Passwort vergessen?

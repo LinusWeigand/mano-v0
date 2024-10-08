@@ -17,8 +17,18 @@ export default function ForgotPassword({ back_to_login, on_close }: LoginProps) 
     const [show_email_not_found_alert, set_show_email_not_found_alert] = useState(false);
     const { setBanner, setBannerEmail } = useBanner();
 
+    const [showInternalError, setShowInternalError] = useState(false);
+    const [showEmailInvalidAlert, setShowEmailInvalidAlert] = useState(false);
+    const [isEmailValid, setIsEmailValid] = useState(false);
+    const [loading, setLoading] = useState(false);
+
     const handle_send_reset_link = async () => {
         console.log("forgot_password email: ", email);
+        if (!isEmailValid) {
+            setShowEmailInvalidAlert(true);
+            return;
+        }
+        setLoading(true);
         try {
             const response = await fetch("http://localhost/api/pre-reset-password", {
                 method: "POST",
@@ -30,12 +40,14 @@ export default function ForgotPassword({ back_to_login, on_close }: LoginProps) 
 
             if (!response.ok) {
                 set_show_email_not_found_alert(true);
+                setLoading(false);
                 return;
             }
             on_close();
             setBanner(BannerType.ResetPassword);
             setBannerEmail(email);
         } catch (error) {
+            setShowInternalError(true);
             console.error("Error occured in handle_send_reset_link: ", error);
         }
     };
@@ -44,6 +56,20 @@ export default function ForgotPassword({ back_to_login, on_close }: LoginProps) 
         if (e.key === 'Enter') {
             handle_send_reset_link();
         }
+    };
+
+    const validateEmail = (email: string) => {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(email);
+    };
+
+    const handle_email_change = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setEmail(value);
+        setIsEmailValid(validateEmail(value));
+        setShowEmailInvalidAlert(false);
+        setShowInternalError(false);
+        set_show_email_not_found_alert(false);
     };
 
     return (
@@ -56,6 +82,34 @@ export default function ForgotPassword({ back_to_login, on_close }: LoginProps) 
             </div>
             <div className="flex flex-col items-stretch mt-[25px] mx-6 mb-[15px]">
                 <p className="mb-4">Gib die E-Mail Addresse ein, welche mit deinem Konto verbunden ist und wir schicken dir eine E-Mail um dein Passwort zurückzusetzen. </p>
+
+
+
+                <label
+                    htmlFor="UserEmail"
+                    className={`relative block overflow-hidden rounded-lg border 
+                    border-gray-400 px-3 pt-8 peer-placeholder-shown:border-black
+                    ${email !== "" && !isEmailValid
+                            ? " focus-within:ring-1 focus-within:ring-red-600 focus-within:border-red-600"
+                            : " focus-within:ring-1 focus-within:ring-gray-600 focus-within:border-gray-600"
+                        }
+                    `}
+                >
+                    <input
+                        type="email"
+                        id="UserEmail"
+                        placeholder="E-Mail"
+                        className="peer h-8 w-full border-none bg-transparent p-0 placeholder-transparent text-lg focus:border-transparent focus:outline-none focus:ring-0"
+                        onChange={(e) => handle_email_change(e)}
+                        onKeyDown={handle_key_down}
+
+                    />
+
+                    <span className={`absolute start-3 top-5 -translate-y-1/2 text-md text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-md peer-focus:top-5 peer-placeholder-shown:text-black 
+                    ${email !== "" && !isEmailValid ? "text-red-600" : "text-gray-600"} `}>
+                        E-Mail
+                    </span>
+                </label>
                 {show_email_not_found_alert && (
                     <div className="bg-white rounded-lg shadow-md p-4 mb-4 flex items-start">
                         <div className="bg-red-400 rounded-full mr-3 flex-shrink-0 border-transparent">
@@ -67,32 +121,43 @@ export default function ForgotPassword({ back_to_login, on_close }: LoginProps) 
                         </div>
                     </div>
                 )}
-
-                <label
-                    htmlFor="UserEmail"
-                    className="relative block overflow-hidden rounded-lg border border-gray-400 px-3 pt-8  focus-within:border-gray-600 focus-within:ring-1 focus-within:ring-gray-600 peer-placeholder-shown:border-black"
-                >
-                    <input
-                        type="email"
-                        id="UserEmail"
-                        placeholder="E-Mail"
-                        className="peer h-8 w-full border-none bg-transparent p-0 placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0 text-lg"
-                        onChange={(e) => setEmail(e.target.value)}
-                        onKeyDown={handle_key_down}
-
-                    />
-
-                    <span className="absolute start-3 top-5 -translate-y-1/2 text-md text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-md peer-focus:top-5 peer-placeholder-shown:text-black text-gray-600">
-                        E-Mail
-                    </span>
-                </label>
-
-                <button
-                    className="flex items-center justify-center rounded-lg text-white p-4 mt-4 bg-darkButton-light hover:bg-darkButton-dark"
-                    onClick={handle_send_reset_link}
-                >
-                    Zurücksetzungslink schicken
-                </button>
+                {showEmailInvalidAlert && (
+                    <div className="bg-white rounded-lg p-4 flex items-start">
+                        <div className="bg-red-400 rounded-full mr-3 flex-shrink-0 border-transparent">
+                            <AlertCircle className="h-6 w-6 text-white" />
+                        </div>
+                        <div>
+                            <p className="text-red-600">E-Mail nicht gültig.</p>
+                        </div>
+                    </div>
+                )}
+                {showInternalError && (
+                    <div className="bg-white rounded-lg shadow-md p-4 mb-4 flex items-start">
+                        <div className="bg-red-400 rounded-full mr-3 flex-shrink-0 border-transparent">
+                            <AlertCircle className="h-12 w-12 text-white" />
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-gray-800">Irgendwas ist schiefgelaufen.</h4>
+                            <p className="text-gray-600">Versuche es später noch einmal.</p>
+                        </div>
+                    </div>
+                )}
+                {loading ?
+                    <button
+                        className="flex items-center justify-center rounded-lg text-white p-4 mt-4 bg-gray-300 gap-[6px] h-[56px]"
+                    >
+                        <div className="h-2 w-2 bg-white rounded-full animate-bounce [animation-delay:-0.3s] -m-"></div>
+                        <div className="h-2 w-2 bg-white rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                        <div className="h-2 w-2 bg-white rounded-full animate-bounce"></div>
+                    </button>
+                    :
+                    <button
+                        className="flex items-center justify-center rounded-lg text-white p-4 mt-4 bg-darkButton-light hover:bg-darkButton-dark"
+                        onClick={handle_send_reset_link}
+                    >
+                        Zurücksetzungslink schicken
+                    </button>
+                }
             </div>
         </Card>
     );

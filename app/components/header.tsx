@@ -10,6 +10,7 @@ import Profil from "./profil";
 import { useSearchParams } from "next/navigation";
 import { useBanner } from "@/context/BannerContext";
 import { BannerType } from "@/types/BannerType";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -17,6 +18,7 @@ export default function Header() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isProfilModalOpen, setIsProfilModalOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const { banner, clearBanner, setBanner, bannerEmail, setBannerEmail } = useBanner();
 
@@ -25,6 +27,10 @@ export default function Header() {
   const email = decodeURIComponent(searchParams.get('e') || '');
 
   const handle_email_verification = async () => {
+    if (typeof window !== 'undefined') {
+      const urlWithoutQueryParams = window.location.pathname;
+      window.history.replaceState(null, '', urlWithoutQueryParams);
+    }
     try {
       const response = await fetch("http://localhost/api/register", {
         method: "POST",
@@ -42,9 +48,12 @@ export default function Header() {
       on_close();
       setBanner(BannerType.EmailVerified)
       console.log("E-Mail verified.")
+
+
     } catch (error) {
       console.error("Error occured in handle_email_verification: ", error);
     }
+
   }
 
   useEffect(() => {

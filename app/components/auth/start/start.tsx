@@ -1,6 +1,6 @@
 
 "use client";
-import { X } from "lucide-react";
+import { AlertCircle, X } from "lucide-react";
 import "./start.css";
 import { Card, CardHeader } from "@/components/ui/card";
 import { useState } from "react";
@@ -14,8 +14,15 @@ interface StartProps {
 const Start = ({ on_close, to_login, to_register }: StartProps) => {
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
+    const [isEmailValid, setIsEmailValid] = useState(false);
+    const [showEmailInvalidAlert, setShowEmailInvalidAlert] = useState(false);
+    const [showInternalError, setShowInternalError] = useState(false);
 
     const handle_next = async () => {
+        if (!isEmailValid) {
+            setShowEmailInvalidAlert(true);
+            return;
+        }
         setLoading(true);
         console.log("handle_next email:", email);
         try {
@@ -31,13 +38,27 @@ const Start = ({ on_close, to_login, to_register }: StartProps) => {
             console.log("Viewer found.");
             to_login(email)
         } catch (error) {
+            setShowInternalError(true);
             console.error("Error occured in handle_next: ", error);
         }
     }
+
     const handle_key_down = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
             handle_next();
         }
+    };
+
+    const validateEmail = (email: string) => {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(email);
+    };
+
+    const handle_email_change = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setEmail(value);
+        setIsEmailValid(validateEmail(value));
+        setShowEmailInvalidAlert(false);
     };
 
     return (
@@ -53,26 +74,53 @@ const Start = ({ on_close, to_login, to_register }: StartProps) => {
 
                 <label
                     htmlFor="UserEmail"
-                    className="relative block overflow-hidden rounded-lg border border-gray-400 px-3 pt-8  focus-within:border-gray-600 focus-within:ring-1 focus-within:ring-gray-600 peer-placeholder-shown:border-black"
+                    className={`relative block overflow-hidden rounded-lg border 
+                    border-gray-400 px-3 pt-8 peer-placeholder-shown:border-black
+                    ${email !== "" && !isEmailValid
+                            ? " focus-within:ring-1 focus-within:ring-red-600 focus-within:border-red-600"
+                            : " focus-within:ring-1 focus-within:ring-gray-600 focus-within:border-gray-600"
+                        }
+                    `}
                 >
                     <input
                         type="email"
                         id="UserEmail"
                         placeholder="E-Mail"
-                        className="peer h-8 w-full border-none bg-transparent p-0 placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0 text-lg"
-                        onChange={(e) => setEmail(e.target.value)}
+                        className="peer h-8 w-full border-none bg-transparent p-0 placeholder-transparent text-lg focus:border-transparent focus:outline-none focus:ring-0"
+                        onChange={(e) => handle_email_change(e)}
                         onKeyDown={handle_key_down}
 
                     />
 
-                    <span className="absolute start-3 top-5 -translate-y-1/2 text-md text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-md peer-focus:top-5 peer-placeholder-shown:text-black text-gray-600">
+                    <span className={`absolute start-3 top-5 -translate-y-1/2 text-md text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-md peer-focus:top-5 peer-placeholder-shown:text-black 
+                    ${email !== "" && !isEmailValid ? "text-red-600" : "text-gray-600"} `}>
                         E-Mail
                     </span>
                 </label>
+                {showEmailInvalidAlert && (
+                    <div className="bg-white rounded-lg p-4 flex items-start">
+                        <div className="bg-red-400 rounded-full mr-3 flex-shrink-0 border-transparent">
+                            <AlertCircle className="h-6 w-6 text-white" />
+                        </div>
+                        <div>
+                            <p className="text-red-600">E-Mail nicht gültig.</p>
+                        </div>
+                    </div>
+                )}
+                {showInternalError && (
+                    <div className="bg-white rounded-lg shadow-md p-4 mb-4 flex items-start">
+                        <div className="bg-red-400 rounded-full mr-3 flex-shrink-0 border-transparent">
+                            <AlertCircle className="h-12 w-12 text-white" />
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-gray-800">Irgendwas ist schiefgelaufen.</h4>
+                            <p className="text-gray-600">Versuche es später noch einmal.</p>
+                        </div>
+                    </div>
+                )}
                 {loading ?
                     (<button
                         className="flex flex items-center justify-center gap-[6px] rounded-lg text-white p-4 mt-4 bg-gray-300 h-[56px]"
-                        onClick={handle_next}
                     >
                         <div className="h-2 w-2 bg-white rounded-full animate-bounce [animation-delay:-0.3s] -m-"></div>
                         <div className="h-2 w-2 bg-white rounded-full animate-bounce [animation-delay:-0.15s]"></div>

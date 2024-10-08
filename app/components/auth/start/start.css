@@ -51,19 +51,16 @@
 
 .WeiterButton {
   background: rgb(230, 29, 77);
-  background: linear-gradient(
-    90deg,
-    rgba(230, 29, 77, 1) 0%,
-    rgba(230, 29, 77, 1) 50%,
-    rgba(230, 29, 77, 1) 100%
-  );
+  background: linear-gradient(90deg,
+      rgba(230, 29, 77, 1) 0%,
+      rgba(230, 29, 77, 1) 50%,
+      rgba(230, 29, 77, 1) 100%);
 }
+
 .WeiterButton:hover {
   background: rgb(250, 29, 97);
-  background: linear-gradient(
-    90deg,
-    rgba(250, 49, 97, 1) 0%,
-    rgba(250, 49, 97, 1) 50%,
-    rgba(250, 49, 97, 1) 100%
-  );
+  background: linear-gradient(90deg,
+      rgba(250, 49, 97, 1) 0%,
+      rgba(250, 49, 97, 1) 50%,
+      rgba(250, 49, 97, 1) 100%);
 }

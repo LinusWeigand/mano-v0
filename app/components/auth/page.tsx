@@ -15,7 +15,7 @@ enum AuthState {
 }
 
 const Auth = ({ on_close }: AuthProps) => {
-  const [state, setState] = useState<AuthState>(AuthState.Start);
+  const [state, setState] = useState<AuthState>(AuthState.ForgotPassword);
   const [email, setEmail] = useState<string>("");
 
 
