@@ -7,10 +7,9 @@ import { useEffect, useRef, useState } from "react";
 import Modal from "./modal";
 import Auth from "./auth/page";
 import Profil from "./profil";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useBanner } from "@/context/BannerContext";
 import { BannerType } from "@/types/BannerType";
-import { useRouter } from "next/navigation";
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -18,7 +17,7 @@ export default function Header() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isProfilModalOpen, setIsProfilModalOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
+  const pathname = usePathname();
 
   const { banner, clearBanner, setBanner, bannerEmail, setBannerEmail } = useBanner();
 
@@ -93,6 +92,9 @@ export default function Header() {
 
   const handleAuth = () => {
     setShowMenu(false);
+    if (pathname === '/login') {
+      return;
+    }
     setIsAuthModalOpen(true);
   };
   const handleProfil = () => {

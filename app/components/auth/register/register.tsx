@@ -74,6 +74,7 @@ export default function Register({ to_start, on_close, email }: RegisterProps) {
         setPassword(value);
         setShowPasswordMissmatchAlert(value !== passwordVerify);
         setShowPasswordLengthError(false);
+        setShowInternalError(false);
     };
 
     const handle_password_verify_change = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,6 +82,7 @@ export default function Register({ to_start, on_close, email }: RegisterProps) {
         setPasswordVerify(value);
         setShowPasswordMissmatchAlert(password !== value);
         setShowPasswordLengthError(false);
+        setShowInternalError(false);
     };
 
 
