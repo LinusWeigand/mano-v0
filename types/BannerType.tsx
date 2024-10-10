@@ -5,5 +5,7 @@ export enum BannerType {
     PasswordResetted,
     VerifyEmailExpired,
     ResetPasswordExpired,
+    ProfilUpdated,
+    ProfilCreated,
     None
 }

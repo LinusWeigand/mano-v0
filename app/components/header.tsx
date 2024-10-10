@@ -17,7 +17,7 @@ export default function Header() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isProfilModalOpen, setIsProfilModalOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const pathname = usePathname();
+  // const pathname = usePathname();
 
   const { banner, clearBanner, setBanner, bannerEmail, setBannerEmail } = useBanner();
 
@@ -92,9 +92,9 @@ export default function Header() {
 
   const handleAuth = () => {
     setShowMenu(false);
-    if (pathname === '/login') {
-      return;
-    }
+    // if (pathname === '/login') {
+    //   return;
+    // }
     setIsAuthModalOpen(true);
   };
   const handleProfil = () => {
@@ -253,6 +253,38 @@ export default function Header() {
           <Check className="text-[#e4a593] h-7 w-7" />
           <span>
             Passwort wurde aktualisiert.
+          </span>
+        </div>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="absolute right-4 text-[#b3725e] hover:text-[#612a1b] hover:bg-transparent"
+          onClick={() => clearBanner()}
+        >
+          <X className="h-5 w-5" />
+        </Button>
+      </div>}
+      {banner === BannerType.ProfilUpdated && <div className="absolute top-0 w-full bg-[#ffd1c4] text-black p-4 flex items-center justify-center">
+        <div className="flex items-center space-x-3">
+          <Check className="text-[#e4a593] h-7 w-7" />
+          <span>
+            Profil wurde aktualisiert.
+          </span>
+        </div>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="absolute right-4 text-[#b3725e] hover:text-[#612a1b] hover:bg-transparent"
+          onClick={() => clearBanner()}
+        >
+          <X className="h-5 w-5" />
+        </Button>
+      </div>}
+      {banner === BannerType.ProfilCreated && <div className="absolute top-0 w-full bg-[#ffd1c4] text-black p-4 flex items-center justify-center">
+        <div className="flex items-center space-x-3">
+          <Check className="text-[#e4a593] h-7 w-7" />
+          <span>
+            Profil wurde erstellt.
           </span>
         </div>
         <Button

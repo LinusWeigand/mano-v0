@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
-import { useJsApiLoader } from "@react-google-maps/api";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,25 +22,15 @@ import {
 import {
   ChevronLeft,
   ChevronRight,
-  Camera,
   Plus,
-  Building2,
   X,
   Globe,
   Instagram,
   MapPin,
+  AlertCircle,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
-
-const mapContainerStyle = {
-  width: "100%",
-  height: "200px",
-};
-
-const center = {
-  lat: 40.7128,
-  lng: -74.006,
-};
+import { useBanner } from "@/context/BannerContext";
+import { BannerType } from "@/types/BannerType";
 
 interface ProfilProps {
   onClose: any;
@@ -49,64 +38,163 @@ interface ProfilProps {
 
 export default function Profil({ onClose }: ProfilProps) {
   const [step, setStep] = useState(1);
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const bioInputRef = useRef<HTMLTextAreaElement>(null);
   const [profileType, setProfileType] = useState<"personal" | "professional">(
     "personal"
   );
+  const [newSkill, setNewSkill] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const totalSteps = 3;
+  const { setBanner } = useBanner();
+
+  const [photos, setPhotos] = useState<{ file: File, preview: string }[]>([]);
+  const [name, setName] = useState("");
+  const [craft, setCraft] = useState("");
+  const [location, setLocation] = useState("");
+  const [website, setWebsite] = useState("");
+  const [instagram, setInstagram] = useState("");
   const [skills, setSkills] = useState<string[]>([
     "Holzmöbel",
     "Küchen",
     "Badezimmer",
   ]);
-  const [newSkill, setNewSkill] = useState("");
-  const [location, setLocation] = useState(center);
-  const [photos, setPhotos] = useState<string[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const totalSteps = 3;
-  const router = useRouter();
+  const [bio, setBio] = useState("");
+  const [experience, setExperience] = useState(10);
+  const [isLoading, setIsLoading] = useState(false)
+  const [showInternalError, setShowInternalError] = useState(false)
 
-  const { isLoaded } = useJsApiLoader({
-    id: "google-map-script",
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
-  });
+  const email = "linus@couchtec.com";
+
+  useEffect(() => {
+    return () => {
+      photos.forEach((photo) => URL.revokeObjectURL(photo.preview));
+    };
+  }, [photos]);
+
+  useEffect(() => {
+    if (step === 1 && nameInputRef.current) {
+      nameInputRef.current.focus();
+    } else if (step === 2 && bioInputRef.current) {
+      bioInputRef.current.focus();
+    }
+
+  }, [step])
+
+  const handleFinish = async () => {
+    try {
+      const formData = new FormData();
+      photos.forEach((photo, index) => {
+        formData.append(`photos_${index}`, photo.file);
+      });
+      formData.append('name', name);
+      formData.append('craft', craft);
+      formData.append('location', location);
+      formData.append('website', website);
+      formData.append('instagram', instagram);
+      formData.append('skills', JSON.stringify(skills));
+      formData.append('bio', bio);
+      formData.append('experience', experience.toString());
+
+
+      const response = await fetch("http://localhost/api/profile", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create profile");
+      }
+
+      setBanner(BannerType.ProfilCreated);
+      onClose();
+
+    } catch (error) {
+      console.error("Error uploading profile: ", error);
+    }
+  }
+
 
   const nextStep = () => setStep((prev) => Math.min(prev + 1, totalSteps));
   const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
 
   const addSkill = () => {
     if (newSkill.trim() !== "" && !skills.includes(newSkill.trim())) {
-      setSkills([...skills, newSkill.trim()]);
+      let new_skills = [...skills, newSkill.trim()];
+      setSkills(new_skills);
+      localStorage.setItem("skills", JSON.stringify(new_skills));
       setNewSkill("");
     }
   };
 
   const removeSkill = (skillToRemove: string) => {
-    setSkills(skills.filter((skill) => skill !== skillToRemove));
+    let new_skills = skills.filter((skill) => skill !== skillToRemove);
+    setSkills(new_skills);
+    localStorage.setItem("skills", JSON.stringify(new_skills));
   };
 
-  const onMapClick = useCallback((e: google.maps.MapMouseEvent) => {
-    setLocation({
-      lat: e.latLng?.lat() || center.lat,
-      lng: e.latLng?.lng() || center.lng,
-    });
-  }, []);
 
   const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files) {
-      const newPhotos = Array.from(files).map((file) =>
-        URL.createObjectURL(file)
-      );
+      const newPhotos = Array.from(files).map((file) => ({
+        file,
+        preview: URL.createObjectURL(file)
+      }));
       setPhotos((prevPhotos) => [...prevPhotos, ...newPhotos]);
     }
   };
 
-  const removePhoto = (photoToRemove: string) => {
-    setPhotos(photos.filter((photo) => photo !== photoToRemove));
+  const removePhoto = (photoToRemove: { file: File, preview: string }) => {
+    setPhotos((prevPhotos) => {
+      URL.revokeObjectURL(photoToRemove.preview);
+      return prevPhotos.filter((photo) => photo.preview !== photoToRemove.preview);
+    });
   };
 
-  const handleFinish = () => {
-    onClose(false);
+  const handleNameChange = (name: string) => {
+    setName(name);
+    localStorage.setItem("name", name);
+  }
+
+  const handleCraftChange = (craft: string) => {
+    setCraft(craft);
+    localStorage.setItem("craft", craft);
+  }
+
+  const handleLocationChange = (location: string) => {
+    setLocation(location);
+    localStorage.setItem("location", location);
+  }
+
+  const handleWebsiteChange = (website: string) => {
+    setWebsite(website);
+    localStorage.setItem("website", website);
+  }
+
+  const handleInstagramChange = (instagram: string) => {
+    setInstagram(instagram);
+    localStorage.setItem("instagram", instagram);
+  }
+
+  const handleBioChange = (bio: string) => {
+    setBio(bio);
+    localStorage.setItem("bio", bio);
+  }
+
+  const handleExperienceChange = (experience: number) => {
+    if (isNaN(experience)) {
+      return;
+    }
+    setExperience(experience);
+    localStorage.setItem("experience", experience.toString());
+  }
+  const handle_key_down = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      nextStep();
+    }
   };
+
 
   return (
     <Card className="w-screen sm:w-[550px] relative">
@@ -144,9 +232,8 @@ export default function Profil({ onClose }: ProfilProps) {
               key={index}
               variant="ghost"
               size="sm"
-              className={`h-1 w-full rounded-none ${
-                index + 1 <= step ? "bg-primary" : "bg-gray-300"
-              } ${index > 0 ? "ml-1" : ""}`}
+              className={`h-1 w-full rounded-none ${index + 1 <= step ? "bg-primary" : "bg-gray-300"
+                } ${index > 0 ? "ml-1" : ""}`}
               onClick={() => setStep(index + 1)}
             />
           ))}
@@ -161,9 +248,12 @@ export default function Profil({ onClose }: ProfilProps) {
               </Label>
               <Input
                 id="name"
+                ref={nameInputRef}
+                className="text-[16px]"
                 placeholder={
                   profileType === "personal" ? "Max Zimmer" : "Holzrausch GmbH."
                 }
+                onChange={(e) => handleNameChange(e.target.value)}
               />
             </div>
             <div className="space-y-2">
@@ -178,6 +268,7 @@ export default function Profil({ onClose }: ProfilProps) {
                     ? "e.g. Schreiner, Zimmerer"
                     : "e.g. Schreinerei, Zimmerei"
                 }
+                onChange={(e) => handleCraftChange(e.target.value)}
               />
             </div>
             <div className="space-y-2">
@@ -188,6 +279,7 @@ export default function Profil({ onClose }: ProfilProps) {
                   id="standort"
                   className="text-[16px]"
                   placeholder="München"
+                  onChange={(e) => handleLocationChange(e.target.value)}
                 />
               </div>
             </div>
@@ -199,6 +291,7 @@ export default function Profil({ onClose }: ProfilProps) {
                   id="website"
                   className="pl-8 text-[16px]"
                   placeholder="https://deine-webseite.de"
+                  onChange={(e) => handleWebsiteChange(e.target.value)}
                 />
               </div>
             </div>
@@ -210,6 +303,8 @@ export default function Profil({ onClose }: ProfilProps) {
                   id="instagram"
                   className="pl-8 text-[16px]"
                   placeholder="@nutzername"
+                  onChange={(e) => handleInstagramChange(e.target.value)}
+                  onKeyDown={handle_key_down}
                 />
               </div>
             </div>
@@ -281,12 +376,14 @@ export default function Profil({ onClose }: ProfilProps) {
               </h3>
               <Textarea
                 id="bio"
+                ref={bioInputRef}
                 className="text-[16px]"
                 placeholder={
                   profileType === "personal"
                     ? "Erzähl uns über dich und dein Handwerk..."
                     : "Erzähl uns über dein Gewerk und dessen Spezialitäten..."
                 }
+                onChange={(e) => handleBioChange(e.target.value)}
               />
             </div>
             <div className="space-y-2">
@@ -300,6 +397,8 @@ export default function Profil({ onClose }: ProfilProps) {
                 type="number"
                 placeholder="10"
                 className="text-[16px]"
+                onChange={(e) => handleExperienceChange(Number(e.target.value))}
+                onKeyDown={handle_key_down}
               />
             </div>
           </div>
@@ -312,7 +411,7 @@ export default function Profil({ onClose }: ProfilProps) {
               {photos.map((photo, index) => (
                 <div key={index} className="relative group">
                   <img
-                    src={photo}
+                    src={photo.preview}
                     alt={`Portfolio ${index + 1}`}
                     className="w-full h-full object-cover rounded"
                   />
@@ -343,22 +442,20 @@ export default function Profil({ onClose }: ProfilProps) {
               multiple
               onChange={handlePhotoUpload}
             />
-            <div className="space-y-2">
-              <Label htmlFor="portfolio-description">
-                Portfolio Beschreibung
-              </Label>
-              <Textarea
-                id="portfolio-description"
-                className="text-[16px]"
-                placeholder={
-                  profileType === "personal"
-                    ? "Beschreibe dein bestes Projekt..."
-                    : "Beschreibe dein bestes Projekt..."
-                }
-              />
-            </div>
+            {showInternalError && (
+              <div className="bg-white rounded-lg shadow-md p-4 my-4 flex items-start">
+                <div className="bg-red-400 rounded-full mr-3 flex-shrink-0 border-transparent">
+                  <AlertCircle className="h-12 w-12 text-white" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-800">Irgendwas ist schiefgelaufen.</h4>
+                  <p className="text-gray-600">Versuche es später noch einmal.</p>
+                </div>
+              </div>
+            )}
           </div>
         )}
+
       </CardContent>
       <CardFooter className="flex justify-between">
         {step > 1 && (
@@ -371,11 +468,23 @@ export default function Profil({ onClose }: ProfilProps) {
             Weiter <ChevronRight className="w-4 h-4 ml-1" />
           </Button>
         ) : (
-          <Button onClick={handleFinish} className="ml-auto">
-            Profil abschließen
-          </Button>
+          <>
+
+            {isLoading ?
+              < Button className="ml-auto gap-[6px] bg-gray-300 hover:bg-gray-300">
+                <div className="h-2 w-2 bg-white rounded-full animate-bounce [animation-delay:-0.3s] -m-"></div>
+                <div className="h-2 w-2 bg-white rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                <div className="h-2 w-2 bg-white rounded-full animate-bounce"></div>
+              </Button>
+              :
+              < Button onClick={handleFinish} className="ml-auto">
+                Profil abschließen
+              </Button>
+            }
+          </>
         )}
+
       </CardFooter>
-    </Card>
+    </Card >
   );
 }
