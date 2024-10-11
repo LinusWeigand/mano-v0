@@ -1,6 +1,8 @@
+import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
-import { Globe, Instagram, X } from "lucide-react"
+import { Globe, Instagram, X, ChevronLeft, ChevronRight } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { useSwipeable } from "react-swipeable"
 
 interface DetailsProps {
   onClose: () => void
@@ -27,22 +29,60 @@ export default function Details({
   experience,
   photos,
 }: DetailsProps) {
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
+
+  const nextPhoto = useCallback(() => {
+    setCurrentPhotoIndex((prevIndex) => (prevIndex + 1) % photos.length)
+  }, [photos.length])
+
+  const prevPhoto = useCallback(() => {
+    setCurrentPhotoIndex((prevIndex) => (prevIndex - 1 + photos.length) % photos.length)
+  }, [photos.length])
+
+  const handlers = useSwipeable({
+    onSwipedLeft: nextPhoto,
+    onSwipedRight: prevPhoto,
+    trackMouse: true,
+    preventScrollOnSwipe: true,
+  })
+
   return (
-    <div className="bg-white rounded-lg overflow-hidden w-full max-w-7xl max-h-[90vh] flex flex-col md:flex-row">
-      <div className="relative md:w-1/2 h-48 sm:h-64 md:h-auto">
+    <div className="bg-white rounded-lg overflow-hidden w-full max-w-7xl h-[90vh] flex flex-col md:flex-row md:h-[80vh] md:w-[80vw] mx-auto">
+      <div
+        className="relative w-full md:w-1/2 h-48 sm:h-64 md:h-full"
+        {...handlers}
+      >
         <img
-          src={photos[0] || `/placeholder.svg?height=600&width=600`}
+          src={photos[currentPhotoIndex] || `/placeholder.svg?height=600&width=600`}
           alt={`${name}'s work`}
           className="w-full h-full object-cover"
         />
         <button
-          className="absolute top-4 right-4 bg-white rounded-full p-2"
+          className="absolute top-4 right-4 bg-white rounded-full p-2 z-10"
           onClick={onClose}
         >
           <X className="h-6 w-6 text-gray-600" />
         </button>
+        {photos.length > 1 && (
+          <>
+            <button
+              className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md"
+              onClick={prevPhoto}
+              aria-label="Previous photo"
+            >
+              <ChevronLeft className="h-6 w-6 text-gray-600" />
+            </button>
+            <button
+              className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md"
+              onClick={nextPhoto}
+              aria-label="Next photo"
+            >
+              <ChevronRight className="h-6 w-6 text-gray-600" />
+            </button>
+          </>
+        )}
       </div>
-      <div className="flex-grow md:w-1/2 h-[calc(90vh-12rem)] sm:h-[calc(90vh-16rem)] md:h-auto overflow-hidden">
+      <div className="flex-grow md:w-1/2 h-[calc(90vh-12rem)] sm:h-[calc(90vh-16rem)] md:h-full overflow-hidden">
         <ScrollArea className="h-full">
           <div className="p-4 sm:p-6 lg:p-8">
             <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2">{name}</h2>
