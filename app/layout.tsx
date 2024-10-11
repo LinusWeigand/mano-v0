@@ -4,6 +4,7 @@ import "./globals.css";
 import { BannerProvider } from "@/context/BannerContext";
 import Header from "./components/header";
 import { ProfilesProvider } from "@/context/ProfilesContext";
+import { AuthProvider } from "@/context/AuthContext";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -33,8 +34,10 @@ export default function RootLayout({
       >
         <BannerProvider>
           <ProfilesProvider>
-            <Header />
-            {children}
+            <AuthProvider>
+              <Header />
+              {children}
+            </AuthProvider>
           </ProfilesProvider>
         </BannerProvider>
       </body>

@@ -3,6 +3,7 @@
 import { AlertCircle, ChevronLeft, X } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 interface LoginProps {
     to_start: () => void;
@@ -16,6 +17,7 @@ export default function Login({ to_start, to_forgot_password, on_close, email }:
     const [show_password_incorrect_alert, set_show_password_incorrect_alert] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [showInternalError, setShowInternalError] = useState(false);
+    const { setIsLoggedIn, setAuthEmail } = useAuth();
 
     const handleLogin = async () => {
         console.log("E-Mail: ", email);
@@ -37,6 +39,9 @@ export default function Login({ to_start, to_forgot_password, on_close, email }:
             }
             on_close();
             setIsLoading(false);
+            setIsLoggedIn(true);
+            setAuthEmail(email);
+            localStorage.setItem("isLoggedIn", "true");
             console.log("Logged in")
         } catch (error) {
             setShowInternalError(true);
