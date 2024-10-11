@@ -46,6 +46,10 @@ export default function Details({
     preventScrollOnSwipe: true,
   })
 
+  const handleThumbnailClick = (index: number) => {
+    setCurrentPhotoIndex(index)
+  }
+
   return (
     <div className="bg-white rounded-lg overflow-hidden w-full max-w-7xl h-[90vh] flex flex-col md:flex-row md:h-[80vh] md:w-[80vw] mx-auto">
       <div
@@ -89,16 +93,16 @@ export default function Details({
             <p className="text-gray-600 mb-4">{craft}</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
-                <h3 className="font-semibold mb-2">Location</h3>
+                <h3 className="font-semibold mb-2">Standort</h3>
                 <p>{location}</p>
               </div>
               <div>
-                <h3 className="font-semibold mb-2">Experience</h3>
-                <p>{experience} years</p>
+                <h3 className="font-semibold mb-2">Erfahrung</h3>
+                <p>{experience} {experience === 1 ? "Jahr" : "Jahre"}</p>
               </div>
             </div>
             <div className="mb-4">
-              <h3 className="font-semibold mb-2">Skills</h3>
+              <h3 className="font-semibold mb-2">Fähigkeiten</h3>
               <div className="flex flex-wrap gap-2">
                 {skills.map((skill, index) => (
                   <span
@@ -111,23 +115,33 @@ export default function Details({
               </div>
             </div>
             <div className="mb-4">
-              <h3 className="font-semibold mb-2">About</h3>
+              <h3 className="font-semibold mb-2">Über</h3>
               <p className="text-gray-600">{bio}</p>
             </div>
             <div className="mb-4">
               <h3 className="font-semibold mb-2">Portfolio</h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {photos.map((image, index) => (
-                  <img
+                  <button
                     key={index}
-                    src={image}
-                    alt={`Portfolio ${index + 1}`}
-                    className="w-full h-24 object-cover rounded"
-                  />
+                    onClick={() => handleThumbnailClick(index)}
+                    className="w-full h-24 relative overflow-hidden rounded group"
+                  >
+                    <img
+                      src={image}
+                      alt={`Portfolio ${index + 1}`}
+                      className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                    />
+                    <div
+                      className={`absolute bottom-0 left-0 right-0 h-1 bg-primary transform transition-transform duration-200 ${index === currentPhotoIndex ? 'scale-x-100' : 'scale-x-0'
+                        }`}
+                      style={{ marginBottom: '-4px' }}
+                    />
+                  </button>
                 ))}
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex flex-col sm:flex-row justify-start items-start sm:items-center gap-4">
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                 <a
                   href={website}
@@ -148,7 +162,7 @@ export default function Details({
                   Instagram
                 </a>
               </div>
-              <Button className="w-full sm:w-auto">Contact Craftsman</Button>
+              {/* <Button className="w-full sm:w-auto">Kontakt</Button> */}
             </div>
           </div>
         </ScrollArea>

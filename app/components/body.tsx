@@ -148,7 +148,7 @@ export default function Body() {
             {selectedprofile &&
                 <Modal isOpen={isDetailsModalOpen} onClose={() => setIsDetailsModalOpen(false)}>
                     <Details
-                        onClose={setIsDetailsModalOpen}
+                        onClose={() => setIsDetailsModalOpen(false)}
                         name={selectedprofile.name}
                         craft={selectedprofile.craft}
                         location={selectedprofile.location}
