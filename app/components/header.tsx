@@ -144,7 +144,7 @@ export default function Header() {
                 <Menu className="h-5 w-5 mr-2" />
                 <div className="h-8 w-8 rounded-full overflow-hidden flex items-center justify-center bg-gradient-to-br from-[#555] to-[#444]">
 
-                  {localStorage.getItem("isLoggedIn") === "true" ? (
+                  {typeof window !== "undefined" && localStorage.getItem("isLoggedIn") === "true" ? (
                     <Avatar className="h-full w-full">
                       <AvatarFallback className="text-primary-foreground text-md font-semibold bg-gradient-to-br from-[#555] to-[#444]">{"L"}</AvatarFallback>
                     </Avatar>
@@ -162,7 +162,7 @@ export default function Header() {
             className="absolute right-4 sm:right-6 top-12 z-10 mt-2 w-56 divide-y divide-gray-100 rounded-md border border-gray-100 bg-white shadow-lg"
             role="menu"
           >
-            {isLoggedIn ?
+            {typeof window !== "undefined" && localStorage.getItem("isLoggedIn") === "true" ?
               <div className="p-2">
                 <a
                   onClick={handleLogout}

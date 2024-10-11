@@ -144,7 +144,7 @@ export default function Details({
             <div className="flex flex-col sm:flex-row justify-start items-start sm:items-center gap-4">
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                 <a
-                  href={website}
+                  href={`https://${website}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:underline flex items-center"
