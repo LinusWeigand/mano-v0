@@ -4,38 +4,15 @@ import { Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import Modal from "./modal";
 import Details from "./details";
+import { useProfiles } from "@/context/ProfilesContext";
 
-interface Profile {
-    id: string,
-    name: string,
-    craft: string,
-    location: string,
-    website: string,
-    instagram: string,
-    bio: string,
-    experience: number,
-    skills: string[],
-    photos: string[]
-}
 
 export default function Body() {
 
     const [photos, setPhotos] = useState<string[]>([]);
+    const { profiles, setProfiles } = useProfiles();
 
-    const [profiles, setProfiles] = useState<Profile[]>([
-        {
-            id: "",
-            name: "",
-            craft: "",
-            location: "",
-            website: "",
-            instagram: "",
-            bio: "",
-            experience: 0,
-            skills: [],
-            photos: []
-        }
-    ]);
+
 
     const [selectedprofile, setSelectedprofile] = useState<any>(profiles[0]);
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
@@ -53,7 +30,7 @@ export default function Body() {
             const result = await response.json();
             const data = result.data;
 
-            const initialProfiles: Profile[] = data.map((profile_object: any) => ({
+            const initialProfiles: ProfileModel[] = data.map((profile_object: any) => ({
                 id: profile_object.id,
                 name: profile_object.name,
                 craft: profile_object.craft,
@@ -92,7 +69,7 @@ export default function Body() {
             const result = await response.json();
             const photoUrls = result.data;
 
-            const photoObjectUrls = await Promise.all(
+            const photoObjectUrls: string[] = await Promise.all(
                 photoUrls.map(async (url: string) => {
                     const response = await fetch(url, {
                         method: "GET",
@@ -108,8 +85,8 @@ export default function Body() {
                 })
             );
 
-            setProfiles((prevProfiles) =>
-                prevProfiles.map((profile) => {
+            setProfiles((prevProfiles: ProfileModel[]) =>
+                prevProfiles.map((profile: ProfileModel) => {
                     if (profile.id === profileId) {
                         return {
                             ...profile,
@@ -134,7 +111,7 @@ export default function Body() {
             <section className="py-16">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {profiles.map((profile, index) => (
+                        {profiles.length > 0 && profiles.map((profile, index) => (
                             <Card
                                 key={index}
                                 className="overflow-hidden cursor-pointer"
@@ -168,21 +145,21 @@ export default function Body() {
                     </div>
                 </div>
             </section>
-
-            <Modal isOpen={isDetailsModalOpen} onClose={() => setIsDetailsModalOpen(false)}>
-                <Details
-                    onClose={setIsDetailsModalOpen}
-                    name={selectedprofile.name}
-                    craft={selectedprofile.craft}
-                    location={selectedprofile.location}
-                    website={selectedprofile.website}
-                    instagram={selectedprofile.instagram}
-                    skills={selectedprofile.skills}
-                    bio={selectedprofile.bio}
-                    experience={selectedprofile.experience}
-                    photos={selectedprofile.photos}
-                />
-            </Modal>
+            {selectedprofile &&
+                <Modal isOpen={isDetailsModalOpen} onClose={() => setIsDetailsModalOpen(false)}>
+                    <Details
+                        onClose={setIsDetailsModalOpen}
+                        name={selectedprofile.name}
+                        craft={selectedprofile.craft}
+                        location={selectedprofile.location}
+                        website={selectedprofile.website}
+                        instagram={selectedprofile.instagram}
+                        skills={selectedprofile.skills}
+                        bio={selectedprofile.bio}
+                        experience={selectedprofile.experience}
+                        photos={selectedprofile.photos}
+                    />
+                </Modal>}
         </main>
     );
 }

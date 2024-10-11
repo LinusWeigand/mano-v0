@@ -12,9 +12,104 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, MapPin, Calendar } from "lucide-react";
+import { useProfiles } from "@/context/ProfilesContext";
 
 export default function SearchBar() {
   const [activeField, setActiveField] = useState<string | null>(null);
+  const [craft, setCraft] = useState("");
+  const [location, setLocation] = useState("");
+  const { setProfiles } = useProfiles();
+
+  const handleSubmit = async () => {
+    if (craft === "" && location === "") {
+      return;
+    }
+
+    console.log("SEARCHING...");
+    try {
+      const response = await fetch("http://localhost/api/search", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ craft, location }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to handle Search");
+      }
+
+      const result = await response.json();
+      const data = result.data;
+
+      const initialProfiles: ProfileModel[] = data.map((profile_object: any) => ({
+        id: profile_object.id,
+        name: profile_object.name,
+        craft: profile_object.craft,
+        location: profile_object.location,
+        website: profile_object.website,
+        instagram: profile_object.instagram,
+        bio: profile_object.bio,
+        experience: profile_object.experience,
+        skills: profile_object.skills,
+        photos: [],
+      }));
+
+      setProfiles(initialProfiles);
+
+      initialProfiles.forEach((profile) => {
+        load_profile_photos(profile.id);
+      });
+
+      console.log("Profiles fetched successfully.");
+    } catch (error) {
+      console.error("Error occurred in get_profiles: ", error);
+    }
+  }
+  const load_profile_photos = async (profileId: string) => {
+    try {
+      const response = await fetch(`http://localhost/api/profile-photos/${profileId}`, {
+        method: "GET",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to get profile photos");
+      }
+
+      const result = await response.json();
+      const photoUrls = result.data;
+
+      const photoObjectUrls: string[] = await Promise.all(
+        photoUrls.map(async (url: string) => {
+          const response = await fetch(url, {
+            method: "GET",
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to get profile photo");
+          }
+
+          const photoBlob = await response.blob();
+          const photoObjectUrl = URL.createObjectURL(photoBlob);
+          return photoObjectUrl;
+        })
+      );
+
+      setProfiles((prevProfiles: ProfileModel[]) =>
+        prevProfiles.map((profile: ProfileModel) => {
+          if (profile.id === profileId) {
+            return {
+              ...profile,
+              photos: photoObjectUrls,
+            };
+          }
+          return profile;
+        })
+      );
+    } catch (error) {
+      console.error(`Error occurred while fetching photos for profile ${profileId}:`, error);
+    }
+  };
 
   return (
     <section className={`pt-5 pb-8 border-b`}>
@@ -26,7 +121,10 @@ export default function SearchBar() {
           <div className="flex mt-2 justify-center ">
             <Card className="self-center sm:w-full w-[300px] shadow-lg sm:rounded-[4rem] overflow-hidden r">
               <CardContent className="p-0 items-center ">
-                <form className="flex flex-col sm:flex-row sm:items-center">
+                <form className="flex flex-col sm:flex-row sm:items-center" onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSubmit();
+                }}>
                   <div
                     className={`flex-1 p-2 transition-colors py-4 pl-8 md:pl-10 lg:w-[300px]
                 ${activeField === "craft"
@@ -49,6 +147,7 @@ export default function SearchBar() {
                       placeholder="Gewerke suchen"
                       className="w-full border-none bg-transparent text-[16px] mt-[1px]"
                       onFocus={() => setActiveField("craft")}
+                      onChange={(e) => setCraft(e.target.value)}
                     />
                   </div>
                   <div
@@ -75,6 +174,7 @@ export default function SearchBar() {
                         placeholder="Ort suchen"
                         className="w-full border-none bg-transparent focus:ring-0 text-[16px]"
                         onFocus={() => setActiveField("location")}
+                        onChange={(e) => setLocation(e.target.value)}
                       />
                     </div>
                   </div>
