@@ -174,7 +174,7 @@ export default function Profil({ onClose }: ProfilProps) {
     localStorage.setItem("website", website);
   }
 
-  const handleGoogleRatingsChange = (website: string) => {
+  const handleGoogleRatingsChange = (googleRatings: string) => {
     setGoogleRatings(googleRatings);
     localStorage.setItem("google_ratings", website);
   }
