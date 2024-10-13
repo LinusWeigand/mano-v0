@@ -36,6 +36,7 @@ export default function Body() {
                 craft: profile_object.craft,
                 location: profile_object.location,
                 website: profile_object.website,
+                google_ratings: profile_object.google_ratings,
                 instagram: profile_object.instagram,
                 bio: profile_object.bio,
                 experience: profile_object.experience,
@@ -153,6 +154,7 @@ export default function Body() {
                         craft={selectedprofile.craft}
                         location={selectedprofile.location}
                         website={selectedprofile.website}
+                        googleRatings={selectedprofile.google_ratings}
                         instagram={selectedprofile.instagram}
                         skills={selectedprofile.skills}
                         bio={selectedprofile.bio}

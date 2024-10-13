@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
-import { Globe, Instagram, X, ChevronLeft, ChevronRight } from "lucide-react"
+import { Globe, Instagram, X, ChevronLeft, ChevronRight, MapPin } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useSwipeable } from "react-swipeable"
 
@@ -10,6 +10,7 @@ interface DetailsProps {
   craft: string
   location: string
   website: string
+  googleRatings: string
   instagram: string
   skills: string[]
   bio: string
@@ -23,6 +24,7 @@ export default function Details({
   craft,
   location,
   website,
+  googleRatings,
   instagram,
   skills,
   bio,
@@ -160,6 +162,15 @@ export default function Details({
                 >
                   <Instagram className="h-5 w-5 mr-1" />
                   Instagram
+                </a>
+                <a
+                  href={`https://${googleRatings}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline flex items-center"
+                >
+                  <MapPin className="h-5 w-5 mr-1" />
+                  Google Ratings
                 </a>
               </div>
               {/* <Button className="w-full sm:w-auto">Kontakt</Button> */}

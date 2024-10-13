@@ -53,6 +53,7 @@ export default function Profil({ onClose }: ProfilProps) {
   const [craft, setCraft] = useState("");
   const [location, setLocation] = useState("");
   const [website, setWebsite] = useState("");
+  const [googleRatings, setGoogleRatings] = useState("");
   const [instagram, setInstagram] = useState("");
   const [skills, setSkills] = useState<string[]>([
     "Holzmöbel",
@@ -91,6 +92,7 @@ export default function Profil({ onClose }: ProfilProps) {
       formData.append('craft', craft);
       formData.append('location', location);
       formData.append('website', website);
+      formData.append('google_ratings', googleRatings);
       formData.append('instagram', instagram);
       formData.append('skills', JSON.stringify(skills));
       formData.append('bio', bio);
@@ -170,6 +172,11 @@ export default function Profil({ onClose }: ProfilProps) {
   const handleWebsiteChange = (website: string) => {
     setWebsite(website);
     localStorage.setItem("website", website);
+  }
+
+  const handleGoogleRatingsChange = (website: string) => {
+    setGoogleRatings(googleRatings);
+    localStorage.setItem("google_ratings", website);
   }
 
   const handleInstagramChange = (instagram: string) => {
@@ -292,6 +299,18 @@ export default function Profil({ onClose }: ProfilProps) {
                   className="pl-8 text-[16px]"
                   placeholder="https://deine-webseite.de"
                   onChange={(e) => handleWebsiteChange(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="google_ratings">Google Maps Rating Link (Optional)</Label>
+              <div className="relative">
+                <Globe className="absolute left-1 top-1 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="google_ratings"
+                  className="pl-8 text-[16px]"
+                  placeholder="https://google.com/maps/mylink"
+                  onChange={(e) => handleGoogleRatingsChange(e.target.value)}
                 />
               </div>
             </div>

@@ -5,6 +5,7 @@ interface ProfileModel {
     craft: string,
     location: string,
     website: string,
+    google_ratings: string,
     instagram: string,
     bio: string,
     experience: number,

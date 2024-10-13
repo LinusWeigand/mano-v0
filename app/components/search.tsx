@@ -48,6 +48,7 @@ export default function SearchBar() {
         craft: profile_object.craft,
         location: profile_object.location,
         website: profile_object.website,
+        google_ratings: profile_object.google_ratings,
         instagram: profile_object.instagram,
         bio: profile_object.bio,
         experience: profile_object.experience,
