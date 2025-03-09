@@ -1,13 +1,13 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { AlertCircle, Check, Globe, Mail, Menu, User, X } from "lucide-react";
+import { AlertCircle, Check, Mail, Menu, User, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Modal from "./modal";
 import Auth from "./auth/page";
 import Profil from "./profil";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useBanner } from "@/context/BannerContext";
 import { BannerType } from "@/types/BannerType";
 import { useAuth } from "@/context/AuthContext";
@@ -21,18 +21,18 @@ export default function Header() {
   const menuRef = useRef<HTMLDivElement>(null);
   // const pathname = usePathname();
 
-  const { banner, clearBanner, setBanner, bannerEmail, setBannerEmail } = useBanner();
+  const { banner, clearBanner, setBanner, bannerEmail } = useBanner();
 
   const searchParams = useSearchParams();
-  const verification_code = decodeURIComponent(searchParams.get('vc') || '');
-  const email = decodeURIComponent(searchParams.get('e') || '');
+  const verification_code = decodeURIComponent(searchParams.get("vc") || "");
+  const email = decodeURIComponent(searchParams.get("e") || "");
 
-  const { authEmail, isLoggedIn, setIsLoggedIn } = useAuth();
+  const { isLoggedIn, setIsLoggedIn, setAuthEmail, getFirstLetter } = useAuth();
 
   const handle_email_verification = async () => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const urlWithoutQueryParams = window.location.pathname;
-      window.history.replaceState(null, '', urlWithoutQueryParams);
+      window.history.replaceState(null, "", urlWithoutQueryParams);
     }
     try {
       const response = await fetch("http://localhost/api/register", {
@@ -49,25 +49,33 @@ export default function Header() {
         return;
       }
       on_close();
-      setBanner(BannerType.EmailVerified)
-      console.log("E-Mail verified.")
-
-
+      setBanner(BannerType.EmailVerified);
+      console.log("E-Mail verified.");
     } catch (error) {
       console.error("Error occured in handle_email_verification: ", error);
     }
+  };
 
-  }
-
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setIsLoggedIn(false);
-  }
+    try {
+      const response = await fetch("/api/auth/logout", {
+        credentials: "include",
+      });
+      await response.json();
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
 
   useEffect(() => {
-
-    if (verification_code !== '' && email != '') {
+    if (verification_code !== "" && email != "") {
       handle_email_verification();
     }
+    checkAuthStatus();
+    setTimeout(async () => {
+      await checkAuthStatus();
+    }, 500);
     const handleScroll = () => {
       if (window.scrollY > 197.9) {
         setScrolled(true);
@@ -112,11 +120,34 @@ export default function Header() {
 
   const on_close = () => {
     setIsAuthModalOpen(false);
-  }
+  };
+
+  const checkAuthStatus = async () => {
+    try {
+      const response = await fetch("/api/auth/status", {
+        credentials: "include",
+      });
+      const data = await response.json();
+
+      if (data.isLoggedIn) {
+        setIsLoggedIn(true);
+      } else {
+        setIsLoggedIn(false);
+      }
+
+      if (data.email) {
+        setAuthEmail(data.email);
+      }
+
+    } catch (error) {
+      console.error("Error checking auth status:", error);
+      setIsLoggedIn(false);
+    }
+  };
 
   return (
     <header
-      className={`sticky top-0 z-50 bg-white relative mt-4
+      className={`sticky top-0 z-50 bg-white relative pt-4 
     ${scrolled ? "border-b" : ""}`}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
@@ -138,15 +169,16 @@ export default function Header() {
               <Button
                 variant="outline"
                 className="flex items-center space-x-3 rounded-full border border-gray-300 shadow-sm hover:shadow-md transition-all duration-200 py-6 px-3 sm:px-4"
-
                 onClick={toggleMenu}
               >
                 <Menu className="h-5 w-5 mr-2" />
                 <div className="h-8 w-8 rounded-full overflow-hidden flex items-center justify-center bg-gradient-to-br from-[#555] to-[#444]">
-
-                  {typeof window !== "undefined" && localStorage.getItem("isLoggedIn") === "true" ? (
+                  {typeof window !== "undefined" &&
+                    isLoggedIn === true && getFirstLetter() ? (
                     <Avatar className="h-full w-full">
-                      <AvatarFallback className="text-primary-foreground text-md font-semibold bg-gradient-to-br from-[#555] to-[#444]">{"L"}</AvatarFallback>
+                      <AvatarFallback className="text-primary-foreground text-md font-semibold bg-gradient-to-br from-[#555] to-[#444]">
+                        {getFirstLetter()}
+                      </AvatarFallback>
                     </Avatar>
                   ) : (
                     <User className="h-5 w-5 text-white" />
@@ -162,7 +194,8 @@ export default function Header() {
             className="absolute right-4 sm:right-6 top-12 z-10 mt-2 w-56 divide-y divide-gray-100 rounded-md border border-gray-100 bg-white shadow-lg"
             role="menu"
           >
-            {typeof window !== "undefined" && localStorage.getItem("isLoggedIn") === "true" ?
+            {typeof window !== "undefined" &&
+              isLoggedIn === true ? (
               <div className="p-2">
                 <a
                   onClick={handleLogout}
@@ -171,9 +204,8 @@ export default function Header() {
                 >
                   Abmelden
                 </a>
-
               </div>
-              :
+            ) : (
               <div className="p-2">
                 <a
                   onClick={handleAuth}
@@ -191,7 +223,7 @@ export default function Header() {
                   Einloggen
                 </a>
               </div>
-            }
+            )}
 
             <div className="p-2">
               <a
@@ -215,12 +247,13 @@ export default function Header() {
       >
         <Profil onClose={setIsProfilModalOpen} />
       </Modal>
-      {
-        banner === BannerType.ResetPassword && <div className="absolute top-0 w-full bg-[#c2e4e6] text-black p-4 flex items-center justify-center">
+      {banner === BannerType.ResetPassword && (
+        <div className="absolute top-0 w-full bg-[#c2e4e6] text-black p-4 flex items-center justify-center">
           <div className="flex items-center space-x-3">
             <Mail className="text-[#4bb0ba] h-7 w-7" />
             <span>
-              Ein Link zum Zurücksetzen deines Passworts wurde an {bannerEmail || 'deine E-Mail'} gesendet.
+              Ein Link zum Zurücksetzen deines Passworts wurde an{" "}
+              {bannerEmail || "deine E-Mail"} gesendet.
             </span>
           </div>
           <Button
@@ -232,13 +265,14 @@ export default function Header() {
             <X className="h-5 w-5" />
           </Button>
         </div>
-      }
-      {
-        banner === BannerType.VerifyEmail && <div className="absolute top-0 w-full bg-[#c2e4e6] text-black p-4 flex items-center justify-center">
+      )}
+      {banner === BannerType.VerifyEmail && (
+        <div className="absolute top-0 w-full bg-[#c2e4e6] text-black p-4 flex items-center justify-center">
           <div className="flex items-center space-x-3">
             <Mail className="text-[#4bb0ba] h-7 w-7" />
             <span>
-              Ein Verifizierungslink wurde an {bannerEmail || 'deine E-Mail'} gesendet.
+              Ein Verifizierungslink wurde an {bannerEmail || "deine E-Mail"}{" "}
+              gesendet.
             </span>
           </div>
           <Button
@@ -250,13 +284,14 @@ export default function Header() {
             <X className="h-5 w-5" />
           </Button>
         </div>
-      }
-      {
-        banner === BannerType.VerifyEmailExpired && <div className="absolute top-0 w-full bg-[#c2e4e6] text-black p-4 flex items-center justify-center">
+      )}
+      {banner === BannerType.VerifyEmailExpired && (
+        <div className="absolute top-0 w-full bg-[#c2e4e6] text-black p-4 flex items-center justify-center">
           <div className="flex items-center space-x-3">
             <Mail className="text-[#4bb0ba] h-7 w-7" />
             <span>
-              Der Verifizierungslink für {bannerEmail || 'deine E-Mail'} ist abgelaufen.
+              Der Verifizierungslink für {bannerEmail || "deine E-Mail"} ist
+              abgelaufen.
             </span>
           </div>
           <Button
@@ -268,14 +303,12 @@ export default function Header() {
             <X className="h-5 w-5" />
           </Button>
         </div>
-      }
-      {
-        banner === BannerType.EmailVerified && <div className="absolute top-0 w-full bg-[#c2e4e6] text-black p-4 flex items-center justify-center">
+      )}
+      {banner === BannerType.EmailVerified && (
+        <div className="absolute top-0 w-full bg-[#c2e4e6] text-black p-4 flex items-center justify-center">
           <div className="flex items-center space-x-3">
             <Mail className="text-[#4bb0ba] h-7 w-7" />
-            <span>
-              Deine E-Mail {bannerEmail || ''} wurde verifiziert.
-            </span>
+            <span>Deine E-Mail {bannerEmail || ""} wurde verifiziert.</span>
           </div>
           <Button
             size="icon"
@@ -286,14 +319,12 @@ export default function Header() {
             <X className="h-5 w-5" />
           </Button>
         </div>
-      }
-      {
-        banner === BannerType.PasswordResetted && <div className="absolute top-0 w-full bg-[#ffd1c4] text-black p-4 flex items-center justify-center">
+      )}
+      {banner === BannerType.PasswordResetted && (
+        <div className="absolute top-0 w-full bg-[#ffd1c4] text-black p-4 flex items-center justify-center">
           <div className="flex items-center space-x-3">
             <Check className="text-[#e4a593] h-7 w-7" />
-            <span>
-              Passwort wurde aktualisiert.
-            </span>
+            <span>Passwort wurde aktualisiert.</span>
           </div>
           <Button
             size="icon"
@@ -304,14 +335,12 @@ export default function Header() {
             <X className="h-5 w-5" />
           </Button>
         </div>
-      }
-      {
-        banner === BannerType.ProfilUpdated && <div className="absolute top-0 w-full bg-[#ffd1c4] text-black p-4 flex items-center justify-center">
+      )}
+      {banner === BannerType.ProfilUpdated && (
+        <div className="absolute top-0 w-full bg-[#ffd1c4] text-black p-4 flex items-center justify-center">
           <div className="flex items-center space-x-3">
             <Check className="text-[#e4a593] h-7 w-7" />
-            <span>
-              Profil wurde aktualisiert.
-            </span>
+            <span>Profil wurde aktualisiert.</span>
           </div>
           <Button
             size="icon"
@@ -322,14 +351,12 @@ export default function Header() {
             <X className="h-5 w-5" />
           </Button>
         </div>
-      }
-      {
-        banner === BannerType.ProfilCreated && <div className="absolute top-0 w-full bg-[#ffd1c4] text-black p-4 flex items-center justify-center">
+      )}
+      {banner === BannerType.ProfilCreated && (
+        <div className="absolute top-0 w-full bg-[#ffd1c4] text-black p-4 flex items-center justify-center">
           <div className="flex items-center space-x-3">
             <Check className="text-[#e4a593] h-7 w-7" />
-            <span>
-              Profil wurde erstellt.
-            </span>
+            <span>Profil wurde erstellt.</span>
           </div>
           <Button
             size="icon"
@@ -340,13 +367,14 @@ export default function Header() {
             <X className="h-5 w-5" />
           </Button>
         </div>
-      }
-      {
-        banner === BannerType.ResetPasswordExpired && <div className="absolute top-0 w-full bg-[#ffd1c4] text-black p-4 flex items-center justify-center">
+      )}
+      {banner === BannerType.ResetPasswordExpired && (
+        <div className="absolute top-0 w-full bg-[#ffd1c4] text-black p-4 flex items-center justify-center">
           <div className="flex items-center space-x-3">
             <AlertCircle className="text-[#e4a593] h-7 w-7" />
             <span>
-              Ihre Anfrage zum Zurücksetzen des Passworts ist bereits abgelaufen. Bitte versuchen Sie es erneut.
+              Ihre Anfrage zum Zurücksetzen des Passworts ist bereits
+              abgelaufen. Bitte versuchen Sie es erneut.
             </span>
           </div>
           <Button
@@ -358,7 +386,7 @@ export default function Header() {
             <X className="h-5 w-5" />
           </Button>
         </div>
-      }
-    </header >
+      )}
+    </header>
   );
 }

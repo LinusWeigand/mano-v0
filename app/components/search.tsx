@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, MapPin, Calendar } from "lucide-react";
+import { Search, MapPin, Calendar, Hammer } from "lucide-react";
 import { useProfiles } from "@/context/ProfilesContext";
 
 export default function SearchBar() {
@@ -194,16 +194,15 @@ export default function SearchBar() {
                         htmlFor="date"
                         className="block text-sm font-medium text-foreground h-full"
                       >
-                        Datum
+                        Spezialität
                       </label>
                       <Select onOpenChange={() => setActiveField("date")}>
                         <SelectTrigger className="mt-[1px] w-full border-none bg-transparent focus:ring-0 text-[16px]">
                           <div className="flex items-center">
-                            <Calendar className="h-5 w-5 text-muted-foreground mr-2" />
+                            <Hammer className="h-5 w-5 text-muted-foreground mr-2" />
                             <SelectValue
-                              style={{ color: "var(--muted-foreground)" }}
-                              className="text-muted-foreground placeholder:text-muted-foreground !text-muted-foreground"
-                              placeholder="Datum auswählen"
+                              className="w-full border-none bg-transparent focus:ring-0 text-[16px] !placeholder:text-muted-foreground !text-muted-foreground"
+                              placeholder="Spezialität aussuchen"
                             />
                           </div>
                         </SelectTrigger>
