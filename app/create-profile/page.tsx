@@ -31,7 +31,7 @@ import Image from "next/image"
 
 export default function ProfileForm() {
   const totalSteps = 5
-  const [step, setStep] = useState(1)
+  const [step, setStep] = useState(2)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [photos, setPhotos] = useState<{ file: File; preview: string }[]>([])
@@ -39,9 +39,11 @@ export default function ProfileForm() {
   const [formData, setFormData] = useState({
     name: "",
     profession: "",
+    yearsOfExperience: "1",
+    standort: "",
+    description: "",
     website: "",
     instagram: "",
-    yearsOfExperience: "1",
     googleMapsLink: "",
     skills: [] as string[],
 
@@ -49,9 +51,11 @@ export default function ProfileForm() {
   const [errors, setErrors] = useState({
     name: "",
     profession: "",
+    yearsOfExperience: "",
+    standort: "",
+    description: "",
     website: "",
     instagram: "",
-    yearsOfExperience: "",
     googleMapsLink: "",
     skills: "",
   })
@@ -100,9 +104,11 @@ export default function ProfileForm() {
     const newErrors = {
       name: "",
       profession: "",
+      yearsOfExperience: "",
+      standort: "",
+      description: "",
       website: "",
       instagram: "",
-      yearsOfExperience: "",
       googleMapsLink: "",
       skills: "",
     }
@@ -282,9 +288,11 @@ export default function ProfileForm() {
             setFormData({
               name: "",
               profession: "",
+              yearsOfExperience: "1",
+              standort: "",
+              description: "",
               website: "",
               instagram: "",
-              yearsOfExperience: "1",
               googleMapsLink: "",
               skills: [],
             })
@@ -304,11 +312,13 @@ export default function ProfileForm() {
       <CardHeader className="bg-muted/50 border-b pb-4">
         <CardTitle className="text-2xl text-center">
           {step === 1
-            ? "Create Profile"
+            ? "Profil Erstellen"
             : step === 2
-            ? "Additional Details"
+            ? "Zusätzliche Details"
             : step === 3
-            ? "Select Your Skills"
+            ? "Soziale Links"
+            : step === 4
+            ? "Fähigkeiten"
             : "Portfolio"}
         </CardTitle>
         <CardDescription className="text-center pt-1">
@@ -467,16 +477,76 @@ export default function ProfileForm() {
             </>
           )}
 
-          {step === 2 && (
-            <>
+{step === 2 && (
+  <>
+    <div className="space-y-3 pt-2">
+      <Label htmlFor="standort" className="text-base font-medium">
+        Standort<span className="text-red-500 ml-1">*</span>
+      </Label>
+      <div className="relative">
+        <MapPin className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
+        <Input
+          id="standort"
+          name="standort"
+          placeholder="München"
+          value={formData.standort}
+          onChange={handleChange}
+          className={`rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${
+            errors.standort
+              ? "border-red-300 focus-visible:ring-red-300"
+              : "focus-visible:border-primary"
+          }`}
+        />
+        {errors.standort && (
+          <div className="absolute right-3 top-3.5 text-red-500">
+            <AlertCircle className="h-5 w-5" />
+          </div>
+        )}
+      </div>
+      {errors.standort && (
+        <p className="text-sm text-red-500 flex items-center gap-1">
+          {errors.standort}
+        </p>
+      )}
+    </div>
 
-            </>
-          )}
+    {/* New Work Description Field */}
+
+
+<div className="space-y-3">
+  <Label htmlFor="description" className="text-base font-medium">
+    Work Description<span className="text-red-500 ml-1">*</span>
+  </Label>
+  <textarea
+    id="description"
+    name="description"
+    placeholder="Describe your work..."
+    value={formData.description}
+    onChange={handleChange}
+    className="w-full rounded-md border-2 h-24 p-2 focus:border-black focus:ring-0 focus:outline-none"
+  />
+  {errors.description && (
+    <p className="text-sm text-red-500 flex items-center gap-1">
+      {errors.description}
+    </p>
+  )}
+</div>
+
+    <div className="flex justify-between gap-4">
+      <Button onClick={prevStep} variant="outline" className="h-12">
+        <ChevronLeft className="w-4 h-4 mr-2" /> Zurück
+      </Button>
+      <Button type="submit" className="w-full h-12 text-base">
+        Next
+      </Button>
+    </div>
+  </>
+)}
+
 
           {step === 3 && (
             <>
               
-
               <div className="space-y-3 pt-2">
                 <Label htmlFor="website" className="text-base font-medium">
                   Website{" "}
@@ -515,7 +585,7 @@ export default function ProfileForm() {
               </div>
 
               <div className="space-y-3 pt-2">
-                <Label htmlFor="website" className="text-base font-medium">
+                <Label htmlFor="instagram" className="text-base font-medium">
                   Instagram{" "}
                   <span className="text-sm font-normal text-muted-foreground">
                     (Optional)
