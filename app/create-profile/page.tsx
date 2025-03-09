@@ -31,7 +31,7 @@ import Image from "next/image"
 
 export default function ProfileForm() {
   const totalSteps = 5
-  const [step, setStep] = useState(2)
+  const [step, setStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [photos, setPhotos] = useState<{ file: File; preview: string }[]>([])
@@ -118,6 +118,11 @@ export default function ProfileForm() {
       isValid = false
     }
 
+    if (!formData.profession) {
+      newErrors.profession = "Please select a profession."
+      isValid = false
+    }
+
     const years = Number(formData.yearsOfExperience)
     if (!formData.yearsOfExperience || isNaN(years) || years <= 0) {
       newErrors.yearsOfExperience = "Please enter a valid positive number."
@@ -130,11 +135,44 @@ export default function ProfileForm() {
 
   const validateStep2 = () => {
     let isValid = true
+
     const newErrors = {
       name: "",
+      profession: "",
+      yearsOfExperience: "",
+      standort: "",
+      description: "",
       website: "",
       instagram: "",
+      googleMapsLink: "",
+      skills: "",
+    }
+
+
+    if (!formData.standort) {
+      newErrors.standort = "Please select a location."
+      isValid = false
+    }
+
+    if (!formData.description) {
+      newErrors.description = "Please provide a description."
+      isValid = false
+    }
+
+    setErrors((prev) => ({ ...prev, ...newErrors }))
+    return isValid
+  }
+
+  const validateStep3 = () => {
+    let isValid = true
+    const newErrors = {
+      name: "",
+      profession: "",
       yearsOfExperience: "",
+      standort: "",
+      description: "",
+      website: "",
+      instagram: "",
       googleMapsLink: "",
       skills: "",
     }
@@ -149,7 +187,7 @@ export default function ProfileForm() {
       isValid = false
     }
 
-    
+
     if (
       formData.googleMapsLink &&
       !formData.googleMapsLink.match(
@@ -163,14 +201,16 @@ export default function ProfileForm() {
     setErrors((prev) => ({ ...prev, ...newErrors }))
     return isValid
   }
-
-  const validateStep3 = () => {
+  const validateStep4 = () => {
     let isValid = true
     const newErrors = {
       name: "",
+      profession: "",
+      yearsOfExperience: "",
+      standort: "",
+      description: "",
       website: "",
       instagram: "",
-      yearsOfExperience: "",
       googleMapsLink: "",
       skills: "",
     }
@@ -211,6 +251,8 @@ export default function ProfileForm() {
       setStep(3)
     } else if (step === 3 && validateStep3()) {
       setStep(4)
+    } else if (step === 4 && validateStep4()) {
+      setStep(5)
     }
   }
 
@@ -314,21 +356,21 @@ export default function ProfileForm() {
           {step === 1
             ? "Profil Erstellen"
             : step === 2
-            ? "Zusätzliche Details"
-            : step === 3
-            ? "Soziale Links"
-            : step === 4
-            ? "Fähigkeiten"
-            : "Portfolio"}
+              ? "Zusätzliche Details"
+              : step === 3
+                ? "Soziale Links"
+                : step === 4
+                  ? "Fähigkeiten"
+                  : "Portfolio"}
         </CardTitle>
         <CardDescription className="text-center pt-1">
           {step === 1
             ? "Fill in your details to create a new profile."
             : step === 2
-            ? "Provide additional details for your profile."
-            : step === 3
-            ? "Select the skills relevant to your craft."
-            : "Upload your portfolio photos."}
+              ? "Provide additional details for your profile."
+              : step === 3
+                ? "Select the skills relevant to your craft."
+                : "Upload your portfolio photos."}
         </CardDescription>
         <div className="flex justify-between mt-2">
           {Array.from({ length: totalSteps }).map((_, index) => (
@@ -336,9 +378,8 @@ export default function ProfileForm() {
               key={index}
               variant="ghost"
               size="sm"
-              className={`h-1 w-full rounded-none ${
-                index + 1 <= step ? "bg-primary" : "bg-gray-300"
-              } ${index > 0 ? "ml-1" : ""}`}
+              className={`h-1 w-full rounded-none ${index + 1 <= step ? "bg-primary" : "bg-gray-300"
+                } ${index > 0 ? "ml-1" : ""}`}
               onClick={() => setStep(index + 1)}
             />
           ))}
@@ -365,11 +406,10 @@ export default function ProfileForm() {
                     placeholder="Enter your name"
                     value={formData.name}
                     onChange={handleChange}
-                    className={`rounded-md bg-white border-2 h-12 pl-4 ${
-                      errors.name
-                        ? "border-red-300 focus-visible:ring-red-300"
-                        : "focus-visible:border-primary"
-                    }`}
+                    className={`rounded-md bg-white border-2 h-12 pl-4 ${errors.name
+                      ? "border-red-300 focus-visible:ring-red-300"
+                      : "focus-visible:border-primary"
+                      }`}
                   />
                   {errors.name && (
                     <div className="absolute right-3 top-3 text-red-500">
@@ -390,38 +430,47 @@ export default function ProfileForm() {
 
 
 
-<div className="space-y-3 pt-2 flex flex-col">
-  <Label htmlFor="profession" className="text-base font-medium">
-    Profession <span className="text-red-500 ">*</span>
-  </Label>
-  <div className="relative">
-    <select
-      id="profession"
-      name="profession"
-      value={formData.profession}
-      onChange={handleChange}
-      className="block w-full appearance-none rounded-md bg-white border-2 h-12 pl-4 pr-10 focus:border-black focus:ring-0 focus:outline-none"
-    >
-      {professionOptions.map((option) => (
-        <option key={option.value} value={option.value}>
-          {option.label}
-        </option>
-      ))}
-    </select>
-    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-      <ChevronDownIcon className="h-5 w-5 text-muted-foreground" />
-    </div>
-  </div>
-  {errors.profession && (
-    <p className="text-sm text-red-500 flex items-center gap-1">
-      {errors.profession}
-    </p>
-  )}
-  <p className="text-sm text-muted-foreground">
-    Please select your current profession.
-  </p>
-</div>
-<div className="space-y-3">
+              <div className="space-y-3 pt-2 flex flex-col">
+                <Label htmlFor="profession" className="text-base font-medium">
+                  Profession <span className="text-red-500 ">*</span>
+                </Label>
+                <div className="relative">
+                  <select
+                    id="profession"
+                    name="profession"
+                    value={formData.profession}
+                    onChange={handleChange}
+                    className={`block w-full appearance-none rounded-md bg-white border-2 h-12 pl-4 pr-10 ${errors.profession ? "border-red-300 focus-visible:ring-red-300" : "focus:border-black"} focus:ring-0 focus:outline-none`}
+                  >
+                    {professionOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+
+                  {errors.name ? (
+                    <div className="absolute right-3 top-3 text-red-500">
+                      <AlertCircle className="h-5 w-5" />
+                    </div>
+                  ) : (
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                      <ChevronDownIcon className="h-5 w-5 text-muted-foreground" />
+                    </div>
+
+                  )
+                  }
+                </div>
+                {errors.profession && (
+                  <p className="text-sm text-red-500 flex items-center gap-1">
+                    {errors.profession}
+                  </p>
+                )}
+                <p className="text-sm text-muted-foreground">
+                  Please select your current profession.
+                </p>
+              </div>
+              <div className="space-y-3">
                 <Label
                   htmlFor="yearsOfExperience"
                   className="text-base font-medium flex items-center"
@@ -477,76 +526,81 @@ export default function ProfileForm() {
             </>
           )}
 
-{step === 2 && (
-  <>
-    <div className="space-y-3 pt-2">
-      <Label htmlFor="standort" className="text-base font-medium">
-        Standort<span className="text-red-500 ml-1">*</span>
-      </Label>
-      <div className="relative">
-        <MapPin className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
-        <Input
-          id="standort"
-          name="standort"
-          placeholder="München"
-          value={formData.standort}
-          onChange={handleChange}
-          className={`rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${
-            errors.standort
-              ? "border-red-300 focus-visible:ring-red-300"
-              : "focus-visible:border-primary"
-          }`}
-        />
-        {errors.standort && (
-          <div className="absolute right-3 top-3.5 text-red-500">
-            <AlertCircle className="h-5 w-5" />
-          </div>
-        )}
-      </div>
-      {errors.standort && (
-        <p className="text-sm text-red-500 flex items-center gap-1">
-          {errors.standort}
-        </p>
-      )}
-    </div>
+          {step === 2 && (
+            <>
+              <div className="space-y-3 pt-2">
+                <Label htmlFor="standort" className="text-base font-medium">
+                  Standort<span className="text-red-500 ml-1">*</span>
+                </Label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
+                  <Input
+                    id="standort"
+                    name="standort"
+                    placeholder="München"
+                    value={formData.standort}
+                    onChange={handleChange}
+                    className={`rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${errors.standort
+                      ? "border-red-300 focus-visible:ring-red-300"
+                      : "focus-visible:border-primary"
+                      }`}
+                  />
+                  {errors.standort && (
+                    <div className="absolute right-3 top-3.5 text-red-500">
+                      <AlertCircle className="h-5 w-5" />
+                    </div>
+                  )}
+                </div>
+                {errors.standort && (
+                  <p className="text-sm text-red-500 flex items-center gap-1">
+                    {errors.standort}
+                  </p>
+                )}
+              </div>
 
-    {/* New Work Description Field */}
+              <div className="space-y-3">
+                <Label htmlFor="description" className="text-base font-medium">
+                  Work Description<span className="text-red-500 ml-1">*</span>
+                </Label>
 
+                <div className="relative">
+                  <textarea
+                    id="description"
+                    name="description"
+                    placeholder="Describe your work..."
+                    value={formData.description}
+                    onChange={handleChange}
+                    className={`w-full rounded-md border-2 h-24 p-2 ${errors.description ? "border-red-300 focus-visible:ring-red-300" : "focus:border-black"} focus:ring-0 focus:outline-none`}
+                  />
 
-<div className="space-y-3">
-  <Label htmlFor="description" className="text-base font-medium">
-    Work Description<span className="text-red-500 ml-1">*</span>
-  </Label>
-  <textarea
-    id="description"
-    name="description"
-    placeholder="Describe your work..."
-    value={formData.description}
-    onChange={handleChange}
-    className="w-full rounded-md border-2 h-24 p-2 focus:border-black focus:ring-0 focus:outline-none"
-  />
-  {errors.description && (
-    <p className="text-sm text-red-500 flex items-center gap-1">
-      {errors.description}
-    </p>
-  )}
-</div>
+                  {errors.description && (
+                    <div className="absolute right-3 top-3.5 text-red-500">
+                      <AlertCircle className="h-5 w-5" />
+                    </div>
+                  )}
+                </div>
+                {errors.description && (
+                  <p className="text-sm text-red-500 flex items-center gap-1">
+                    {errors.description}
+                  </p>
+                )}
+              </div>
 
-    <div className="flex justify-between gap-4">
-      <Button onClick={prevStep} variant="outline" className="h-12">
-        <ChevronLeft className="w-4 h-4 mr-2" /> Zurück
-      </Button>
-      <Button type="submit" className="w-full h-12 text-base">
-        Next
-      </Button>
-    </div>
-  </>
-)}
+              <div className="flex justify-between gap-4">
+                <Button onClick={prevStep} variant="outline" className="h-12">
+                  <ChevronLeft className="w-4 h-4 mr-2" /> Zurück
+                </Button>
+                <Button type="submit" className="w-full h-12 text-base">
+                  Next
+                </Button>
+              </div>
+            </>
+          )}
 
 
           {step === 3 && (
             <>
-              
+
               <div className="space-y-3 pt-2">
                 <Label htmlFor="website" className="text-base font-medium">
                   Website{" "}
@@ -562,11 +616,10 @@ export default function ProfileForm() {
                     placeholder="https://yourwebsite.com"
                     value={formData.website}
                     onChange={handleChange}
-                    className={`rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${
-                      errors.website
-                        ? "border-red-300 focus-visible:ring-red-300"
-                        : "focus-visible:border-primary"
-                    }`}
+                    className={`rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${errors.website
+                      ? "border-red-300 focus-visible:ring-red-300"
+                      : "focus-visible:border-primary"
+                      }`}
                   />
                   {errors.website && (
                     <div className="absolute right-3 top-3.5 text-red-500">
@@ -591,19 +644,19 @@ export default function ProfileForm() {
                     (Optional)
                   </span>
                 </Label>
-              <div className="flex items-center">
-                <div className="bg-muted flex items-center px-3 py-3 rounded-l-md !border-2 !border-gray-300 border-r-0">
-                  <Instagram className="h-5 w-5 text-muted-foreground" />
+                <div className="flex items-center">
+                  <div className="bg-muted flex items-center px-3 py-3 rounded-l-md !border-2 !border-gray-300 border-r-0">
+                    <Instagram className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <Input
+                    id="instagram"
+                    name="instagram"
+                    placeholder="username"
+                    value={formData.instagram}
+                    onChange={handleChange}
+                    className="!border-2 !border-gray-300 !border-l-0 h-12 bg-white pl-3 rounded-r-md"
+                  />
                 </div>
-                <Input
-                  id="instagram"
-                  name="instagram"
-                  placeholder="username"
-                  value={formData.instagram}
-                  onChange={handleChange}
-                  className="!border-2 !border-gray-300 !border-l-0 h-12 bg-white pl-3 rounded-r-md"
-                />
-              </div>
               </div>
               <div className="space-y-3 pt-2">
                 <Label
@@ -623,11 +676,10 @@ export default function ProfileForm() {
                     placeholder="https://maps.google.com/..."
                     value={formData.googleMapsLink}
                     onChange={handleChange}
-                    className={`rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${
-                      errors.googleMapsLink
-                        ? "border-red-300 focus-visible:ring-red-300"
-                        : "focus-visible:border-primary"
-                    }`}
+                    className={`rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${errors.googleMapsLink
+                      ? "border-red-300 focus-visible:ring-red-300"
+                      : "focus-visible:border-primary"
+                      }`}
                   />
                   {errors.googleMapsLink && (
                     <div className="absolute right-3 top-3.5 text-red-500">
