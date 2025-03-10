@@ -12,6 +12,7 @@ import { useBanner } from "@/context/BannerContext";
 import { BannerType } from "@/types/BannerType";
 import { useAuth } from "@/context/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -19,9 +20,9 @@ export default function Header() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isProfilModalOpen, setIsProfilModalOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  // const pathname = usePathname();
 
   const { banner, clearBanner, setBanner, bannerEmail } = useBanner();
+  const router = useRouter();
 
   const searchParams = useSearchParams();
   const verification_code = decodeURIComponent(searchParams.get("vc") || "");
@@ -115,7 +116,7 @@ export default function Header() {
   };
   const handleProfil = () => {
     setShowMenu(false);
-    setIsProfilModalOpen(true);
+    router.push("/create-profile");
   };
 
   const on_close = () => {

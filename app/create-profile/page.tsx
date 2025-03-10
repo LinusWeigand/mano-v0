@@ -1,8 +1,7 @@
 
 "use client"
 
-import type React from "react"
-import { useRef, useState } from "react"
+import React, { useRef, useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -38,46 +37,61 @@ export default function ProfileForm() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [formData, setFormData] = useState({
     name: "",
-    profession: "",
-    yearsOfExperience: "1",
-    standort: "",
-    description: "",
+    craft: "",
+    experience: "1",
+    location: "",
+    bio: "",
     website: "",
     instagram: "",
-    googleMapsLink: "",
+    google_ratings: "",
     skills: [] as string[],
-
   })
   const [errors, setErrors] = useState({
     name: "",
-    profession: "",
-    yearsOfExperience: "",
-    standort: "",
-    description: "",
+    craft: "",
+    experience: "",
+    location: "",
+    bio: "",
     website: "",
     instagram: "",
-    googleMapsLink: "",
+    google_ratings: "",
     skills: "",
+    photos: "",
   })
 
-  const availableSkills = [
-    "Carpentry",
-    "Plumbing",
-    "Electrical",
-    "Masonry",
-    "Painting",
-    "Tiling",
-    // add more skills as needed
-  ]
+  // Remove the hard-coded availableSkills array and fetch them dynamically
+  const [availableSkills, setAvailableSkills] = useState<string[]>([])
+  const [loadingSkills, setLoadingSkills] = useState(true)
+  const [skillsError, setSkillsError] = useState<string | null>(null)
 
-  // Define your predefined options
-  const professionOptions = [
-    { value: '', label: 'Select your profession' },
-    { value: 'developer', label: 'Developer' },
-    { value: 'designer', label: 'Designer' },
-    { value: 'manager', label: 'Manager' },
-    { value: 'other', label: 'Other' },
-  ];
+  useEffect(() => {
+    fetch("/api/skills")
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch skills")
+        }
+        return res.json()
+      })
+      .then((data) => {
+        const skillsArray = data.data.map((item: { name: string }) => item.name)
+        setAvailableSkills(skillsArray)
+      })
+      .catch((error) => {
+        console.error(error)
+        setSkillsError("Failed to load skills")
+      })
+      .finally(() => {
+        setLoadingSkills(false)
+      })
+  }, [])
+
+  const craftOptions = [
+    { value: "", label: "Wählen Sie Ihr Handwerk" },
+    { value: "schreiner", label: "Schreiner" },
+    { value: "zimmerer", label: "Zimmerer" },
+    { value: "bodenleger", label: "Bodenleger" },
+    { value: "elektriker", label: "Elektriker" },
+  ]
 
   const removePhoto = (photoToRemove: { file: File; preview: string }) => {
     setPhotos((prevPhotos) => {
@@ -97,35 +111,49 @@ export default function ProfileForm() {
       }))
       setPhotos((prevPhotos) => [...prevPhotos, ...newPhotos])
     }
+    const newErrors = {
+      name: "",
+      craft: "",
+      experience: "",
+      location: "",
+      bio: "",
+      website: "",
+      instagram: "",
+      google_ratings: "",
+      skills: "",
+      photos: "",
+    }
+    setErrors(newErrors)
   }
 
   const validateStep1 = () => {
     let isValid = true
     const newErrors = {
       name: "",
-      profession: "",
-      yearsOfExperience: "",
-      standort: "",
-      description: "",
+      craft: "",
+      experience: "",
+      location: "",
+      bio: "",
       website: "",
       instagram: "",
-      googleMapsLink: "",
+      google_ratings: "",
       skills: "",
+      photos: "",
     }
 
     if (!formData.name || formData.name.length < 2) {
-      newErrors.name = "Name must be at least 2 characters."
+      newErrors.name = "Der Name muss mindestens 2 Charktere enthalten."
       isValid = false
     }
 
-    if (!formData.profession) {
-      newErrors.profession = "Please select a profession."
+    if (!formData.craft) {
+      newErrors.craft = "Bitte wählen Sie Ihr Handwerk aus."
       isValid = false
     }
 
-    const years = Number(formData.yearsOfExperience)
-    if (!formData.yearsOfExperience || isNaN(years) || years <= 0) {
-      newErrors.yearsOfExperience = "Please enter a valid positive number."
+    const exp = Number(formData.experience)
+    if (!formData.experience || isNaN(exp) || exp <= 0) {
+      newErrors.experience = "Bitte geben Sie eine positive Zahl an."
       isValid = false
     }
 
@@ -135,27 +163,26 @@ export default function ProfileForm() {
 
   const validateStep2 = () => {
     let isValid = true
-
     const newErrors = {
       name: "",
-      profession: "",
-      yearsOfExperience: "",
-      standort: "",
-      description: "",
+      craft: "",
+      experience: "",
+      location: "",
+      bio: "",
       website: "",
       instagram: "",
-      googleMapsLink: "",
+      google_ratings: "",
       skills: "",
+      photos: "",
     }
 
-
-    if (!formData.standort) {
-      newErrors.standort = "Please select a location."
+    if (!formData.location) {
+      newErrors.location = "Bitte geben Sie einen Standort an."
       isValid = false
     }
 
-    if (!formData.description) {
-      newErrors.description = "Please provide a description."
+    if (!formData.bio) {
+      newErrors.bio = "Bitte geben Sie eine Beschreibung an."
       isValid = false
     }
 
@@ -167,14 +194,15 @@ export default function ProfileForm() {
     let isValid = true
     const newErrors = {
       name: "",
-      profession: "",
-      yearsOfExperience: "",
-      standort: "",
-      description: "",
+      craft: "",
+      experience: "",
+      location: "",
+      bio: "",
       website: "",
       instagram: "",
-      googleMapsLink: "",
+      google_ratings: "",
       skills: "",
+      photos: "",
     }
 
     if (
@@ -183,49 +211,78 @@ export default function ProfileForm() {
         /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w-./?%&=]*)?$/
       )
     ) {
-      newErrors.website = "Please enter a valid URL."
+      newErrors.website = "Bitte geben Sie eine korrekte URL an."
       isValid = false
     }
 
-
     if (
-      formData.googleMapsLink &&
-      !formData.googleMapsLink.match(
+      formData.google_ratings &&
+      !formData.google_ratings.match(
         /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w-./?%&=]*)?$/
       )
     ) {
-      newErrors.googleMapsLink = "Please enter a valid URL."
+      newErrors.google_ratings = "Bitte geben Sie eine korrekte URL an."
       isValid = false
     }
 
     setErrors((prev) => ({ ...prev, ...newErrors }))
     return isValid
   }
+
   const validateStep4 = () => {
     let isValid = true
     const newErrors = {
       name: "",
-      profession: "",
-      yearsOfExperience: "",
-      standort: "",
-      description: "",
+      craft: "",
+      experience: "",
+      location: "",
+      bio: "",
       website: "",
       instagram: "",
-      googleMapsLink: "",
+      google_ratings: "",
       skills: "",
+      photos: "",
     }
 
     if (formData.skills.length === 0) {
-      newErrors.skills = "Please select at least one skill."
+      newErrors.skills = "Bitte geben Sie mindestens eine Fähigkeit an."
       isValid = false
     }
+
+    setErrors((prev) => ({ ...prev, ...newErrors }))
+    return isValid
+  }
+
+  const validateStep5 = () => {
+    let isValid = true
+    const newErrors = {
+      name: "",
+      craft: "",
+      experience: "",
+      location: "",
+      bio: "",
+      website: "",
+      instagram: "",
+      google_ratings: "",
+      skills: "",
+      photos: "",
+    }
+
+    if (photos.length < 1) {
+      newErrors.photos = "Bitte laden Sie mindestens ein Foto hoch."
+      isValid = false
+    }
+
+    console.log("Photos length: {}", photos.length);
 
     setErrors((prev) => ({ ...prev, ...newErrors }))
     return isValid
   }
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target
     setFormData((prev) => ({
@@ -262,27 +319,36 @@ export default function ProfileForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    // You can add additional validation here if needed before submitting.
+    if (!validateStep5() || !validateStep1() || !validateStep2() || !validateStep3() || !validateStep4()) {
+      return;
+    }
+
     setIsSubmitting(true)
     try {
       const data = new FormData()
-      // Append uploaded photos
-      photos.forEach((photo, index) => {
-        data.append(`photos_${index}`, photo.file)
-      })
-      // Append the rest of the form fields
+      // photos.forEach((photo, index) => {
+      //   data.append(`photos_${index}`, photo.file)
+      // })
       data.append("name", formData.name)
+      data.append("craft", formData.craft)
+      data.append("location", formData.location)
       data.append("website", formData.website)
+      data.append("google_ratings", formData.google_ratings)
       data.append("instagram", formData.instagram)
-      data.append("yearsOfExperience", formData.yearsOfExperience)
-      data.append("googleMapsLink", formData.googleMapsLink)
+      data.append("bio", formData.bio)
+      data.append("experience", formData.experience)
       data.append("skills", JSON.stringify(formData.skills))
 
-      // Send the form data to the backend
+      photos.forEach((photo) => {
+        data.append("photos", photo.file);
+      });
+
+      console.log("Posting to backend...")
       const response = await fetch("http://localhost/api/profile", {
         method: "POST",
         body: data,
       })
+      console.log("Posted to backend")
 
       if (!response.ok) {
         throw new Error("Failed to create profile")
@@ -290,7 +356,6 @@ export default function ProfileForm() {
 
       console.log("Profile created successfully!")
       setIsSuccess(true)
-      // Optionally, clear the form or trigger a success banner/redirect here.
     } catch (error) {
       console.error("Error creating profile:", error)
     } finally {
@@ -300,17 +365,17 @@ export default function ProfileForm() {
 
   const handleDecrement = () => {
     setFormData((prev) => {
-      const currentValue = Number(prev.yearsOfExperience) || 1
+      const currentValue = Number(prev.experience) || 1
       const newValue = currentValue > 1 ? currentValue - 1 : 1
-      return { ...prev, yearsOfExperience: newValue.toString() }
+      return { ...prev, experience: newValue.toString() }
     })
   }
 
   const handleIncrement = () => {
     setFormData((prev) => {
-      const currentValue = Number(prev.yearsOfExperience) || 1
+      const currentValue = Number(prev.experience) || 1
       const newValue = currentValue + 1
-      return { ...prev, yearsOfExperience: newValue.toString() }
+      return { ...prev, experience: newValue.toString() }
     })
   }
 
@@ -320,31 +385,10 @@ export default function ProfileForm() {
         <div className="rounded-full bg-green-100 p-3">
           <CheckCircle2 className="h-8 w-8 text-green-600" />
         </div>
-        <h2 className="text-2xl font-bold">Profile Created!</h2>
+        <h2 className="text-2xl font-bold">Profil erstellt!</h2>
         <p className="text-center text-muted-foreground">
-          Your profile has been successfully created.
+          Ihr Profil wurde erfolgreich erstellt.
         </p>
-        <Button
-          onClick={() => {
-            setIsSuccess(false)
-            setFormData({
-              name: "",
-              profession: "",
-              yearsOfExperience: "1",
-              standort: "",
-              description: "",
-              website: "",
-              instagram: "",
-              googleMapsLink: "",
-              skills: [],
-            })
-            setPhotos([])
-            setStep(1)
-          }}
-          className="w-full h-12 text-base mt-6"
-        >
-          Create Another Profile
-        </Button>
       </div>
     )
   }
@@ -365,12 +409,14 @@ export default function ProfileForm() {
         </CardTitle>
         <CardDescription className="text-center pt-1">
           {step === 1
-            ? "Fill in your details to create a new profile."
+            ? "Geben Sie Ihre Daten ein, um ein neues Profil zu erstellen."
             : step === 2
-              ? "Provide additional details for your profile."
+              ? "Geben Sie zusätzliche Details zu Ihrem Profil an."
               : step === 3
-                ? "Select the skills relevant to your craft."
-                : "Upload your portfolio photos."}
+                ? "Fügen Sie Ihre sozialen Links hinzu."
+                : step === 4
+                  ? "Wählen Sie die für Ihre Handwerk relevanten Fähigkeiten aus."
+                  : "Laden Sie Fotos Ihrer letzten Arbeiten hoch."}
         </CardDescription>
         <div className="flex justify-between mt-2">
           {Array.from({ length: totalSteps }).map((_, index) => (
@@ -403,12 +449,12 @@ export default function ProfileForm() {
                   <Input
                     id="name"
                     name="name"
-                    placeholder="Enter your name"
+                    placeholder="Geben Sie Ihren Namen ein"
                     value={formData.name}
                     onChange={handleChange}
                     className={`rounded-md bg-white border-2 h-12 pl-4 ${errors.name
-                      ? "border-red-300 focus-visible:ring-red-300"
-                      : "focus-visible:border-primary"
+                        ? "border-red-300 focus-visible:ring-red-300"
+                        : "focus-visible:border-primary"
                       }`}
                   />
                   {errors.name && (
@@ -423,33 +469,32 @@ export default function ProfileForm() {
                   </p>
                 )}
                 <p className="text-sm text-muted-foreground">
-                  This is your public display name.
+                    Dies ist Ihr öffentlicher Anzeigename.
                 </p>
               </div>
 
-
-
-
               <div className="space-y-3 pt-2 flex flex-col">
-                <Label htmlFor="profession" className="text-base font-medium">
-                  Profession <span className="text-red-500 ">*</span>
+                <Label htmlFor="craft" className="text-base font-medium">
+                  Handwerk <span className="text-red-500">*</span>
                 </Label>
                 <div className="relative">
                   <select
-                    id="profession"
-                    name="profession"
-                    value={formData.profession}
+                    id="craft"
+                    name="craft"
+                    value={formData.craft}
                     onChange={handleChange}
-                    className={`block w-full appearance-none rounded-md bg-white border-2 h-12 pl-4 pr-10 ${errors.profession ? "border-red-300 focus-visible:ring-red-300" : "focus:border-black"} focus:ring-0 focus:outline-none`}
+                    className={`block w-full appearance-none rounded-md bg-white border-2 h-12 pl-4 pr-10 ${errors.craft
+                        ? "border-red-300 focus-visible:ring-red-300"
+                        : "focus:border-black"
+                      } focus:ring-0 focus:outline-none`}
                   >
-                    {professionOptions.map((option) => (
+                    {craftOptions.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
                       </option>
                     ))}
                   </select>
-
-                  {errors.name ? (
+                  {errors.craft ? (
                     <div className="absolute right-3 top-3 text-red-500">
                       <AlertCircle className="h-5 w-5" />
                     </div>
@@ -457,28 +502,23 @@ export default function ProfileForm() {
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
                       <ChevronDownIcon className="h-5 w-5 text-muted-foreground" />
                     </div>
-
-                  )
-                  }
+                  )}
                 </div>
-                {errors.profession && (
+                {errors.craft && (
                   <p className="text-sm text-red-500 flex items-center gap-1">
-                    {errors.profession}
+                    {errors.craft}
                   </p>
                 )}
-                <p className="text-sm text-muted-foreground">
-                  Please select your current profession.
-                </p>
               </div>
+
               <div className="space-y-3">
                 <Label
-                  htmlFor="yearsOfExperience"
+                  htmlFor="experience"
                   className="text-base font-medium flex items-center"
                 >
-                  Years of Experience{" "}
+                  Jahre der Erfahrung{" "}
                   <span className="text-red-500 ml-1">*</span>
                 </Label>
-
                 <div className="flex items-center gap-4">
                   <Button
                     type="button"
@@ -489,12 +529,12 @@ export default function ProfileForm() {
                     <Minus className="w-10 h-10" />
                   </Button>
                   <Input
-                    id="yearsOfExperience"
-                    name="yearsOfExperience"
+                    id="experience"
+                    name="experience"
                     type="number"
                     min="1"
                     max="1000"
-                    value={formData.yearsOfExperience}
+                    value={formData.experience}
                     onChange={handleChange}
                     className="h-12 w-28 rounded-sm border-gray-200 sm:text-sm text-center appearance-none pr-2 pl-6"
                   />
@@ -507,21 +547,15 @@ export default function ProfileForm() {
                     <Plus className="w-10 h-10" />
                   </Button>
                 </div>
-
-                {errors.yearsOfExperience && (
+                {errors.experience && (
                   <p className="text-sm text-red-500 flex items-center gap-1">
-                    {errors.yearsOfExperience}
+                    {errors.experience}
                   </p>
                 )}
               </div>
 
-
-
-              <Button
-                type="submit"
-                className="w-full h-12 text-base mt-6"
-              >
-                Next
+              <Button type="submit" className="w-full h-12 text-base mt-6">
+                Weiter
               </Button>
             </>
           )}
@@ -529,59 +563,60 @@ export default function ProfileForm() {
           {step === 2 && (
             <>
               <div className="space-y-3 pt-2">
-                <Label htmlFor="standort" className="text-base font-medium">
+                <Label htmlFor="location" className="text-base font-medium">
                   Standort<span className="text-red-500 ml-1">*</span>
                 </Label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
                   <Input
-                    id="standort"
-                    name="standort"
-                    placeholder="München"
-                    value={formData.standort}
+                    id="location"
+                    name="location"
+                    placeholder="Geben Sie Ihren Standort an"
+                    value={formData.location}
                     onChange={handleChange}
-                    className={`rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${errors.standort
-                      ? "border-red-300 focus-visible:ring-red-300"
-                      : "focus-visible:border-primary"
+                    className={`rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${errors.location
+                        ? "border-red-300 focus-visible:ring-red-300"
+                        : "focus-visible:border-primary"
                       }`}
                   />
-                  {errors.standort && (
+                  {errors.location && (
                     <div className="absolute right-3 top-3.5 text-red-500">
                       <AlertCircle className="h-5 w-5" />
                     </div>
                   )}
                 </div>
-                {errors.standort && (
+                {errors.location && (
                   <p className="text-sm text-red-500 flex items-center gap-1">
-                    {errors.standort}
+                    {errors.location}
                   </p>
                 )}
               </div>
 
               <div className="space-y-3">
-                <Label htmlFor="description" className="text-base font-medium">
-                  Work Description<span className="text-red-500 ml-1">*</span>
+                <Label htmlFor="bio" className="text-base font-medium">
+                  Beschreibung<span className="text-red-500 ml-1">*</span>
                 </Label>
-
-                <div className="relative">
+                <div className="relative text-muted-foreground">
                   <textarea
-                    id="description"
-                    name="description"
-                    placeholder="Describe your work..."
-                    value={formData.description}
+                    id="bio"
+                    name="bio"
+                    placeholder="Beschreiben Sie Ihre Arbeit..."
+                    value={formData.bio}
                     onChange={handleChange}
-                    className={`w-full rounded-md border-2 h-24 p-2 ${errors.description ? "border-red-300 focus-visible:ring-red-300" : "focus:border-black"} focus:ring-0 focus:outline-none`}
+                    className={`w-full rounded-md border-2 h-24 p-2 text-muted-foreground ${errors.bio
+                        ? "border-red-300 focus-visible:ring-red-300"
+                        : "focus:border-black"
+                      } focus:ring-0 focus:outline-none`}
                   />
-
-                  {errors.description && (
+                  {errors.bio && (
                     <div className="absolute right-3 top-3.5 text-red-500">
                       <AlertCircle className="h-5 w-5" />
                     </div>
                   )}
                 </div>
-                {errors.description && (
+                {errors.bio && (
                   <p className="text-sm text-red-500 flex items-center gap-1">
-                    {errors.description}
+                    {errors.bio}
                   </p>
                 )}
               </div>
@@ -591,16 +626,14 @@ export default function ProfileForm() {
                   <ChevronLeft className="w-4 h-4 mr-2" /> Zurück
                 </Button>
                 <Button type="submit" className="w-full h-12 text-base">
-                  Next
+                  Weiter
                 </Button>
               </div>
             </>
           )}
 
-
           {step === 3 && (
             <>
-
               <div className="space-y-3 pt-2">
                 <Label htmlFor="website" className="text-base font-medium">
                   Website{" "}
@@ -613,12 +646,12 @@ export default function ProfileForm() {
                   <Input
                     id="website"
                     name="website"
-                    placeholder="https://yourwebsite.com"
+                    placeholder="https://deine-webseite.de"
                     value={formData.website}
                     onChange={handleChange}
                     className={`rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${errors.website
-                      ? "border-red-300 focus-visible:ring-red-300"
-                      : "focus-visible:border-primary"
+                        ? "border-red-300 focus-visible:ring-red-300"
+                        : "focus-visible:border-primary"
                       }`}
                   />
                   {errors.website && (
@@ -633,7 +666,7 @@ export default function ProfileForm() {
                   </p>
                 )}
                 <p className="text-sm text-muted-foreground">
-                  Your personal or professional website.
+                  Ihre persönliche oder berufliche Webseite.
                 </p>
               </div>
 
@@ -651,7 +684,7 @@ export default function ProfileForm() {
                   <Input
                     id="instagram"
                     name="instagram"
-                    placeholder="username"
+                    placeholder="nutzername"
                     value={formData.instagram}
                     onChange={handleChange}
                     className="!border-2 !border-gray-300 !border-l-0 h-12 bg-white pl-3 rounded-r-md"
@@ -659,11 +692,8 @@ export default function ProfileForm() {
                 </div>
               </div>
               <div className="space-y-3 pt-2">
-                <Label
-                  htmlFor="googleMapsLink"
-                  className="text-base font-medium"
-                >
-                  Google Maps Link{" "}
+                <Label htmlFor="google_ratings" className="text-base font-medium">
+                  Google Bewertungen{" "}
                   <span className="text-sm font-normal text-muted-foreground">
                     (Optional)
                   </span>
@@ -671,25 +701,25 @@ export default function ProfileForm() {
                 <div className="relative">
                   <MapPin className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
                   <Input
-                    id="googleMapsLink"
-                    name="googleMapsLink"
-                    placeholder="https://maps.google.com/..."
-                    value={formData.googleMapsLink}
+                    id="google_ratings"
+                    name="google_ratings"
+                    placeholder="https://ratings.google.com/..."
+                    value={formData.google_ratings}
                     onChange={handleChange}
-                    className={`rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${errors.googleMapsLink
-                      ? "border-red-300 focus-visible:ring-red-300"
-                      : "focus-visible:border-primary"
+                    className={`rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${errors.google_ratings
+                        ? "border-red-300 focus-visible:ring-red-300"
+                        : "focus-visible:border-primary"
                       }`}
                   />
-                  {errors.googleMapsLink && (
+                  {errors.google_ratings && (
                     <div className="absolute right-3 top-3.5 text-red-500">
                       <AlertCircle className="h-5 w-5" />
                     </div>
                   )}
                 </div>
-                {errors.googleMapsLink && (
+                {errors.google_ratings && (
                   <p className="text-sm text-red-500 flex items-center gap-1">
-                    {errors.googleMapsLink}
+                    {errors.google_ratings}
                   </p>
                 )}
               </div>
@@ -699,7 +729,7 @@ export default function ProfileForm() {
                   <ChevronLeft className="w-4 h-4 mr-2" /> Zurück
                 </Button>
                 <Button type="submit" className="w-full h-12 text-base">
-                  Next
+                  Weiter
                 </Button>
               </div>
             </>
@@ -709,24 +739,30 @@ export default function ProfileForm() {
             <>
               <div className="pt-2">
                 <Label className="text-base font-medium mb-2">
-                  Skills <span className="text-red-500 ml-1">*</span>
+                  Fähigkeiten <span className="text-red-500 ml-1">*</span>
                 </Label>
-                <div className="flex flex-wrap gap-3">
-                  {availableSkills.map((skill) => {
-                    const isSelected = formData.skills.includes(skill)
-                    return (
-                      <Button
-                        key={skill}
-                        type="button"
-                        variant={isSelected ? "default" : "outline"}
-                        onClick={() => handleSkillToggle(skill)}
-                        className="px-4 py-2"
-                      >
-                        {skill}
-                      </Button>
-                    )
-                  })}
-                </div>
+                {loadingSkills ? (
+                  <p>Fähigkeiten laden...</p>
+                ) : skillsError ? (
+                  <p className="text-sm text-red-500">{skillsError}</p>
+                ) : (
+                  <div className="flex flex-wrap gap-3">
+                    {availableSkills.map((skill) => {
+                      const isSelected = formData.skills.includes(skill)
+                      return (
+                        <Button
+                          key={skill}
+                          type="button"
+                          variant={isSelected ? "default" : "outline"}
+                          onClick={() => handleSkillToggle(skill)}
+                          className="px-4 py-2"
+                        >
+                          {skill}
+                        </Button>
+                      )
+                    })}
+                  </div>
+                )}
                 {errors.skills && (
                   <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
                     {errors.skills}
@@ -739,7 +775,7 @@ export default function ProfileForm() {
                   <ChevronLeft className="w-4 h-4 mr-2" /> Zurück
                 </Button>
                 <Button type="submit" className="w-full h-12 text-base">
-                  Next
+                  Weiter
                 </Button>
               </div>
             </>
@@ -781,12 +817,23 @@ export default function ProfileForm() {
                 {photos.length < 5 && (
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-[130px] h-[130px] flex items-center justify-center bg-gray-200 rounded cursor-pointer hover:border-2 hover:border-gray-400"
+                    className={`${errors.photos ? "!border-red-500" : "hover:border-gray-400"}  border-gray-200 relative w-[130px] h-[130px] flex items-center justify-center bg-gray-200 rounded cursor-pointer border-2 `}
                   >
+                  {errors.photos && (
+                    <div className="absolute right-3 top-3 text-red-500">
+                      <AlertCircle className="text-red-500 h-5 w-5" />
+                    </div>
+                  )} 
                     <Plus className="w-6 h-6 text-gray-600" />
+
                   </div>
+
                 )}
               </div>
+
+                  <p className="text-sm text-red-500 flex items-center gap-1">
+                    {errors.photos}
+                  </p>
               <input
                 type="file"
                 ref={fileInputRef}
@@ -800,7 +847,7 @@ export default function ProfileForm() {
                   <ChevronLeft className="w-4 h-4 mr-2" /> Zurück
                 </Button>
                 <Button type="submit" className="w-full h-12 text-base">
-                  {isSubmitting ? "Creating..." : "Create Profile"}
+                  {isSubmitting ? "Erstellen..." : "Profil erstellen"}
                 </Button>
               </div>
             </div>
@@ -810,7 +857,7 @@ export default function ProfileForm() {
       <CardFooter className="flex justify-center border-t pt-6 bg-muted/30">
         <div className="flex items-center text-sm text-muted-foreground">
           <User className="mr-2 h-4 w-4" />
-          Your profile information is stored securely
+          Ihre Profilinformationen werden sicher gespeichert
         </div>
       </CardFooter>
     </Card>

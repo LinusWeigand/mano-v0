@@ -56,6 +56,7 @@ export default function Register({ to_start, on_close, email }: RegisterProps) {
 
       if (!response.ok) {
         setShowInternalError(true);
+        setIsLoading(false);
         throw new Error("Failed to register");
       }
 
@@ -66,6 +67,7 @@ export default function Register({ to_start, on_close, email }: RegisterProps) {
       on_close();
     } catch (error) {
       setShowInternalError(true);
+      setIsLoading(false);
       console.error("Error occured in handle_pre_register: ", error);
     }
   }
