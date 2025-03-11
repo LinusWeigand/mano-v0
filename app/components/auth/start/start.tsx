@@ -143,6 +143,7 @@ const Start = ({ on_close, to_login, to_register }: StartProps) => {
           </button>)
         }
 
+        {/*
         <div className="LoginLineBreak">
           <div className="Line" />
           <p> oder </p>
@@ -177,6 +178,7 @@ const Start = ({ on_close, to_login, to_register }: StartProps) => {
           </svg>
           Weiter mit Google
         </button>
+          */}
       </div>
     </Card>
   );
