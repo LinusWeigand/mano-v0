@@ -6,6 +6,9 @@ interface AuthContextProps {
   setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
   isLoggedIn: boolean;
 
+  setHasProfile: React.Dispatch<React.SetStateAction<boolean>>;
+  hasProfile: boolean;
+
   setAuthEmail: React.Dispatch<React.SetStateAction<string>>;
   authEmail: string;
 
@@ -24,16 +27,17 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [hasProfile, setHasProfile] = useState<boolean>(false);
   const [authEmail, setAuthEmail] = useState<string>("");
 
   const getFirstLetter = () => {
     return typeof authEmail === "string" && authEmail.length > 0
       ? authEmail.charAt(0).toUpperCase()
-      : ""; 
+      : "";
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn, authEmail, setAuthEmail, getFirstLetter }}>
+    <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn, hasProfile, setHasProfile, authEmail, setAuthEmail, getFirstLetter }}>
       {children}
     </AuthContext.Provider>
   );

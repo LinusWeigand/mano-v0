@@ -17,7 +17,7 @@ export default function Login({ to_start, to_forgot_password, on_close, email }:
   const [show_password_incorrect_alert, set_show_password_incorrect_alert] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showInternalError, setShowInternalError] = useState(false);
-  const { setIsLoggedIn, setAuthEmail } = useAuth();
+  const { setIsLoggedIn, setAuthEmail, setHasProfile } = useAuth();
   const passwordInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -47,6 +47,14 @@ export default function Login({ to_start, to_forgot_password, on_close, email }:
       on_close();
       setIsLoading(false);
       setIsLoggedIn(true);
+
+      const data = await response.json();
+      console.log("DATA: ", data);
+      if (data.hasProfile) {
+        setHasProfile(true)
+      } else {
+        setHasProfile(false)
+      }
       setAuthEmail(email);
       console.log("Logged in")
     } catch (error) {

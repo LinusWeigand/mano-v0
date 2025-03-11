@@ -27,8 +27,11 @@ import {
   ChevronDownIcon,
 } from "lucide-react"
 import Image from "next/image"
+import { useAuth } from "@/context/AuthContext"
+import { useRouter } from "next/navigation"
 
 export default function ProfileForm() {
+  const router = useRouter()
   const totalSteps = 5
   const [step, setStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -64,8 +67,18 @@ export default function ProfileForm() {
   const [availableSkills, setAvailableSkills] = useState<string[]>([])
   const [loadingSkills, setLoadingSkills] = useState(true)
 
+  const { isLoggedIn, hasProfile, setHasProfile } = useAuth();
+
 
   useEffect(() => {
+    if (!isLoggedIn) {
+      router.push("/login") 
+    }
+
+    if (hasProfile) {
+      router.push("")
+    }
+
     fetch("/api/skills")
       .then((res) => {
         if (!res.ok) {
@@ -331,16 +344,16 @@ export default function ProfileForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setIsSubmitting(true)
-    const step1 = validateStep1();
-    const step2 = validateStep2();
-    const step3 = validateStep3();
-    const step4 = validateStep4();
-    const step5 = validateStep5();
+    const step1 = validateStep1()
+    const step2 = validateStep2()
+    const step3 = validateStep3()
+    const step4 = validateStep4()
+    const step5 = validateStep5()
 
 
     if (!step1 || !step2 || !step3 || !step4 || !step5) {
-      setIsSubmitting(false);
-      return;
+      setIsSubmitting(false)
+      return
     }
 
     try {
@@ -359,8 +372,8 @@ export default function ProfileForm() {
       data.append("skills", JSON.stringify(formData.skills))
 
       photos.forEach((photo) => {
-        data.append("photos", photo.file);
-      });
+        data.append("photos", photo.file)
+      })
 
       const response = await fetch("http://localhost/api/profile", {
         method: "POST",
@@ -368,12 +381,13 @@ export default function ProfileForm() {
       })
 
       if (!response.ok) {
-        setShowInternalError(true);
+        setShowInternalError(true)
         throw new Error("Failed to create profile")
       }
 
-      setShowInternalError(false);
+      setShowInternalError(false)
       setIsSuccess(true)
+      setHasProfile(true)
     } catch (error) {
       setShowInternalError(true);
     } finally {

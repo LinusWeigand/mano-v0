@@ -28,7 +28,7 @@ export default function Header() {
   const verification_code = decodeURIComponent(searchParams.get("vc") || "");
   const email = decodeURIComponent(searchParams.get("e") || "");
 
-  const { isLoggedIn, setIsLoggedIn, setAuthEmail, getFirstLetter } = useAuth();
+  const { isLoggedIn, setIsLoggedIn, hasProfile, setHasProfile, setAuthEmail, getFirstLetter } = useAuth();
 
   const handle_email_verification = async () => {
     if (typeof window !== "undefined") {
@@ -59,6 +59,7 @@ export default function Header() {
 
   const handleLogout = async () => {
     setIsLoggedIn(false);
+    setHasProfile(false);
     try {
       const response = await fetch("/api/auth/logout", {
         credentials: "include",
@@ -135,6 +136,11 @@ export default function Header() {
       } else {
         setIsLoggedIn(false);
       }
+      if (data.hasProfile) {
+        setHasProfile(true);
+      } else {
+        setHasProfile(false);
+      }
 
       if (data.email) {
         setAuthEmail(data.email);
@@ -143,6 +149,7 @@ export default function Header() {
     } catch (error) {
       console.error("Error checking auth status:", error);
       setIsLoggedIn(false);
+      setHasProfile(false);
     }
   };
 
@@ -160,12 +167,14 @@ export default function Header() {
           </div>
           <div className="">
             <div className="flex items-center space-x-4">
+            { hasProfile ? <></> :(
               <a
                 onClick={handleProfil}
                 className="text-gray-600 hover:text-gray-900 hover:cursor-pointer hidden sm:block"
               >
                 Als Handwerker loslegen
               </a>
+            )}
 
               <Button
                 variant="outline"
