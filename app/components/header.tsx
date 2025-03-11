@@ -235,6 +235,7 @@ export default function Header() {
               </div>
             )}
 
+            { hasProfile ? <></> :(
             <div className="p-2">
               <a
                 onClick={handleProfil}
@@ -244,6 +245,7 @@ export default function Header() {
                 Als Handwerker loslegen
               </a>
             </div>
+            )}
           </div>
         )}
       </div>

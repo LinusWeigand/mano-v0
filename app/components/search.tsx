@@ -20,7 +20,9 @@ export default function SearchBar() {
   const [location, setLocation] = useState("");
   const [skill, setSkill] = useState("");
   const [skills, setAvailableSkills] = useState<string | null>(null);
+  const [crafts, setAvailableCrafts] = useState<string | null>(null);
   const [loadingSkills, setLoadingSkills] = useState(true)
+  const [loadingCrafts, setLoadingCrafts] = useState(true)
 
   const { setProfiles } = useProfiles();
 
@@ -42,6 +44,24 @@ export default function SearchBar() {
       })
       .finally(() => {
         setLoadingSkills(false)
+      })
+    setLoadingSkills(true)
+    fetch("/api/crafts")
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch crafts")
+        }
+        return res.json()
+      })
+      .then((data) => {
+        const craftsArray = data.data.map((item: { name: string }) => item.name)
+        setAvailableCrafts(craftsArray)
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+      .finally(() => {
+        setLoadingCrafts(false)
       })
   }, [])
 
@@ -153,6 +173,31 @@ export default function SearchBar() {
                 }}>
                   <div
                     className={`flex-1 p-2 transition-colors py-4 pl-8 md:pl-10 lg:w-[300px]
+                ${activeField === "name"
+                        ? "bg-white hover:bg-white"
+                        : activeField === null
+                          ? "bg-white hover:bg-[#ebebeb]"
+                          : "bg-muted hover:bg-[#dddddd]"
+                      }`}
+                    onClick={() => setActiveField("name")}
+                  >
+                    <label
+                      htmlFor="craft"
+                      className="block text-sm font-medium h-full text-foreground"
+                    >
+                      Name
+                    </label>
+                    <Input
+                      id="craft"
+                      type="text"
+                      placeholder="Gewerke suchen"
+                      className="w-full border-none bg-transparent text-[16px] mt-[1px]"
+                      onFocus={() => setActiveField("name")}
+                      onChange={(e) => setCraft(e.target.value)}
+                    />
+                  </div>
+                  <div
+                    className={` flex flex-row items-center
                 ${activeField === "craft"
                         ? "bg-white hover:bg-white"
                         : activeField === null
@@ -161,21 +206,40 @@ export default function SearchBar() {
                       }`}
                     onClick={() => setActiveField("craft")}
                   >
-                    <label
-                      htmlFor="craft"
-                      className="block text-sm font-medium h-full text-foreground"
-                    >
-                      Handwerk
-                    </label>
-                    <Input
-                      id="craft"
-                      type="text"
-                      placeholder="Gewerke suchen"
-                      className="w-full border-none bg-transparent text-[16px] mt-[1px]"
-                      onFocus={() => setActiveField("craft")}
-                      onChange={(e) => setCraft(e.target.value)}
-                    />
+                    {crafts && (
+                      <div className="flex-1 flex flex-col p-2 transition-colors py-4 pl-8 md:pr-12 ">
+                        <label
+                          htmlFor="craft"
+                          className="block text-sm font-medium text-foreground h-full"
+                        >
+                          Handwerk
+                        </label>
+                        <Select onOpenChange={() => setActiveField("craft")}>
+                          <SelectTrigger className="mt-[1px] w-full border-none bg-transparent focus:ring-0 text-[16px]">
+                            <div className="flex items-center">
+                              <Hammer className="h-5 w-5 text-muted-foreground mr-2" />
+                              <SelectValue
+                                className="w-full border-none bg-transparent focus:ring-0 text-[16px] !placeholder:text-muted-foreground !text-muted-foreground"
+                                placeholder="Spezialität aussuchen"
+                              />
+                            </div>
+                          </SelectTrigger>
+                          <SelectContent>
+                            {crafts.map((item, index) => (
+                              <SelectItem
+                                key={index}
+                                value={item}
+                                onClick={() => setSkill(item)}
+                              >
+                                {item}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                   </div>
+
                   <div
                     className={`flex-1 p-2 transition-colors py-4 pl-8 md:pr-12           
                  ${activeField === "location"
@@ -206,13 +270,13 @@ export default function SearchBar() {
                   </div>
                   <div
                     className={` flex flex-row items-center
-                ${activeField === "date"
+                ${activeField === "skill"
                         ? "bg-white hover:bg-white"
                         : activeField === null
                           ? "bg-white hover:bg-[#ebebeb]"
                           : "bg-muted hover:bg-[#dddddd]"
                       }`}
-                    onClick={() => setActiveField("date")}
+                    onClick={() => setActiveField("skill")}
                   >
                     {skills && (
                       <div className="flex-1 flex flex-col p-2 transition-colors py-4 pl-8 md:pr-12 ">
@@ -222,7 +286,7 @@ export default function SearchBar() {
                         >
                           Spezialität
                         </label>
-                        <Select onOpenChange={() => setActiveField("date")}>
+                        <Select onOpenChange={() => setActiveField("skill")}>
                           <SelectTrigger className="mt-[1px] w-full border-none bg-transparent focus:ring-0 text-[16px]">
                             <div className="flex items-center">
                               <Hammer className="h-5 w-5 text-muted-foreground mr-2" />

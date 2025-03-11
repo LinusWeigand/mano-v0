@@ -144,6 +144,7 @@ export default function Details({
             </div>
             <div className="flex flex-col sm:flex-row justify-start items-start sm:items-center gap-4">
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+              {website && (
                 <a
                   href={`https://${website}`}
                   target="_blank"
@@ -153,6 +154,8 @@ export default function Details({
                   <Globe className="h-5 w-5 mr-1" />
                   Webseite
                 </a>
+              )}
+              {instagram && (
                 <a
                   href={`https://instagram.com/${instagram}`}
                   target="_blank"
@@ -162,6 +165,8 @@ export default function Details({
                   <Instagram className="h-5 w-5 mr-1" />
                   Instagram
                 </a>
+              )}
+              {googleRatings && (
                 <a
                   href={`https://${googleRatings}`}
                   target="_blank"
@@ -171,6 +176,7 @@ export default function Details({
                   <MapPin className="h-5 w-5 mr-1" />
                   Google Bewertungen
                 </a>
+              )}
               </div>
               {/* <Button className="w-full sm:w-auto">Kontakt</Button> */}
             </div>
