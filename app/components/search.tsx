@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -18,7 +18,32 @@ export default function SearchBar() {
   const [activeField, setActiveField] = useState<string | null>(null);
   const [craft, setCraft] = useState("");
   const [location, setLocation] = useState("");
+  const [skill, setSkill] = useState("");
+  const [skills, setAvailableSkills] = useState<string | null>(null);
+  const [loadingSkills, setLoadingSkills] = useState(true)
+
   const { setProfiles } = useProfiles();
+
+  useEffect(() => {
+    setLoadingSkills(true)
+    fetch("/api/skills")
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch skills")
+        }
+        return res.json()
+      })
+      .then((data) => {
+        const skillsArray = data.data.map((item: { name: string }) => item.name)
+        setAvailableSkills(skillsArray)
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+      .finally(() => {
+        setLoadingSkills(false)
+      })
+  }, [])
 
   const handleSubmit = async () => {
     if (craft === "" && location === "") {
@@ -189,37 +214,38 @@ export default function SearchBar() {
                       }`}
                     onClick={() => setActiveField("date")}
                   >
-                    <div className="flex-1 flex flex-col p-2 transition-colors py-4 pl-8 md:pr-12 ">
-                      <label
-                        htmlFor="date"
-                        className="block text-sm font-medium text-foreground h-full"
-                      >
-                        Spezialität
-                      </label>
-                      <Select onOpenChange={() => setActiveField("date")}>
-                        <SelectTrigger className="mt-[1px] w-full border-none bg-transparent focus:ring-0 text-[16px]">
-                          <div className="flex items-center">
-                            <Hammer className="h-5 w-5 text-muted-foreground mr-2" />
-                            <SelectValue
-                              className="w-full border-none bg-transparent focus:ring-0 text-[16px] !placeholder:text-muted-foreground !text-muted-foreground"
-                              placeholder="Spezialität aussuchen"
-                            />
-                          </div>
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="asap">
-                            So schnell wie möglich
-                          </SelectItem>
-                          <SelectItem value="this-week">Diese Woche</SelectItem>
-                          <SelectItem value="next-week">
-                            Nächste Woche
-                          </SelectItem>
-                          <SelectItem value="next-month">
-                            Nächsten Monat
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    {skills && (
+                      <div className="flex-1 flex flex-col p-2 transition-colors py-4 pl-8 md:pr-12 ">
+                        <label
+                          htmlFor="date"
+                          className="block text-sm font-medium text-foreground h-full"
+                        >
+                          Spezialität
+                        </label>
+                        <Select onOpenChange={() => setActiveField("date")}>
+                          <SelectTrigger className="mt-[1px] w-full border-none bg-transparent focus:ring-0 text-[16px]">
+                            <div className="flex items-center">
+                              <Hammer className="h-5 w-5 text-muted-foreground mr-2" />
+                              <SelectValue
+                                className="w-full border-none bg-transparent focus:ring-0 text-[16px] !placeholder:text-muted-foreground !text-muted-foreground"
+                                placeholder="Spezialität aussuchen"
+                              />
+                            </div>
+                          </SelectTrigger>
+                          <SelectContent>
+                            {skills.map((item, index) => (
+                              <SelectItem
+                                key={index}
+                                value={item}
+                                onClick={() => setSkill(item)}
+                              >
+                                {item}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                     <div
                       className={`p-2 md:p-2 ${activeField === null
                         ? "rounded-b-[4rem] md:rounded-r-[4rem] md:rounded-bl-none"

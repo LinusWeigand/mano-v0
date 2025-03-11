@@ -68,6 +68,9 @@ export default function ProfileForm() {
   const [loadingSkills, setLoadingSkills] = useState(true)
 
   const { isLoggedIn, hasProfile, setHasProfile } = useAuth();
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const locationInputRef = useRef<HTMLInputElement>(null);
+  const websiteInputRef = useRef<HTMLInputElement>(null);
 
 
   useEffect(() => {
@@ -79,6 +82,11 @@ export default function ProfileForm() {
       router.push("")
     }
 
+    if (nameInputRef.current) {
+      nameInputRef.current.focus();
+    }
+
+    setLoadingSkills(true)
     fetch("/api/skills")
       .then((res) => {
         if (!res.ok) {
@@ -328,8 +336,18 @@ export default function ProfileForm() {
     e.preventDefault()
     if (step === 1 && validateStep1()) {
       setStep(2)
+      setTimeout(() => {
+        if (locationInputRef.current) {
+          locationInputRef.current.focus();
+        }
+      }, 100);
     } else if (step === 2 && validateStep2()) {
       setStep(3)
+      setTimeout(() => {
+        if (websiteInputRef.current) {
+          websiteInputRef.current.focus();
+        }
+      }, 100);
     } else if (step === 3 && validateStep3()) {
       setStep(4)
     } else if (step === 4 && validateStep4()) {
@@ -479,6 +497,7 @@ export default function ProfileForm() {
                 </Label>
                 <div className="relative">
                   <Input
+                    ref={nameInputRef}
                     id="name"
                     name="name"
                     placeholder="Geben Sie Ihren Namen ein"
@@ -601,6 +620,7 @@ export default function ProfileForm() {
                 <div className="relative">
                   <MapPin className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
                   <Input
+                    ref={locationInputRef}
                     id="location"
                     name="location"
                     placeholder="Geben Sie Ihren Standort an"
@@ -676,6 +696,7 @@ export default function ProfileForm() {
                 <div className="relative">
                   <Globe className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
                   <Input
+                    ref={websiteInputRef}
                     id="website"
                     name="website"
                     placeholder="https://deine-webseite.de"
