@@ -46,23 +46,24 @@ export default function ProfileForm() {
     google_ratings: "",
     skills: [] as string[],
   })
-  const [errors, setErrors] = useState({
-    name: "",
-    craft: "",
-    experience: "",
-    location: "",
-    bio: "",
-    website: "",
-    instagram: "",
-    google_ratings: "",
-    skills: "",
-    photos: "",
-  })
 
-  // Remove the hard-coded availableSkills array and fetch them dynamically
+  const [nameError, setNameError] = useState("");
+  const [craftError, setCraftError] = useState("");
+  const [experienceError, setExperienceError] = useState("");
+  const [locationError, setLocationError] = useState("");
+  const [bioError, setBioError] = useState("");
+  const [websiteError, setWebsiteError] = useState("");
+  const [instagramError, setInstagramError] = useState("");
+  const [googleRatingsError, setGoogleRatingsError] = useState("");
+  const [skillsError, setSkillsError] = useState("");
+  const [photosError, setPhotosError] = useState("");
+  const [missingFieldsError, setMissingFieldsError] = useState("");
+  const [invalidURLSError, setInvalidURLSError] = useState("");
+  const [showInternalError, setShowInternalError] = useState(false);
+
   const [availableSkills, setAvailableSkills] = useState<string[]>([])
   const [loadingSkills, setLoadingSkills] = useState(true)
-  const [skillsError, setSkillsError] = useState<string | null>(null)
+
 
   useEffect(() => {
     fetch("/api/skills")
@@ -84,6 +85,63 @@ export default function ProfileForm() {
         setLoadingSkills(false)
       })
   }, [])
+
+  useEffect(() => {
+    let fields = [];
+    let field_count = 0;
+    if (nameError) {
+      fields.push("Name")
+      field_count += 1
+    }
+    if (craftError) {
+      fields.push("Handwerk")
+      field_count += 1
+    }
+    if (experienceError) {
+      fields.push("Erfahrung")
+      field_count += 1
+    }
+    if (locationError) {
+      fields.push("Standort")
+      field_count += 1
+    }
+    if (bioError) {
+      fields.push("Beschreibung")
+      field_count += 1
+    }
+    if (skillsError) {
+      fields.push("Fähigkeiten")
+      field_count += 1
+    }
+    let message = "";
+    if (field_count === 1) {
+      message = "Folgendes Feld muss noch angegeben werden: " + fields.join(", ") + "."
+    } else if (field_count > 1) {
+      message = "Folgende Felder müssen noch angegeben werden: " + fields.join(", ") + "."
+    }
+    setMissingFieldsError(message)
+
+    fields = []
+    field_count = 0
+    if (websiteError) {
+      fields.push("Webseite")
+      field_count += 1
+    }
+    if (instagramError) {
+      fields.push("Instagram")
+      field_count += 1
+    }
+    if (googleRatingsError) {
+      fields.push("Google Bewertungen")
+      field_count += 1
+    }
+    if (field_count === 1) {
+      message = "Folgender Link ist noch inkorrekt: " + fields.join(", ") + "."
+    } else if (field_count > 1) {
+      message = "Folgende Links sind noch inkorrekt: " + fields.join(", ") + "."
+    }
+    setInvalidURLSError(message)
+  }, [nameError, craftError, experienceError, locationError, bioError, websiteError, instagramError, googleRatingsError, skillsError])
 
   const craftOptions = [
     { value: "", label: "Wählen Sie Ihr Handwerk" },
@@ -111,99 +169,49 @@ export default function ProfileForm() {
       }))
       setPhotos((prevPhotos) => [...prevPhotos, ...newPhotos])
     }
-    const newErrors = {
-      name: "",
-      craft: "",
-      experience: "",
-      location: "",
-      bio: "",
-      website: "",
-      instagram: "",
-      google_ratings: "",
-      skills: "",
-      photos: "",
-    }
-    setErrors(newErrors)
+    setPhotosError("")
   }
 
   const validateStep1 = () => {
     let isValid = true
-    const newErrors = {
-      name: "",
-      craft: "",
-      experience: "",
-      location: "",
-      bio: "",
-      website: "",
-      instagram: "",
-      google_ratings: "",
-      skills: "",
-      photos: "",
-    }
 
     if (!formData.name || formData.name.length < 2) {
-      newErrors.name = "Der Name muss mindestens 2 Charktere enthalten."
+      setNameError("Der Name muss mindestens 2 Charktere enthalten.")
       isValid = false
     }
 
     if (!formData.craft) {
-      newErrors.craft = "Bitte wählen Sie Ihr Handwerk aus."
+      setCraftError("Bitte wählen Sie Ihr Handwerk aus.")
       isValid = false
     }
 
     const exp = Number(formData.experience)
     if (!formData.experience || isNaN(exp) || exp <= 0) {
-      newErrors.experience = "Bitte geben Sie eine positive Zahl an."
+      setExperienceError("Bitte geben Sie eine positive Zahl an.")
       isValid = false
     }
 
-    setErrors(newErrors)
     return isValid
   }
 
   const validateStep2 = () => {
     let isValid = true
-    const newErrors = {
-      name: "",
-      craft: "",
-      experience: "",
-      location: "",
-      bio: "",
-      website: "",
-      instagram: "",
-      google_ratings: "",
-      skills: "",
-      photos: "",
-    }
 
     if (!formData.location) {
-      newErrors.location = "Bitte geben Sie einen Standort an."
+      setLocationError("Bitte geben Sie einen Standort an.")
       isValid = false
     }
 
     if (!formData.bio) {
-      newErrors.bio = "Bitte geben Sie eine Beschreibung an."
+      setBioError("Bitte geben Sie eine Beschreibung an.")
       isValid = false
     }
 
-    setErrors((prev) => ({ ...prev, ...newErrors }))
     return isValid
   }
 
   const validateStep3 = () => {
     let isValid = true
-    const newErrors = {
-      name: "",
-      craft: "",
-      experience: "",
-      location: "",
-      bio: "",
-      website: "",
-      instagram: "",
-      google_ratings: "",
-      skills: "",
-      photos: "",
-    }
 
     if (
       formData.website &&
@@ -211,7 +219,7 @@ export default function ProfileForm() {
         /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w-./?%&=]*)?$/
       )
     ) {
-      newErrors.website = "Bitte geben Sie eine korrekte URL an."
+      setWebsiteError("Bitte geben Sie eine korrekte URL an.")
       isValid = false
     }
 
@@ -221,61 +229,32 @@ export default function ProfileForm() {
         /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w-./?%&=]*)?$/
       )
     ) {
-      newErrors.google_ratings = "Bitte geben Sie eine korrekte URL an."
+      setGoogleRatingsError("Bitte geben Sie eine korrekte URL an.")
       isValid = false
     }
 
-    setErrors((prev) => ({ ...prev, ...newErrors }))
     return isValid
   }
 
   const validateStep4 = () => {
     let isValid = true
-    const newErrors = {
-      name: "",
-      craft: "",
-      experience: "",
-      location: "",
-      bio: "",
-      website: "",
-      instagram: "",
-      google_ratings: "",
-      skills: "",
-      photos: "",
-    }
 
-    if (formData.skills.length === 0) {
-      newErrors.skills = "Bitte geben Sie mindestens eine Fähigkeit an."
+    if (formData.skills.length < 1) {
+      setSkillsError("Bitte geben Sie mindestens eine Fähigkeit an.");
       isValid = false
     }
 
-    setErrors((prev) => ({ ...prev, ...newErrors }))
     return isValid
   }
 
   const validateStep5 = () => {
     let isValid = true
-    const newErrors = {
-      name: "",
-      craft: "",
-      experience: "",
-      location: "",
-      bio: "",
-      website: "",
-      instagram: "",
-      google_ratings: "",
-      skills: "",
-      photos: "",
-    }
 
     if (photos.length < 1) {
-      newErrors.photos = "Bitte laden Sie mindestens ein Foto hoch."
+      setPhotosError("Bitte laden Sie mindestens ein Foto hoch.")
       isValid = false
     }
 
-    console.log("Photos length: {}", photos.length);
-
-    setErrors((prev) => ({ ...prev, ...newErrors }))
     return isValid
   }
 
@@ -289,6 +268,37 @@ export default function ProfileForm() {
       ...prev,
       [name]: value,
     }))
+    switch (name) {
+      case "name":
+        setNameError("");
+        break;
+      case "craft":
+        setCraftError("");
+        break;
+      case "experience":
+        setExperienceError("");
+        break;
+      case "location":
+        setLocationError("");
+        break;
+      case "bio":
+        setBioError("");
+        break;
+      case "website":
+        setWebsiteError("");
+        break;
+      case "instagram":
+        setInstagramError("");
+        break;
+      case "google_ratings":
+        setGoogleRatingsError("");
+        break;
+      case "skills":
+        setSkillsError("");
+        break;
+      default:
+        break;
+    }
   }
 
   const handleSkillToggle = (skill: string) => {
@@ -298,6 +308,7 @@ export default function ProfileForm() {
         : [...prev.skills, skill]
       return { ...prev, skills }
     })
+    setSkillsError("");
   }
 
   const handleNext = (e: React.FormEvent) => {
@@ -319,11 +330,19 @@ export default function ProfileForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!validateStep5() || !validateStep1() || !validateStep2() || !validateStep3() || !validateStep4()) {
+    setIsSubmitting(true)
+    const step1 = validateStep1();
+    const step2 = validateStep2();
+    const step3 = validateStep3();
+    const step4 = validateStep4();
+    const step5 = validateStep5();
+
+
+    if (!step1 || !step2 || !step3 || !step4 || !step5) {
+      setIsSubmitting(false);
       return;
     }
 
-    setIsSubmitting(true)
     try {
       const data = new FormData()
       // photos.forEach((photo, index) => {
@@ -343,21 +362,20 @@ export default function ProfileForm() {
         data.append("photos", photo.file);
       });
 
-      console.log("Posting to backend...")
       const response = await fetch("http://localhost/api/profile", {
         method: "POST",
         body: data,
       })
-      console.log("Posted to backend")
 
       if (!response.ok) {
+        setShowInternalError(true);
         throw new Error("Failed to create profile")
       }
 
-      console.log("Profile created successfully!")
+      setShowInternalError(false);
       setIsSuccess(true)
     } catch (error) {
-      console.error("Error creating profile:", error)
+      setShowInternalError(true);
     } finally {
       setIsSubmitting(false)
     }
@@ -452,20 +470,20 @@ export default function ProfileForm() {
                     placeholder="Geben Sie Ihren Namen ein"
                     value={formData.name}
                     onChange={handleChange}
-                    className={`rounded-md bg-white border-2 h-12 pl-4 ${errors.name
+                    className={`rounded-md bg-white border-2 h-12 pl-4 ${nameError
                         ? "border-red-300 focus-visible:ring-red-300"
                         : "focus-visible:border-primary"
                       }`}
                   />
-                  {errors.name && (
+                  {nameError && (
                     <div className="absolute right-3 top-3 text-red-500">
                       <AlertCircle className="h-5 w-5" />
                     </div>
                   )}
                 </div>
-                {errors.name && (
+                {nameError && (
                   <p className="text-sm text-red-500 flex items-center gap-1">
-                    {errors.name}
+                    {nameError}
                   </p>
                 )}
                 <p className="text-sm text-muted-foreground">
@@ -483,7 +501,7 @@ export default function ProfileForm() {
                     name="craft"
                     value={formData.craft}
                     onChange={handleChange}
-                    className={`block w-full appearance-none rounded-md bg-white border-2 h-12 pl-4 pr-10 ${errors.craft
+                    className={`block w-full appearance-none rounded-md bg-white border-2 h-12 pl-4 pr-10 ${craftError
                         ? "border-red-300 focus-visible:ring-red-300"
                         : "focus:border-black"
                       } focus:ring-0 focus:outline-none`}
@@ -494,7 +512,7 @@ export default function ProfileForm() {
                       </option>
                     ))}
                   </select>
-                  {errors.craft ? (
+                  {craftError ? (
                     <div className="absolute right-3 top-3 text-red-500">
                       <AlertCircle className="h-5 w-5" />
                     </div>
@@ -504,9 +522,9 @@ export default function ProfileForm() {
                     </div>
                   )}
                 </div>
-                {errors.craft && (
+                {craftError && (
                   <p className="text-sm text-red-500 flex items-center gap-1">
-                    {errors.craft}
+                    {craftError}
                   </p>
                 )}
               </div>
@@ -547,9 +565,9 @@ export default function ProfileForm() {
                     <Plus className="w-10 h-10" />
                   </Button>
                 </div>
-                {errors.experience && (
+                {experienceError && (
                   <p className="text-sm text-red-500 flex items-center gap-1">
-                    {errors.experience}
+                    {experienceError}
                   </p>
                 )}
               </div>
@@ -574,20 +592,20 @@ export default function ProfileForm() {
                     placeholder="Geben Sie Ihren Standort an"
                     value={formData.location}
                     onChange={handleChange}
-                    className={`rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${errors.location
+                    className={`rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${locationError
                         ? "border-red-300 focus-visible:ring-red-300"
                         : "focus-visible:border-primary"
                       }`}
                   />
-                  {errors.location && (
+                  {locationError && (
                     <div className="absolute right-3 top-3.5 text-red-500">
                       <AlertCircle className="h-5 w-5" />
                     </div>
                   )}
                 </div>
-                {errors.location && (
+                {locationError && (
                   <p className="text-sm text-red-500 flex items-center gap-1">
-                    {errors.location}
+                    {locationError}
                   </p>
                 )}
               </div>
@@ -603,20 +621,20 @@ export default function ProfileForm() {
                     placeholder="Beschreiben Sie Ihre Arbeit..."
                     value={formData.bio}
                     onChange={handleChange}
-                    className={`w-full rounded-md border-2 h-24 p-2 text-muted-foreground ${errors.bio
+                    className={`w-full rounded-md border-2 h-24 p-2 text-muted-foreground ${bioError
                         ? "border-red-300 focus-visible:ring-red-300"
                         : "focus:border-black"
                       } focus:ring-0 focus:outline-none`}
                   />
-                  {errors.bio && (
+                  {bioError && (
                     <div className="absolute right-3 top-3.5 text-red-500">
                       <AlertCircle className="h-5 w-5" />
                     </div>
                   )}
                 </div>
-                {errors.bio && (
+                {bioError && (
                   <p className="text-sm text-red-500 flex items-center gap-1">
-                    {errors.bio}
+                    {bioError}
                   </p>
                 )}
               </div>
@@ -649,20 +667,20 @@ export default function ProfileForm() {
                     placeholder="https://deine-webseite.de"
                     value={formData.website}
                     onChange={handleChange}
-                    className={`rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${errors.website
+                    className={`rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${websiteError
                         ? "border-red-300 focus-visible:ring-red-300"
                         : "focus-visible:border-primary"
                       }`}
                   />
-                  {errors.website && (
+                  {websiteError && (
                     <div className="absolute right-3 top-3.5 text-red-500">
                       <AlertCircle className="h-5 w-5" />
                     </div>
                   )}
                 </div>
-                {errors.website && (
+                {websiteError && (
                   <p className="text-sm text-red-500 flex items-center gap-1">
-                    {errors.website}
+                    {websiteError}
                   </p>
                 )}
                 <p className="text-sm text-muted-foreground">
@@ -706,20 +724,20 @@ export default function ProfileForm() {
                     placeholder="https://ratings.google.com/..."
                     value={formData.google_ratings}
                     onChange={handleChange}
-                    className={`rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${errors.google_ratings
+                    className={`rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${googleRatingsError
                         ? "border-red-300 focus-visible:ring-red-300"
                         : "focus-visible:border-primary"
                       }`}
                   />
-                  {errors.google_ratings && (
+                  {googleRatingsError && (
                     <div className="absolute right-3 top-3.5 text-red-500">
                       <AlertCircle className="h-5 w-5" />
                     </div>
                   )}
                 </div>
-                {errors.google_ratings && (
+                {googleRatingsError && (
                   <p className="text-sm text-red-500 flex items-center gap-1">
-                    {errors.google_ratings}
+                    {googleRatingsError}
                   </p>
                 )}
               </div>
@@ -741,11 +759,9 @@ export default function ProfileForm() {
                 <Label className="text-base font-medium mb-2">
                   Fähigkeiten <span className="text-red-500 ml-1">*</span>
                 </Label>
-                {loadingSkills ? (
-                  <p>Fähigkeiten laden...</p>
-                ) : skillsError ? (
-                  <p className="text-sm text-red-500">{skillsError}</p>
-                ) : (
+                { loadingSkills ? 
+                  <p> Fähigkeiten laden... </p>
+                : (
                   <div className="flex flex-wrap gap-3">
                     {availableSkills.map((skill) => {
                       const isSelected = formData.skills.includes(skill)
@@ -759,13 +775,13 @@ export default function ProfileForm() {
                         >
                           {skill}
                         </Button>
-                      )
+                        );
                     })}
                   </div>
                 )}
-                {errors.skills && (
+                {skillsError && (
                   <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
-                    {errors.skills}
+                    {skillsError}
                   </p>
                 )}
               </div>
@@ -817,9 +833,9 @@ export default function ProfileForm() {
                 {photos.length < 5 && (
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    className={`${errors.photos ? "!border-red-500" : "hover:border-gray-400"}  border-gray-200 relative w-[130px] h-[130px] flex items-center justify-center bg-gray-200 rounded cursor-pointer border-2 `}
+                    className={`${photosError ? "!border-red-500" : "hover:border-gray-400"}  border-gray-200 relative w-[130px] h-[130px] flex items-center justify-center bg-gray-200 rounded cursor-pointer border-2 `}
                   >
-                  {errors.photos && (
+                  {photosError && (
                     <div className="absolute right-3 top-3 text-red-500">
                       <AlertCircle className="text-red-500 h-5 w-5" />
                     </div>
@@ -830,10 +846,27 @@ export default function ProfileForm() {
 
                 )}
               </div>
-
                   <p className="text-sm text-red-500 flex items-center gap-1">
-                    {errors.photos}
+                    {photosError}
                   </p>
+                  <p className="text-sm text-red-500 flex items-center gap-1">
+                    {missingFieldsError}
+                  </p>
+                  <p className="text-sm text-red-500 flex items-center gap-1">
+                    {invalidURLSError}
+                  </p>
+
+        {showInternalError && (
+          <div className="bg-white rounded-lg shadow-md p-4 mb-4 flex items-start">
+            <div className="bg-red-400 rounded-full mr-3 flex-shrink-0 border-transparent">
+              <AlertCircle className="h-12 w-12 text-white" />
+            </div>
+            <div>
+              <h4 className="font-bold text-gray-800">Irgendwas ist schiefgelaufen.</h4>
+              <p className="text-gray-600">Versuche es später noch einmal.</p>
+            </div>
+          </div>
+        )}
               <input
                 type="file"
                 ref={fileInputRef}

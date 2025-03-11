@@ -55,14 +55,14 @@ function Modal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center ">
       {/* Overlay */}
-      <div className="fixed inset-0 bg-black opacity-50"></div>
+      <div className="fixed inset-0 bg-black opacity-50 "></div>
 
       {/* Modal Content */}
       <div
         ref={modalRef}
-        className="relative bg-white rounded-2xl shadow-lg z-10"
+        className="relative bg-white rounded-2xl shadow-lg z-10 w-full sm:w-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {children}

@@ -1,5 +1,4 @@
 import { useState, useCallback } from "react"
-import { Button } from "@/components/ui/button"
 import { Globe, Instagram, X, ChevronLeft, ChevronRight, MapPin } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useSwipeable } from "react-swipeable"
@@ -53,9 +52,9 @@ export default function Details({
   }
 
   return (
-    <div className="bg-white rounded-lg overflow-hidden w-full max-w-7xl h-[90vh] flex flex-col md:flex-row md:h-[80vh] md:w-[80vw] mx-auto">
+    <div className="bg-white rounded-lg overflow-hidden w-full max-w-7xl h-[90vh] flex flex-col lg:flex-row lg:h-[80vh] lg:w-[80vw] mx-auto">
       <div
-        className="relative w-full md:w-1/2 h-48 sm:h-64 md:h-full"
+        className="relative w-full lg:w-1/2 h-48 sm:h-64 lg:h-full"
         {...handlers}
       >
         <img
@@ -88,12 +87,12 @@ export default function Details({
           </>
         )}
       </div>
-      <div className="flex-grow md:w-1/2 h-[calc(90vh-12rem)] sm:h-[calc(90vh-16rem)] md:h-full overflow-hidden">
+      <div className="flex-grow lg:w-1/2 h-[calc(90vh-12rem)] sm:h-[calc(90vh-16rem)] lg:h-full overflow-hidden">
         <ScrollArea className="h-full">
           <div className="p-4 sm:p-6 lg:p-8">
             <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2">{name}</h2>
             <p className="text-gray-600 mb-4">{craft}</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
                 <h3 className="font-semibold mb-2">Standort</h3>
                 <p>{location}</p>
@@ -117,7 +116,7 @@ export default function Details({
               </div>
             </div>
             <div className="mb-4">
-              <h3 className="font-semibold mb-2">Über</h3>
+              <h3 className="font-semibold mb-2">Beschreibung</h3>
               <p className="text-gray-600">{bio}</p>
             </div>
             <div className="mb-4">
@@ -152,7 +151,7 @@ export default function Details({
                   className="text-blue-600 hover:underline flex items-center"
                 >
                   <Globe className="h-5 w-5 mr-1" />
-                  Website
+                  Webseite
                 </a>
                 <a
                   href={`https://instagram.com/${instagram}`}
@@ -170,7 +169,7 @@ export default function Details({
                   className="text-blue-600 hover:underline flex items-center"
                 >
                   <MapPin className="h-5 w-5 mr-1" />
-                  Google Ratings
+                  Google Bewertungen
                 </a>
               </div>
               {/* <Button className="w-full sm:w-auto">Kontakt</Button> */}
