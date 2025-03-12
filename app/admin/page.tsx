@@ -18,6 +18,7 @@ import {
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useProfiles } from "@/context/ProfilesContext"
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("crafts")
@@ -25,13 +26,6 @@ export default function AdminDashboard() {
   const [newSkill, setNewSkill] = useState("")
   const [crafts, setCrafts] = useState<string[]>([])
   const [skills, setSkills] = useState<string[]>([])
-  const [profiles, setProfiles] = useState<{ id: string; name: string; email: string; verified: boolean }[]>([
-    { id: "1", name: "John Doe", email: "john@example.com", verified: true },
-    { id: "2", name: "Jane Smith", email: "jane@example.com", verified: false },
-    { id: "3", name: "Robert Johnson", email: "robert@example.com", verified: false },
-    { id: "4", name: "Emily Davis", email: "emily@example.com", verified: true },
-    { id: "5", name: "Michael Wilson", email: "michael@example.com", verified: false },
-  ])
   const [isSubmittingCraft, setIsSubmittingCraft] = useState(false)
   const [isSubmittingSkill, setIsSubmittingSkill] = useState(false)
   const [craftDialogOpen, setCraftDialogOpen] = useState(false)
@@ -49,6 +43,8 @@ export default function AdminDashboard() {
   const [editingSkill, setEditingSkill] = useState<string | null>(null)
   const [editedCraftName, setEditedCraftName] = useState("")
   const [editedSkillName, setEditedSkillName] = useState("")
+
+  const { profiles, setProfiles } = useProfiles();
 
   useEffect(() => {
     setLoadingSkills(true)
@@ -90,7 +86,105 @@ export default function AdminDashboard() {
       .finally(() => {
         setLoadingCrafts(false)
       })
+
+    setLoadingProfiles(true)
+    get_profiles()
   }, [])
+
+  const get_profiles = async () => {
+    try {
+      const response = await fetch("http://localhost/api/profiles", {
+        method: "GET",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to get profiles");
+      }
+
+      const result = await response.json();
+      const data = result.data;
+
+      const initialProfiles: ProfileModel[] = data.map(
+        (profile_object: any) => ({
+          id: profile_object.id,
+          viewer_id: profile_object.viewer_id,
+          name: profile_object.name,
+          craft: profile_object.craft,
+          location: profile_object.location,
+          website: profile_object.website,
+          google_ratings: profile_object.google_ratings,
+          instagram: profile_object.instagram,
+          bio: profile_object.bio,
+          experience: profile_object.experience,
+          skills: profile_object.skills,
+          photos: [],
+        }),
+      );
+
+      setProfiles(initialProfiles);
+
+      initialProfiles.forEach((profile) => {
+        load_profile_photos(profile.id);
+      });
+
+      console.log("Profiles fetched successfully.");
+      setLoadingProfiles(false)
+    } catch (error) {
+      console.error("Error occurred in get_profiles: ", error);
+      setLoadingProfiles(false)
+    }
+  };
+
+  const load_profile_photos = async (profileId: string) => {
+    try {
+      const response = await fetch(
+        `http://localhost/api/profile-photos/${profileId}`,
+        {
+          method: "GET",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to get profile photos");
+      }
+
+      const result = await response.json();
+      const photoUrls = result.data;
+
+      const photoObjectUrls: string[] = await Promise.all(
+        photoUrls.map(async (url: string) => {
+          const response = await fetch(url, {
+            method: "GET",
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to get profile photo");
+          }
+
+          const photoBlob = await response.blob();
+          const photoObjectUrl = URL.createObjectURL(photoBlob);
+          return photoObjectUrl;
+        }),
+      );
+
+      setProfiles((prevProfiles: ProfileModel[]) =>
+        prevProfiles.map((profile: ProfileModel) => {
+          if (profile.id === profileId) {
+            return {
+              ...profile,
+              photos: photoObjectUrls,
+            };
+          }
+          return profile;
+        }),
+      );
+    } catch (error) {
+      console.error(
+        `Error occurred while fetching photos for profile ${profileId}:`,
+        error,
+      );
+    }
+  };
 
   const handleAddCraft = async () => {
     if (!newCraft.trim()) return
@@ -202,9 +296,9 @@ export default function AdminDashboard() {
         <Tabs defaultValue="crafts" className="w-full" onValueChange={setActiveTab}>
           <div className="flex justify-between items-center mb-4">
             <TabsList>
-              <TabsTrigger value="crafts">Crafts</TabsTrigger>
-              <TabsTrigger value="skills">Skills</TabsTrigger>
-              <TabsTrigger value="users">Profiles</TabsTrigger>
+              <TabsTrigger value="crafts">Handwerke</TabsTrigger>
+              <TabsTrigger value="skills">Fähigkeiten</TabsTrigger>
+              <TabsTrigger value="users">Profile</TabsTrigger>
             </TabsList>
 
             {activeTab === "crafts" ? (
@@ -212,7 +306,7 @@ export default function AdminDashboard() {
                 <DialogTrigger asChild>
                   <Button>
                     <PlusCircle className="mr-2 h-4 w-4" />
-                    Add Craft
+                    Handwerk hinzufügen
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
@@ -243,17 +337,17 @@ export default function AdminDashboard() {
                 <DialogTrigger asChild>
                   <Button>
                     <PlusCircle className="mr-2 h-4 w-4" />
-                    Add Skill
+                    Fähigkeit hinzufügen
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Add New Skill</DialogTitle>
-                    <DialogDescription>Enter the name of the skill you want to add to the system.</DialogDescription>
+                    <DialogTitle>Fähigkeit hinzufügen</DialogTitle>
+                    <DialogDescription>Gebe den Namen der Fähigkeit an, welchen du zum System hinzufügen möchtest.</DialogDescription>
                   </DialogHeader>
                   <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="skill-name">Skill Name</Label>
+                      <Label htmlFor="skill-name">Fähigkeit Name</Label>
                       <Input
                         id="skill-name"
                         value={newSkill}
@@ -273,7 +367,7 @@ export default function AdminDashboard() {
               <Button asChild>
                 <Link href="/admin/create-profile">
                   <PlusCircle className="mr-2 h-4 w-4" />
-                  Create Profile
+                  Profil erstellen
                 </Link>
               </Button>
             )}
@@ -282,8 +376,8 @@ export default function AdminDashboard() {
           <TabsContent value="crafts" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Crafts List</CardTitle>
-                <CardDescription>Manage the crafts available in the system.</CardDescription>
+                <CardTitle>Handwerksliste</CardTitle>
+                <CardDescription>Verwalte die Handwerke verfügbar im System.</CardDescription>
               </CardHeader>
               <CardContent>
                 {loadingCrafts ? (
@@ -346,8 +440,8 @@ export default function AdminDashboard() {
           <TabsContent value="skills" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Skills List</CardTitle>
-                <CardDescription>Manage the skills available in the system.</CardDescription>
+                <CardTitle>Fähigkeitsliste</CardTitle>
+                <CardDescription>Verwalte die Fähigkeiten verfügbar im System.</CardDescription>
               </CardHeader>
               <CardContent>
                 {loadingSkills ? (
@@ -410,25 +504,28 @@ export default function AdminDashboard() {
           <TabsContent value="users" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Profiles List</CardTitle>
-                <CardDescription>Manage profiles in the system.</CardDescription>
+                <CardTitle>Profilliste</CardTitle>
+                <CardDescription>Verwalte die Profile im System.</CardDescription>
               </CardHeader>
               <CardContent>
+                {loadingProfiles ? (
+                  <p> Profile laden... </p>
+                ) : (
                 <div className="grid gap-4">
                   {profiles.map((profile) => (
                     <div key={profile.id} className="flex items-center justify-between p-3 border rounded-md">
                       <div className="flex flex-col">
                         <span className="font-medium">{profile.name}</span>
-                        <span className="text-sm text-muted-foreground">{profile.email}</span>
+                        <span className="text-sm text-muted-foreground">{profile.craft}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        {profile.verified ? (
+                        {profile.viewer_id ? (
                           <div className="flex items-center gap-1 text-sm px-2 py-1 bg-green-100 text-green-800 rounded-md">
                             <CheckCircle className="h-4 w-4 text-green-600" />
-                            Verified
+                            Verifiziert
                           </div>
                         ) : (
-                          <span className="text-sm px-2 py-1 bg-muted rounded-md">Not Verified</span>
+                          <span className="text-sm px-2 py-1 bg-muted rounded-md">Nicht Verifiziert</span>
                         )}
                         <Button variant="ghost" size="sm">
                           <Settings className="h-4 w-4" />
@@ -437,6 +534,12 @@ export default function AdminDashboard() {
                     </div>
                   ))}
                 </div>
+                )}
+                {profileError && (
+                  <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                    Profile konnten nicht geladen werden.
+                  </p>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

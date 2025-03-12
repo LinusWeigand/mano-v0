@@ -101,6 +101,7 @@ const handleSubmit = async () => {
 
     const profiles = result.data.map((profile) => ({
       id: profile.id,
+      viewer_id: profile.viewer_id,
       name: profile.name,
       craft: profile.craft,
       location: profile.location,

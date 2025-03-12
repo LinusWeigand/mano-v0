@@ -29,6 +29,7 @@ export default function Body() {
       const initialProfiles: ProfileModel[] = data.map(
         (profile_object: any) => ({
           id: profile_object.id,
+          viewer_id: profile_object.viewer_id,
           name: profile_object.name,
           craft: profile_object.craft,
           location: profile_object.location,
