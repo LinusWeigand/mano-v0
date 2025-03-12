@@ -70,21 +70,21 @@ export default function Header() {
     }
   };
 
+  const handleScroll = () => {
+    if (window.scrollY > 197.9) {
+      setScrolled(true);
+    } else {
+      setScrolled(false);
+    }
+  };
+
   useEffect(() => {
     if (verification_code !== "" && email != "") {
       handle_email_verification();
     }
-    checkAuthStatus();
     setTimeout(async () => {
       await checkAuthStatus();
-    }, 500);
-    const handleScroll = () => {
-      if (window.scrollY > 197.9) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
-    };
+    }, 300);
     window.addEventListener("scroll", handleScroll);
     return () => {
       window.removeEventListener("scroll", handleScroll);

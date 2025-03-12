@@ -16,9 +16,12 @@ import { useProfiles } from "@/context/ProfilesContext";
 
 export default function SearchBar() {
   const [activeField, setActiveField] = useState<string | null>(null);
+
+  const [name, setName] = useState("");
   const [craft, setCraft] = useState("");
   const [location, setLocation] = useState("");
   const [skill, setSkill] = useState("");
+
   const [skills, setAvailableSkills] = useState<string | null>(null);
   const [crafts, setAvailableCrafts] = useState<string | null>(null);
   const [loadingSkills, setLoadingSkills] = useState(true)
@@ -65,53 +68,61 @@ export default function SearchBar() {
       })
   }, [])
 
-  const handleSubmit = async () => {
-    if (craft === "" && location === "") {
-      return;
-    }
 
-    console.log("SEARCHING...");
-    try {
-      const response = await fetch("http://localhost/api/search", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ craft, location }),
-      });
+const handleSubmit = async () => {
+  const payload = {};
 
-      if (!response.ok) {
-        throw new Error("Failed to handle Search");
-      }
+  console.log("craft: ", craft)
+  console.log("skill: ", skill)
 
-      const result = await response.json();
-      const data = result.data;
 
-      const initialProfiles: ProfileModel[] = data.map((profile_object: any) => ({
-        id: profile_object.id,
-        name: profile_object.name,
-        craft: profile_object.craft,
-        location: profile_object.location,
-        website: profile_object.website,
-        google_ratings: profile_object.google_ratings,
-        instagram: profile_object.instagram,
-        bio: profile_object.bio,
-        experience: profile_object.experience,
-        skills: profile_object.skills,
-        photos: [],
-      }));
+  if (name.trim()) payload.name = name;
+  if (craft.trim()) payload.craft = craft;
+  if (location.trim()) payload.location = location;
+  if (skill.trim()) payload.skill = skill;
 
-      setProfiles(initialProfiles);
-
-      initialProfiles.forEach((profile) => {
-        load_profile_photos(profile.id);
-      });
-
-      console.log("Profiles fetched successfully.");
-    } catch (error) {
-      console.error("Error occurred in get_profiles: ", error);
-    }
+  if (Object.keys(payload).length === 0) {
+    console.log("No search parameters provided.");
+    return;
   }
+
+  try {
+    const response = await fetch("/api/profiles/search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch profiles.");
+    }
+
+    const result = await response.json();
+
+    const profiles = result.data.map((profile) => ({
+      id: profile.id,
+      name: profile.name,
+      craft: profile.craft,
+      location: profile.location,
+      website: profile.website,
+      instagram: profile.instagram,
+      bio: profile.bio,
+      experience: profile.experience,
+      google_ratings: profile.google_ratings,
+      skills: profile.skills || [],
+      photos: [],
+    }));
+
+    setProfiles(profiles);
+
+    profiles.forEach((profile) => {
+      load_profile_photos(profile.id);
+    });
+  } catch (error) {
+    console.error("Error fetching profiles:", error);
+  }
+};
+
   const load_profile_photos = async (profileId: string) => {
     try {
       const response = await fetch(`http://localhost/api/profile-photos/${profileId}`, {
@@ -193,7 +204,7 @@ export default function SearchBar() {
                       placeholder="Gewerke suchen"
                       className="w-full border-none bg-transparent text-[16px] mt-[1px]"
                       onFocus={() => setActiveField("name")}
-                      onChange={(e) => setCraft(e.target.value)}
+                      onChange={(e) => setName(e.target.value)}
                     />
                   </div>
                   <div
@@ -214,7 +225,7 @@ export default function SearchBar() {
                         >
                           Handwerk
                         </label>
-                        <Select onOpenChange={() => setActiveField("craft")}>
+                        <Select onOpenChange={() => setActiveField("craft")} onValueChange={(value) => setCraft(value)}>
                           <SelectTrigger className="mt-[1px] w-full border-none bg-transparent focus:ring-0 text-[16px]">
                             <div className="flex items-center">
                               <Hammer className="h-5 w-5 text-muted-foreground mr-2" />
@@ -229,7 +240,6 @@ export default function SearchBar() {
                               <SelectItem
                                 key={index}
                                 value={item}
-                                onClick={() => setSkill(item)}
                               >
                                 {item}
                               </SelectItem>
@@ -286,7 +296,7 @@ export default function SearchBar() {
                         >
                           Spezialität
                         </label>
-                        <Select onOpenChange={() => setActiveField("skill")}>
+                        <Select onOpenChange={() => setActiveField("skill")} onValueChange={(value) => setSkill(value)}>
                           <SelectTrigger className="mt-[1px] w-full border-none bg-transparent focus:ring-0 text-[16px]">
                             <div className="flex items-center">
                               <Hammer className="h-5 w-5 text-muted-foreground mr-2" />
@@ -301,7 +311,6 @@ export default function SearchBar() {
                               <SelectItem
                                 key={index}
                                 value={item}
-                                onClick={() => setSkill(item)}
                               >
                                 {item}
                               </SelectItem>

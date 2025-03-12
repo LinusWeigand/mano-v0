@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+  reactStrictMode: false, // Disable strict mode
+};
 
-export default nextConfig;
+export default nextConfig; // Correct ESM syntax

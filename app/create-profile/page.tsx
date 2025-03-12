@@ -66,6 +66,8 @@ export default function ProfileForm() {
 
   const [availableSkills, setAvailableSkills] = useState<string[]>([])
   const [loadingSkills, setLoadingSkills] = useState(true)
+  const [availableCrafts, setAvailableCrafts] = useState<string[]>([])
+  const [loadingCrafts, setLoadingCrafts] = useState(true)
 
   const { isLoggedIn, hasProfile, setHasProfile } = useAuth();
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -74,13 +76,15 @@ export default function ProfileForm() {
 
 
   useEffect(() => {
-    if (!isLoggedIn) {
-      router.push("/login") 
-    }
+    setTimeout(async () => {
+      if (!isLoggedIn) {
+        router.push("/login") 
+      }
+      if (hasProfile) {
+        router.push("")
+      }
+    }, 500);
 
-    if (hasProfile) {
-      router.push("")
-    }
 
     if (nameInputRef.current) {
       nameInputRef.current.focus();
@@ -104,6 +108,26 @@ export default function ProfileForm() {
       })
       .finally(() => {
         setLoadingSkills(false)
+      })
+
+    setLoadingCrafts(true)
+    fetch("/api/crafts")
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch crafts")
+        }
+        return res.json()
+      })
+      .then((data) => {
+        const craftsArray = data.data.map((item: { name: string }) => item.name)
+        setAvailableCrafts(craftsArray)
+      })
+      .catch((error) => {
+        console.error(error)
+        setCraftError("Failed to load skills")
+      })
+      .finally(() => {
+        setLoadingCrafts(false)
       })
   }, [])
 
@@ -163,14 +187,6 @@ export default function ProfileForm() {
     }
     setInvalidURLSError(message)
   }, [nameError, craftError, experienceError, locationError, bioError, websiteError, instagramError, googleRatingsError, skillsError])
-
-  const craftOptions = [
-    { value: "", label: "Wählen Sie Ihr Handwerk" },
-    { value: "schreiner", label: "Schreiner" },
-    { value: "zimmerer", label: "Zimmerer" },
-    { value: "bodenleger", label: "Bodenleger" },
-    { value: "elektriker", label: "Elektriker" },
-  ]
 
   const removePhoto = (photoToRemove: { file: File; preview: string }) => {
     setPhotos((prevPhotos) => {
@@ -439,6 +455,8 @@ export default function ProfileForm() {
         <p className="text-center text-muted-foreground">
           Ihr Profil wurde erfolgreich erstellt.
         </p>
+
+        <Button onClick={() => {router.push("/")}} className="w-[200px] h-12 text-base"> Zurück zur Startseite</Button>
       </div>
     )
   }
@@ -529,6 +547,9 @@ export default function ProfileForm() {
                   Handwerk <span className="text-red-500">*</span>
                 </Label>
                 <div className="relative">
+                  { loadingCrafts ? 
+                    <p> Fähigkeiten laden... </p>
+                  : (
                   <select
                     id="craft"
                     name="craft"
@@ -539,12 +560,13 @@ export default function ProfileForm() {
                         : "focus:border-black"
                       } focus:ring-0 focus:outline-none`}
                   >
-                    {craftOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
+                    {availableCrafts.map((option, index) => (
+                      <option key={index} value={option}>
+                        {option}
                       </option>
                     ))}
                   </select>
+                  )}
                   {craftError ? (
                     <div className="absolute right-3 top-3 text-red-500">
                       <AlertCircle className="h-5 w-5" />
