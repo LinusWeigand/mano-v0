@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import AdminDashboard from './dashboard';
 
 async function checkAdmin() {
-  const res = await fetch('http://localhost/api/auth/status', {
+  const res = await fetch('http://localhost/api/auth/admin', {
     headers: {
       Cookie: cookies().toString(), // secure cookie forwarding
     },
@@ -19,7 +19,7 @@ async function checkAdmin() {
   console.log("authData: ", authData)
 
   if (!authData.is_admin) {
-    // redirect('/');
+    redirect('/');
   }
 
   return authData;

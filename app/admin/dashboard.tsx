@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useProfiles } from "@/context/ProfilesContext"
+import { useRouter } from "next/navigation"
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("crafts")
@@ -43,6 +44,8 @@ export default function AdminDashboard() {
   const [editingSkill, setEditingSkill] = useState<string | null>(null)
   const [editedCraftName, setEditedCraftName] = useState("")
   const [editedSkillName, setEditedSkillName] = useState("")
+
+  const router = useRouter();
 
   const { profiles, setProfiles } = useProfiles();
 
@@ -527,7 +530,11 @@ export default function AdminDashboard() {
                         ) : (
                           <span className="text-sm px-2 py-1 bg-muted rounded-md">Nicht Verifiziert</span>
                         )}
-                        <Button variant="ghost" size="sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => router.push(`/edit-profile/${profile.id}`)}
+                        >
                           <Settings className="h-4 w-4" />
                         </Button>
                       </div>

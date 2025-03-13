@@ -55,56 +55,40 @@ export default function Body() {
     }
   };
 
-  const load_profile_photos = async (profileId: string) => {
-    try {
-      const response = await fetch(
-        `http://localhost/api/profile-photos/${profileId}`,
-        {
-          method: "GET",
-        },
-      );
+const load_profile_photos = async (profileId: string) => {
+  try {
+    const response = await fetch(`http://localhost/api/profile-photos/${profileId}`, {
+      method: "GET",
+    });
 
-      if (!response.ok) {
-        throw new Error("Failed to get profile photos");
-      }
-
-      const result = await response.json();
-      const photoUrls = result.data;
-
-      const photoObjectUrls: string[] = await Promise.all(
-        photoUrls.map(async (url: string) => {
-          const response = await fetch(url, {
-            method: "GET",
-          });
-
-          if (!response.ok) {
-            throw new Error("Failed to get profile photo");
-          }
-
-          const photoBlob = await response.blob();
-          const photoObjectUrl = URL.createObjectURL(photoBlob);
-          return photoObjectUrl;
-        }),
-      );
-
-      setProfiles((prevProfiles: ProfileModel[]) =>
-        prevProfiles.map((profile: ProfileModel) => {
-          if (profile.id === profileId) {
-            return {
-              ...profile,
-              photos: photoObjectUrls,
-            };
-          }
-          return profile;
-        }),
-      );
-    } catch (error) {
-      console.error(
-        `Error occurred while fetching photos for profile ${profileId}:`,
-        error,
-      );
+    if (!response.ok) {
+      throw new Error("Failed to get profile photos");
     }
-  };
+
+    const result = await response.json();
+    const photos = result.data; // each photo is { id, url }
+
+    // Instead of doing a second fetch and blob conversion, just store these URLs:
+    const photoUrls = photos.map((photo: { id: string; url: string }) => photo.url);
+
+    setProfiles((prevProfiles: ProfileModel[]) =>
+      prevProfiles.map((profile: ProfileModel) => {
+        if (profile.id === profileId) {
+          return {
+            ...profile,
+            photos: photoUrls,
+          };
+        }
+        return profile;
+      }),
+    );
+  } catch (error) {
+    console.error(
+      `Error occurred while fetching photos for profile ${profileId}:`,
+      error,
+    );
+  }
+};
 
   useEffect(() => {
     get_profiles();
@@ -127,7 +111,7 @@ export default function Body() {
                 >
                   <img
                     src={profile.photos[0]}
-                    alt={`${profile.name}'s ${profile.craft}`}
+                    alt=""
                     className="w-full h-48 object-cover"
                   />
                   <CardContent className="p-4">

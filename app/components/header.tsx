@@ -70,6 +70,28 @@ export default function Header() {
     }
   };
 
+  const handleEditProfile = async () => {
+    try {
+      const res = await fetch("/api/profile-id", {
+        method: "GET",
+        credentials: "include",
+      });
+      if (!res.ok) {
+        console.error("Error fetching profile ID");
+        return;
+      }
+      const data = await res.json();
+      if (data?.data?.profile_id) {
+        router.push(`/edit-profile/${data.data.profile_id}`);
+      } else {
+        console.error("No profile_id found in response");
+      }
+    } catch (error) {
+      console.error("Error fetching profile ID:", error);
+    }
+  };
+
+
   const handleScroll = () => {
     if (window.scrollY > 197.9) {
       setScrolled(true);
@@ -167,14 +189,17 @@ export default function Header() {
           </div>
           <div className="">
             <div className="flex items-center space-x-4">
-            { hasProfile ? <></> :(
-              <a
-                onClick={handleProfil}
-                className="text-gray-600 hover:text-gray-900 hover:cursor-pointer hidden sm:block"
-              >
-                Als Handwerker loslegen
-              </a>
-            )}
+
+              {!hasProfile &&
+                (
+                  <a
+                    onClick={handleProfil}
+                    className="text-gray-600 hover:text-gray-900 hover:cursor-pointer hidden sm:block"
+                  >
+                    Als Handwerker loslegen
+                  </a>
+                )}
+
 
               <Button
                 variant="outline"
@@ -235,16 +260,28 @@ export default function Header() {
               </div>
             )}
 
-            { hasProfile ? <></> :(
-            <div className="p-2">
-              <a
-                onClick={handleProfil}
-                className="block rounded-lg px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-700 hover:cursor-pointer"
-                role="menuitem"
-              >
-                Als Handwerker loslegen
-              </a>
-            </div>
+
+
+            {hasProfile ? (
+              <div className="p-2">
+                <a
+                  onClick={handleEditProfile}
+                  className="block rounded-lg px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-700 hover:cursor-pointer"
+                  role="menuitem"
+                >
+                  Profil bearbeiten
+                </a>
+              </div>
+            ) : (
+              <div className="p-2">
+                <a
+                  onClick={handleProfil}
+                  className="block rounded-lg px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-700 hover:cursor-pointer"
+                  role="menuitem"
+                >
+                  Als Handwerker loslegen
+                </a>
+              </div>
             )}
           </div>
         )}

@@ -75,6 +75,16 @@ export default function ProfileForm() {
 
 
   useEffect(() => {
+    setTimeout(async () => {
+      if (!isLoggedIn) {
+        router.push("/login")
+      }
+      if (hasProfile) {
+        router.push("")
+      }
+    }, 500);
+
+
     if (nameInputRef.current) {
       nameInputRef.current.focus();
     }
@@ -445,19 +455,12 @@ export default function ProfileForm() {
           Ihr Profil wurde erfolgreich erstellt.
         </p>
 
-        <Button onClick={() => {router.push("/")}} className="w-[200px] h-12 text-base"> Zurück zur Startseite</Button>
+        <Button onClick={() => { router.push("/") }} className="w-[200px] h-12 text-base"> Zurück zur Startseite</Button>
       </div>
     )
   }
 
   return (
-   <div className="container mx-auto py-6">
-      <div className="flex items-center mb-6">
-        <Button variant="outline" onClick={() => router.push("/admin")} className="mr-4">
-          <ChevronLeft className="mr-2 h-4 w-4" />
-          Zurück zum Dashboard
-        </Button>
-      </div>
     <Card className="w-full max-w-md mx-auto shadow-lg border-2">
       <CardHeader className="bg-muted/50 border-b pb-4">
         <CardTitle className="text-2xl text-center">
@@ -518,8 +521,8 @@ export default function ProfileForm() {
                     value={formData.name}
                     onChange={handleChange}
                     className={`rounded-md bg-white border-2 h-12 pl-4 ${nameError
-                        ? "border-red-300 focus-visible:ring-red-300"
-                        : "focus-visible:border-primary"
+                      ? "border-red-300 focus-visible:ring-red-300"
+                      : "focus-visible:border-primary"
                       }`}
                   />
                   {nameError && (
@@ -534,7 +537,7 @@ export default function ProfileForm() {
                   </p>
                 )}
                 <p className="text-sm text-muted-foreground">
-                    Dies ist Ihr öffentlicher Anzeigename.
+                  Dies ist Ihr öffentlicher Anzeigename.
                 </p>
               </div>
 
@@ -543,26 +546,26 @@ export default function ProfileForm() {
                   Handwerk <span className="text-red-500">*</span>
                 </Label>
                 <div className="relative">
-                  { loadingCrafts ? 
+                  {loadingCrafts ?
                     <p> Fähigkeiten laden... </p>
-                  : (
-                  <select
-                    id="craft"
-                    name="craft"
-                    value={formData.craft}
-                    onChange={handleChange}
-                    className={`block w-full appearance-none rounded-md bg-white border-2 h-12 pl-4 pr-10 ${craftError
-                        ? "border-red-300 focus-visible:ring-red-300"
-                        : "focus:border-black"
-                      } focus:ring-0 focus:outline-none`}
-                  >
-                    {availableCrafts.map((option, index) => (
-                      <option key={index} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                  )}
+                    : (
+                      <select
+                        id="craft"
+                        name="craft"
+                        value={formData.craft}
+                        onChange={handleChange}
+                        className={`block w-full appearance-none rounded-md bg-white border-2 h-12 pl-4 pr-10 ${craftError
+                          ? "border-red-300 focus-visible:ring-red-300"
+                          : "focus:border-black"
+                          } focus:ring-0 focus:outline-none`}
+                      >
+                        {availableCrafts.map((option, index) => (
+                          <option key={index} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    )}
                   {craftError ? (
                     <div className="absolute right-3 top-3 text-red-500">
                       <AlertCircle className="h-5 w-5" />
@@ -645,8 +648,8 @@ export default function ProfileForm() {
                     value={formData.location}
                     onChange={handleChange}
                     className={`rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${locationError
-                        ? "border-red-300 focus-visible:ring-red-300"
-                        : "focus-visible:border-primary"
+                      ? "border-red-300 focus-visible:ring-red-300"
+                      : "focus-visible:border-primary"
                       }`}
                   />
                   {locationError && (
@@ -674,8 +677,8 @@ export default function ProfileForm() {
                     value={formData.bio}
                     onChange={handleChange}
                     className={`w-full rounded-md border-2 h-24 p-2 text-muted-foreground ${bioError
-                        ? "border-red-300 focus-visible:ring-red-300"
-                        : "focus:border-black"
+                      ? "border-red-300 focus-visible:ring-red-300"
+                      : "focus:border-black"
                       } focus:ring-0 focus:outline-none`}
                   />
                   {bioError && (
@@ -721,8 +724,8 @@ export default function ProfileForm() {
                     value={formData.website}
                     onChange={handleChange}
                     className={`rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${websiteError
-                        ? "border-red-300 focus-visible:ring-red-300"
-                        : "focus-visible:border-primary"
+                      ? "border-red-300 focus-visible:ring-red-300"
+                      : "focus-visible:border-primary"
                       }`}
                   />
                   {websiteError && (
@@ -778,8 +781,8 @@ export default function ProfileForm() {
                     value={formData.google_ratings}
                     onChange={handleChange}
                     className={`rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${googleRatingsError
-                        ? "border-red-300 focus-visible:ring-red-300"
-                        : "focus-visible:border-primary"
+                      ? "border-red-300 focus-visible:ring-red-300"
+                      : "focus-visible:border-primary"
                       }`}
                   />
                   {googleRatingsError && (
@@ -812,26 +815,26 @@ export default function ProfileForm() {
                 <Label className="text-base font-medium mb-2">
                   Fähigkeiten <span className="text-red-500 ml-1">*</span>
                 </Label>
-                { loadingSkills ? 
+                {loadingSkills ?
                   <p> Fähigkeiten laden... </p>
-                : (
-                  <div className="flex flex-wrap gap-3">
-                    {availableSkills.map((skill) => {
-                      const isSelected = formData.skills.includes(skill)
-                      return (
-                        <Button
-                          key={skill}
-                          type="button"
-                          variant={isSelected ? "default" : "outline"}
-                          onClick={() => handleSkillToggle(skill)}
-                          className="px-4 py-2"
-                        >
-                          {skill}
-                        </Button>
+                  : (
+                    <div className="flex flex-wrap gap-3">
+                      {availableSkills.map((skill) => {
+                        const isSelected = formData.skills.includes(skill)
+                        return (
+                          <Button
+                            key={skill}
+                            type="button"
+                            variant={isSelected ? "default" : "outline"}
+                            onClick={() => handleSkillToggle(skill)}
+                            className="px-4 py-2"
+                          >
+                            {skill}
+                          </Button>
                         );
-                    })}
-                  </div>
-                )}
+                      })}
+                    </div>
+                  )}
                 {skillsError && (
                   <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
                     {skillsError}
@@ -886,38 +889,38 @@ export default function ProfileForm() {
                     onClick={() => fileInputRef.current?.click()}
                     className={`${photosError ? "!border-red-500" : "hover:border-gray-400"}  border-gray-200 relative w-[130px] h-[130px] flex items-center justify-center bg-gray-200 rounded cursor-pointer border-2 `}
                   >
-                  {photosError && (
-                    <div className="absolute right-3 top-3 text-red-500">
-                      <AlertCircle className="text-red-500 h-5 w-5" />
-                    </div>
-                  )} 
+                    {photosError && (
+                      <div className="absolute right-3 top-3 text-red-500">
+                        <AlertCircle className="text-red-500 h-5 w-5" />
+                      </div>
+                    )}
                     <Plus className="w-6 h-6 text-gray-600" />
 
                   </div>
 
                 )}
               </div>
-                  <p className="text-sm text-red-500 flex items-center gap-1">
-                    {photosError}
-                  </p>
-                  <p className="text-sm text-red-500 flex items-center gap-1">
-                    {missingFieldsError}
-                  </p>
-                  <p className="text-sm text-red-500 flex items-center gap-1">
-                    {invalidURLSError}
-                  </p>
+              <p className="text-sm text-red-500 flex items-center gap-1">
+                {photosError}
+              </p>
+              <p className="text-sm text-red-500 flex items-center gap-1">
+                {missingFieldsError}
+              </p>
+              <p className="text-sm text-red-500 flex items-center gap-1">
+                {invalidURLSError}
+              </p>
 
-        {showInternalError && (
-          <div className="bg-white rounded-lg shadow-md p-4 mb-4 flex items-start">
-            <div className="bg-red-400 rounded-full mr-3 flex-shrink-0 border-transparent">
-              <AlertCircle className="h-12 w-12 text-white" />
-            </div>
-            <div>
-              <h4 className="font-bold text-gray-800">Irgendwas ist schiefgelaufen.</h4>
-              <p className="text-gray-600">Versuche es später noch einmal.</p>
-            </div>
-          </div>
-        )}
+              {showInternalError && (
+                <div className="bg-white rounded-lg shadow-md p-4 mb-4 flex items-start">
+                  <div className="bg-red-400 rounded-full mr-3 flex-shrink-0 border-transparent">
+                    <AlertCircle className="h-12 w-12 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gray-800">Irgendwas ist schiefgelaufen.</h4>
+                    <p className="text-gray-600">Versuche es später noch einmal.</p>
+                  </div>
+                </div>
+              )}
               <input
                 type="file"
                 ref={fileInputRef}
@@ -945,6 +948,5 @@ export default function ProfileForm() {
         </div>
       </CardFooter>
     </Card>
-  </div>
   )
 }
