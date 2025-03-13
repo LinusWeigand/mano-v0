@@ -12,7 +12,7 @@ export default function CreateProfilePage() {
   React.useEffect(() => {
     if (!isLoggedIn) router.push("/login")
     else if (hasProfile) router.push("/")
-  }, [isLoggedIn, hasProfile, router])
+  }, [isLoggedIn, router])
 
   return (
     <div className="py-10">

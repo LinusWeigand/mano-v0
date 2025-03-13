@@ -52,9 +52,9 @@ export default function Details({
   }
 
   return (
-    <div className="bg-white rounded-lg overflow-hidden w-full max-w-7xl h-[90vh] flex flex-col lg:flex-row lg:h-[80vh] lg:w-[80vw] mx-auto">
+    <div className="bg-white rounded-lg overflow-hidden w-full max-w-7xl h-full flex flex-col lg:flex-row lg:h-[80vh] lg:w-[80vw] mx-auto">
       <div
-        className="relative w-full lg:w-1/2 h-48 sm:h-64 lg:h-full"
+        className="relative w-full lg:w-1/2 h-[270px] sm:h-[300px] lg:h-full"
         {...handlers}
       >
         <img
@@ -144,39 +144,39 @@ export default function Details({
             </div>
             <div className="flex flex-col sm:flex-row justify-start items-start sm:items-center gap-4">
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-              {website && (
-                <a
-                  href={`https://${website}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline flex items-center"
-                >
-                  <Globe className="h-5 w-5 mr-1" />
-                  Webseite
-                </a>
-              )}
-              {instagram && (
-                <a
-                  href={`https://instagram.com/${instagram}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline flex items-center"
-                >
-                  <Instagram className="h-5 w-5 mr-1" />
-                  Instagram
-                </a>
-              )}
-              {googleRatings && (
-                <a
-                  href={`https://${googleRatings}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline flex items-center"
-                >
-                  <MapPin className="h-5 w-5 mr-1" />
-                  Google Bewertungen
-                </a>
-              )}
+                {website && (
+                  <a
+                    href={`https://${website}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline flex items-center"
+                  >
+                    <Globe className="h-5 w-5 mr-1" />
+                    Webseite
+                  </a>
+                )}
+                {instagram && (
+                  <a
+                    href={`https://instagram.com/${instagram}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline flex items-center"
+                  >
+                    <Instagram className="h-5 w-5 mr-1" />
+                    Instagram
+                  </a>
+                )}
+                {googleRatings && (
+                  <a
+                    href={`https://${googleRatings}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline flex items-center"
+                  >
+                    <MapPin className="h-5 w-5 mr-1" />
+                    Google Bewertungen
+                  </a>
+                )}
               </div>
               {/* <Button className="w-full sm:w-auto">Kontakt</Button> */}
             </div>

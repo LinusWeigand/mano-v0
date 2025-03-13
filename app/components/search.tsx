@@ -173,17 +173,17 @@ export default function SearchBar() {
 
   return (
     <section className="pt-5 pb-8 border-b">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 ">
+      <div className="container mx-auto px-4 lg:px-6 lg:px-8 ">
         <div className="flex flex-col lg:max-w-xl mx-auto items-center">
-          <h1 className="text-4xl font-bold text-center mb-8 w-[300px] sm:w-full">
+          <h1 className="text-4xl font-bold text-center mb-8 w-[300px] lg:w-full">
             Finde erfahrene Handwerker
           </h1>
           <div className="flex mt-2 justify-center ">
-            <Card className="self-center sm:w-full w-[300px] shadow-lg sm:rounded-[4rem] overflow-hidden">
+            <Card className="self-center sm:w-full w-[300px] shadow-lg lg:rounded-[4rem] overflow-hidden">
               <CardContent className="p-0 items-center">
                 {/* Important: ensure type="submit" so form submission is triggered */}
                 <form
-                  className="flex flex-col sm:flex-row sm:items-center"
+                  className="flex flex-col lg:flex-row lg:items-center"
                   onSubmit={(e) => {
                     e.preventDefault();
                     handleSubmit();
@@ -191,7 +191,7 @@ export default function SearchBar() {
                 >
                   {/* Name field */}
                   <div
-                    className={`flex-1 p-2 transition-colors py-4 pl-8 md:pl-10 lg:w-[300px]
+                    className={`flex-1 p-2 transition-colors py-4 pl-8 lg:pl-10 lg:w-[300px]
                       ${activeField === "name"
                         ? "bg-white hover:bg-white"
                         : activeField === null
@@ -218,7 +218,7 @@ export default function SearchBar() {
 
                   {/* Crafts select */}
                   <div
-                    className={`flex flex-row items-center
+                    className={`flex flex-row items-center                       
                       ${activeField === "craft"
                         ? "bg-white hover:bg-white"
                         : activeField === null
@@ -228,7 +228,7 @@ export default function SearchBar() {
                     onClick={() => setActiveField("craft")}
                   >
                     {crafts && (
-                      <div className="flex-1 flex flex-col p-2 transition-colors py-4 pl-8 md:pr-12">
+                      <div className="flex-1 flex flex-col p-2 transition-colors py-4 pl-8 lg:pr-8 w-[265px]">
                         <label
                           htmlFor="craft"
                           className="block text-sm font-medium text-foreground h-full"
@@ -292,7 +292,7 @@ export default function SearchBar() {
 
                   {/* Skills select + submit button */}
                   <div
-                    className={`flex flex-row items-center
+                    className={`flex flex-row items-center 
                       ${activeField === "skill"
                         ? "bg-white hover:bg-white"
                         : activeField === null
@@ -302,7 +302,7 @@ export default function SearchBar() {
                     onClick={() => setActiveField("skill")}
                   >
                     {skills && (
-                      <div className="flex-1 flex flex-col p-2 transition-colors py-4 pl-8 md:pr-12">
+                      <div className="flex-1 flex flex-col p-2 transition-colors py-4 pl-8 md:pr-4 w-[248px]">
                         <label
                           htmlFor="date"
                           className="block text-sm font-medium text-foreground h-full"

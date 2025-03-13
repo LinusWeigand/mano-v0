@@ -368,7 +368,7 @@ export default function AdminDashboard() {
               </Dialog>
             ) : (
               <Button asChild>
-                <Link href="/admin/create-profile">
+                <Link href="/create-profile">
                   <PlusCircle className="mr-2 h-4 w-4" />
                   Profil erstellen
                 </Link>

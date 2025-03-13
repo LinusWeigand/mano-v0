@@ -21,6 +21,7 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import { useAuth } from "@/context/AuthContext"
 
 interface PhotoItem {
   id?: string;
@@ -88,6 +89,8 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
   const [loadingSkills, setLoadingSkills] = useState(true)
   const [availableCrafts, setAvailableCrafts] = useState<string[]>([])
   const [loadingCrafts, setLoadingCrafts] = useState(true)
+
+  const { setHasProfile } = useAuth()
 
   const nameInputRef = useRef<HTMLInputElement>(null)
   const locationInputRef = useRef<HTMLInputElement>(null)
@@ -447,6 +450,7 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
       }
 
       setShowInternalError(false)
+      setHasProfile(true)
       setIsSuccess(true)
 
     } catch (error) {
