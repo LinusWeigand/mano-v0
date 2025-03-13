@@ -26,7 +26,7 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
   const [hasProfile, setHasProfile] = useState<boolean>(false);
   const [authEmail, setAuthEmail] = useState<string>("");
 

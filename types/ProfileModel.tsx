@@ -9,6 +9,7 @@ interface ProfileModel {
   google_ratings: string,
   instagram: string,
   bio: string,
+  register_number: string,
   experience: number,
   skills: string[],
   photos: string[]

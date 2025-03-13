@@ -18,10 +18,12 @@ import {
   Plus,
   X,
   ChevronDownIcon,
+  Hash,
 } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/context/AuthContext"
+import { register } from "module"
 
 interface PhotoItem {
   id?: string;
@@ -36,6 +38,7 @@ interface ProfileFormProps {
     experience: string;
     location: string;
     bio: string;
+    register_number: string;
     website: string;
     instagram: string;
     google_ratings: string;
@@ -65,6 +68,7 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
     experience: initialData?.experience || "1",
     location: initialData?.location || "",
     bio: initialData?.bio || "",
+    register_number: initialData?.register_number || "",
     website: initialData?.website || "",
     instagram: initialData?.instagram || "",
     google_ratings: initialData?.google_ratings || "",
@@ -76,6 +80,7 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
   const [experienceError, setExperienceError] = useState("")
   const [locationError, setLocationError] = useState("")
   const [bioError, setBioError] = useState("")
+  const [registerNumberError, setRegisterNumberError] = useState("")
   const [websiteError, setWebsiteError] = useState("")
   const [instagramError, setInstagramError] = useState("")
   const [googleRatingsError, setGoogleRatingsError] = useState("")
@@ -167,6 +172,10 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
       fields.push("Beschreibung")
       field_count += 1
     }
+    if (registerNumberError) {
+      fields.push("Handelsregisternummer")
+      field_count += 1
+    }
     if (skillsError) {
       fields.push("Fähigkeiten")
       field_count += 1
@@ -178,6 +187,7 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
       message = "Folgende Felder müssen noch angegeben werden: " + fields.join(", ") + "."
     }
     setMissingFieldsError(message)
+    message = ""
 
     fields = []
     field_count = 0
@@ -205,6 +215,7 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
     experienceError,
     locationError,
     bioError,
+    registerNumberError,
     websiteError,
     instagramError,
     googleRatingsError,
@@ -283,6 +294,11 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
       isValid = false
     }
 
+    if (!formData.register_number) {
+      setRegisterNumberError("Bitte geben Sie eine Handelsregisternummer an.")
+      isValid = false
+    }
+
     return isValid
   }
 
@@ -348,6 +364,9 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
         break
       case "bio":
         setBioError("")
+        break
+      case "register_number":
+        setRegisterNumberError("")
         break
       case "website":
         setWebsiteError("")
@@ -424,6 +443,7 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
       data.append("google_ratings", formData.google_ratings)
       data.append("instagram", formData.instagram)
       data.append("bio", formData.bio)
+      data.append("register_number", formData.register_number)
       data.append("experience", formData.experience)
       data.append("skills", JSON.stringify(formData.skills))
 
@@ -558,7 +578,7 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
                     placeholder="Geben Sie Ihren Namen ein"
                     value={formData.name}
                     onChange={handleChange}
-                    className={`rounded-md bg-white border-2 h-12 pl-4 ${nameError ? "border-red-300 focus-visible:ring-red-300" : "focus-visible:border-primary"
+                    className={`text-[16px] rounded-md bg-white border-2 h-12 pl-4 ${nameError ? "border-red-300 focus-visible:ring-red-300" : "focus-visible:border-primary"
                       }`}
                   />
                   {nameError && (
@@ -630,7 +650,7 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
                     max="1000"
                     value={formData.experience}
                     onChange={handleChange}
-                    className="h-12 w-28 rounded-sm border-gray-200 sm:text-sm text-center appearance-none pr-2 pl-6"
+                    className="text-[16px] h-12 w-28 rounded-sm border-gray-200 sm:text-sm text-center appearance-none pr-2 pl-6"
                   />
                   <Button
                     type="button"
@@ -666,7 +686,7 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
                     placeholder="Geben Sie Ihren Standort an"
                     value={formData.location}
                     onChange={handleChange}
-                    className={`rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${locationError ? "border-red-300 focus-visible:ring-red-300" : "focus-visible:border-primary"
+                    className={`text-[16px] rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${locationError ? "border-red-300 focus-visible:ring-red-300" : "focus-visible:border-primary"
                       }`}
                   />
                   {locationError && (
@@ -701,6 +721,30 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
                 {bioError && <p className="text-sm text-red-500 flex items-center gap-1">{bioError}</p>}
               </div>
 
+              <div className="space-y-3 pt-2">
+                <Label htmlFor="register_number" className="text-base font-medium">
+                  Handelsregisternummer<span className="text-red-500 ml-1">*</span>
+                </Label>
+                <div className="relative">
+                  <Hash className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
+                  <Input
+                    id="register_number"
+                    name="register_number"
+                    placeholder="Geben Sie Ihre Handelsregisternummer an"
+                    value={formData.register_number}
+                    onChange={handleChange}
+                    className={`text-[16px] rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${registerNumberError ? "border-red-300 focus-visible:ring-red-300" : "focus-visible:border-primary"
+                      }`}
+                  />
+                  {registerNumberError && (
+                    <div className="absolute right-3 top-3.5 text-red-500">
+                      <AlertCircle className="h-5 w-5" />
+                    </div>
+                  )}
+                </div>
+                {registerNumberError && <p className="text-sm text-red-500 flex items-center gap-1">{registerNumberError}</p>}
+              </div>
+
               <div className="flex justify-between gap-4">
                 <Button onClick={prevStep} variant="outline" className="h-12" disabled={isSubmitting}>
                   <ChevronLeft className="w-4 h-4 mr-2" /> Zurück
@@ -727,7 +771,7 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
                     placeholder="https://deine-webseite.de"
                     value={formData.website}
                     onChange={handleChange}
-                    className={`rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${websiteError ? "border-red-300 focus-visible:ring-red-300" : "focus-visible:border-primary"
+                    className={`text-[16px] rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${websiteError ? "border-red-300 focus-visible:ring-red-300" : "focus-visible:border-primary"
                       }`}
                   />
                   {websiteError && (
@@ -754,7 +798,7 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
                     placeholder="nutzername"
                     value={formData.instagram}
                     onChange={handleChange}
-                    className="!border-2 !border-gray-300 !border-l-0 h-12 bg-white pl-3 rounded-r-md"
+                    className="text-[16px] !border-2 !border-gray-300 !border-l-0 h-12 bg-white pl-3 rounded-r-md"
                   />
                 </div>
               </div>
@@ -770,7 +814,7 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
                     placeholder="https://ratings.google.com/..."
                     value={formData.google_ratings}
                     onChange={handleChange}
-                    className={`rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${googleRatingsError ? "border-red-300 focus-visible:ring-red-300" : "focus-visible:border-primary"
+                    className={`text-[16px] rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${googleRatingsError ? "border-red-300 focus-visible:ring-red-300" : "focus-visible:border-primary"
                       }`}
                   />
                   {googleRatingsError && (

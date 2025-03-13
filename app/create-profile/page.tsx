@@ -7,15 +7,16 @@ import ProfileForm from "../components/ProfileForm"
 
 export default function CreateProfilePage() {
   const router = useRouter()
-  const { isLoggedIn, hasProfile, setHasProfile } = useAuth()
+  const { isLoggedIn, hasProfile} = useAuth()
 
   React.useEffect(() => {
+    console.log("isLoggedIn: ", isLoggedIn)
     if (!isLoggedIn) router.push("/login")
     else if (hasProfile) router.push("/")
-  }, [isLoggedIn, router])
+  }, [isLoggedIn])
 
   return (
-    <div className="py-10">
+    <div className="sm:py-10">
       <ProfileForm
       />
     </div>
