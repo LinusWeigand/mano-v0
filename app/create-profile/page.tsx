@@ -7,7 +7,7 @@ import ProfileForm from "../components/ProfileForm"
 
 export default function CreateProfilePage() {
   const router = useRouter()
-  const { isLoggedIn, hasProfile} = useAuth()
+  const { isLoggedIn, hasProfile, isLoading} = useAuth()
 
   React.useEffect(() => {
     console.log("isLoggedIn: ", isLoggedIn)
@@ -17,8 +17,9 @@ export default function CreateProfilePage() {
 
   return (
     <div className="sm:py-10">
-      <ProfileForm
-      />
+    {isLoggedIn && !isLoading && (
+      <ProfileForm />
+    )}
     </div>
   )
 }
