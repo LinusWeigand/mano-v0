@@ -12,6 +12,9 @@ interface AuthContextProps {
   setAuthEmail: React.Dispatch<React.SetStateAction<string>>;
   authEmail: string;
 
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  isLoading: boolean;
+
   getFirstLetter: () => string;
 }
 
@@ -27,6 +30,7 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [hasProfile, setHasProfile] = useState<boolean>(false);
   const [authEmail, setAuthEmail] = useState<string>("");
 
@@ -37,7 +41,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn, hasProfile, setHasProfile, authEmail, setAuthEmail, getFirstLetter }}>
+    <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn, hasProfile, setHasProfile, authEmail, setAuthEmail, isLoading, setIsLoading, getFirstLetter }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,77 +1,84 @@
-"use client";
+"use client"
 
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import ProfileForm from "@/app/components/ProfileForm";
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import ProfileForm from "@/app/components/ProfileForm"
+import ProfileSkeleton from "@/app/components/ProfileSkeleton"
 
 interface PhotoObject {
-  id: string;
-  url: string;
+  id: string
+  url: string
 }
 
 interface ProfileData {
-  name: string;
-  craft: string;
-  experience: string;
-  location: string;
-  bio: string;
-  website: string;
-  instagram: string;
-  google_ratings: string;
-  skills: string[];
-  photos: PhotoObject[];
-  profile_id: string;
+  name: string
+  craft: string
+  experience: string
+  location: string
+  bio: string
+  website: string
+  instagram: string
+  google_ratings: string
+  skills: string[]
+  photos: PhotoObject[]
+  profile_id: string
+  register_number: string
 }
 
 export default function EditProfilePage({ params }: { params: { id: string } }) {
-  const router = useRouter();
-  const [initialData, setInitialData] = useState<ProfileData | null>(null);
+  const [initialData, setInitialData] = useState<ProfileData | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   // Fetch the JSON containing photo IDs and URLs
   const loadProfilePhotos = async (profileId: string) => {
-    const response = await fetch(`/api/profile-photos/${profileId}`);
-    if (!response.ok) throw new Error("Failed to fetch profile photos");
+    const response = await fetch(`/api/profile-photos/${profileId}`)
+    if (!response.ok) throw new Error("Failed to fetch profile photos")
 
-    const result = await response.json();
+    const result = await response.json()
     // result.data is an array of { id, url }
-    return result.data as PhotoObject[];
-  };
+    return result.data as PhotoObject[]
+  }
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await fetch(`/api/profile/${params.id}`);
-        if (!res.ok) throw new Error("Failed to fetch profile");
+        setIsLoading(true)
+        const res = await fetch(`/api/profile/${params.id}`)
+        if (!res.ok) throw new Error("Failed to fetch profile")
 
-        const result = await res.json();
-        const profileData = result.data.profile;
+        const result = await res.json()
+        const profileData = result.data.profile
 
         // Now 'photos' will be an array of {id, url}
-        const photoRecords = await loadProfilePhotos(params.id);
+        const photoRecords = await loadProfilePhotos(params.id)
 
         setInitialData({
           ...profileData,
           photos: photoRecords,
-          profile_id: params.id
-        });
+          profile_id: params.id,
+        })
       } catch (error) {
-        console.error(error);
+        console.error(error)
+      } finally {
+        setIsLoading(false)
       }
-    };
+    }
 
-    fetchProfile();
-  }, [params.id]);
+    fetchProfile()
+  }, [params.id])
 
-  if (!initialData) {
-    return <p className="py-10">Profil wird geladen...</p>;
+  if (isLoading) {
+    return (
+      <div className="py-10">
+        <ProfileSkeleton />
+      </div>
+    )
   }
 
   return (
     <div className="py-10">
-      <ProfileForm
-        initialData={initialData}
-        isEditing={true}
-      />
+      <ProfileForm initialData={initialData} isEditing={true} />
     </div>
-  );
+  )
 }
+

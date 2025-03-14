@@ -181,7 +181,6 @@ export default function SearchBar() {
           <div className="flex mt-2 justify-center ">
             <Card className="self-center sm:w-full w-[300px] shadow-lg lg:rounded-[4rem] overflow-hidden">
               <CardContent className="p-0 items-center">
-                {/* Important: ensure type="submit" so form submission is triggered */}
                 <form
                   className="flex flex-col lg:flex-row lg:items-center"
                   onSubmit={(e) => {
@@ -216,7 +215,6 @@ export default function SearchBar() {
                     />
                   </div>
 
-                  {/* Crafts select */}
                   <div
                     className={`flex flex-row items-center                       
                       ${activeField === "craft"
@@ -226,38 +224,40 @@ export default function SearchBar() {
                           : "bg-muted hover:bg-[#dddddd]"
                       }`}
                     onClick={() => setActiveField("craft")}
-                  >
-                    {crafts && (
-                      <div className="flex-1 flex flex-col p-2 transition-colors py-4 pl-8 lg:pr-8 w-[265px]">
-                        <label
-                          htmlFor="craft"
-                          className="block text-sm font-medium text-foreground h-full"
-                        >
-                          Handwerk
-                        </label>
-                        <Select
-                          onOpenChange={() => setActiveField("craft")}
-                          onValueChange={(value) => setCraft(value)}
-                        >
-                          <SelectTrigger className="mt-[1px] w-full border-none bg-transparent focus:ring-0 text-[16px]">
-                            <div className="flex items-center">
-                              <Hammer className="h-5 w-5 text-muted-foreground mr-2" />
-                              <SelectValue
-                                className="w-full border-none bg-transparent focus:ring-0 text-[16px] !placeholder:text-muted-foreground !text-muted-foreground"
-                                placeholder="Handwerk aussuchen"
-                              />
-                            </div>
-                          </SelectTrigger>
-                          <SelectContent>
-                            {crafts.map((item, index) => (
-                              <SelectItem key={index} value={item}>
-                                {item}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                    >
+                  {!crafts ? (
+                    <div className="flex-1 flex flex-col  transition-colors pt-2 pl-8 lg:pr-8 w-[265px]">
+                      <div className="h-3 w-24 bg-gray-200 rounded animate-pulse "></div>
+                      <div className="flex items-center mt-[1px] w-full h-9">
+                        <div className="h-5 w-5 bg-gray-200 rounded-full animate-pulse mr-2"></div>
+                        <div className="h-5 w-40 bg-gray-200 rounded animate-pulse"></div>
                       </div>
-                    )}
+                    </div>
+                  ) : (
+                    <div className="flex-1 flex flex-col p-2 transition-colors py-4 pl-8 lg:pr-8 w-[265px]">
+                      <label htmlFor="craft" className="block text-sm font-medium text-foreground h-full">
+                        Handwerk
+                      </label>
+                      <Select onOpenChange={() => setActiveField("craft")} onValueChange={(value) => setCraft(value)}>
+                        <SelectTrigger className="mt-[1px] w-full border-none bg-transparent focus:ring-0 text-[16px]">
+                          <div className="flex items-center">
+                            <Hammer className="h-5 w-5 text-muted-foreground mr-2" />
+                            <SelectValue
+                              className="w-full border-none bg-transparent focus:ring-0 text-[16px] !placeholder:text-muted-foreground !text-muted-foreground"
+                              placeholder="Handwerk aussuchen"
+                            />
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {crafts.map((item, index) => (
+                            <SelectItem key={index} value={item}>
+                              {item}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                   </div>
 
                   {/* Location input */}
@@ -301,7 +301,15 @@ export default function SearchBar() {
                       }`}
                     onClick={() => setActiveField("skill")}
                   >
-                    {skills && (
+                    {!skills ? (
+                      <div className="flex-1 flex flex-col  transition-colors pt-2 pl-8 lg:pr-8 w-[248px]">
+                        <div className="h-3 w-24 bg-gray-200 rounded animate-pulse "></div>
+                        <div className="flex items-center mt-[1px] w-full h-9">
+                          <div className="h-5 w-5 bg-gray-200 rounded-full animate-pulse mr-2"></div>
+                          <div className="h-5 w-40 bg-gray-200 rounded animate-pulse"></div>
+                        </div>
+                      </div>
+                    ) : (
                       <div className="flex-1 flex flex-col p-2 transition-colors py-4 pl-8 md:pr-4 w-[248px]">
                         <label
                           htmlFor="date"

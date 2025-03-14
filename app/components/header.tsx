@@ -28,7 +28,7 @@ export default function Header() {
   const verification_code = decodeURIComponent(searchParams.get("vc") || "");
   const email = decodeURIComponent(searchParams.get("e") || "");
 
-  const { isLoggedIn, setIsLoggedIn, hasProfile, setHasProfile, setAuthEmail, getFirstLetter } = useAuth();
+  const { isLoggedIn, setIsLoggedIn, hasProfile, setHasProfile, setAuthEmail, getFirstLetter, isLoading, setIsLoading } = useAuth();
 
   const handle_email_verification = async () => {
     if (typeof window !== "undefined") {
@@ -106,6 +106,7 @@ export default function Header() {
     }
     setTimeout(async () => {
       await checkAuthStatus();
+      setIsLoading(false);
     }, 300);
     window.addEventListener("scroll", handleScroll);
     return () => {
@@ -187,19 +188,38 @@ export default function Header() {
               <span className="ml-2 text-2xl font-semibold">Mano</span>
             </Link>
           </div>
+
+      {isLoading ? (
+         
+  <div className="">
+    <div className="flex items-center space-x-4">
+      {/* Placeholder for "Als Handwerker loslegen" text */}
+      {/* <div className="h-4 w-40 bg-gray-200 rounded animate-pulse hidden sm:block"></div> */}
+
+      {/* Button skeleton with matching dimensions */}
+      <div className="flex items-center space-x-3 rounded-full border border-gray-300 shadow-sm py-2 px-3 sm:px-4 animate-pulse gap-1">
+        {/* Menu icon placeholder */}
+        <div className="h-5 w-5 bg-gray-200 rounded mr-2"></div>
+        
+        {/* Avatar placeholder with matching dimensions */}
+        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-gray-300 to-gray-200 flex items-center justify-center">
+          <div className="h-5 w-5 bg-gray-300 rounded-full opacity-50"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+        ) : (
+          // Actual content
           <div className="">
             <div className="flex items-center space-x-4">
-
-              {!hasProfile &&
-                (
-                  <a
-                    onClick={handleProfil}
-                    className="text-gray-600 hover:text-gray-900 hover:cursor-pointer hidden sm:block"
-                  >
-                    Als Handwerker loslegen
-                  </a>
-                )}
-
+              {!hasProfile && (
+                <a
+                  onClick={handleProfil}
+                  className="text-gray-600 hover:text-gray-900 hover:cursor-pointer hidden sm:block"
+                >
+                  Als Handwerker loslegen
+                </a>
+              )}
 
               <Button
                 variant="outline"
@@ -222,6 +242,7 @@ export default function Header() {
               </Button>
             </div>
           </div>
+        )}
         </div>
         {showMenu && (
           <div
@@ -288,13 +309,6 @@ export default function Header() {
       </div>
       <Modal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)}>
         <Auth on_close={on_close} />
-      </Modal>
-
-      <Modal
-        isOpen={isProfilModalOpen}
-        onClose={() => setIsProfilModalOpen(false)}
-      >
-        <Profil onClose={setIsProfilModalOpen} />
       </Modal>
       {banner === BannerType.ResetPassword && (
         <div className="absolute top-0 w-full bg-[#c2e4e6] text-black p-4 flex items-center justify-center">
