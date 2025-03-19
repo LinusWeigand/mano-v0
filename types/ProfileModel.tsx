@@ -3,6 +3,7 @@ interface ProfileModel {
   id: string,
   viewer_id: string,
   name: string,
+  email: string,
   craft: string,
   location: string,
   website: string,

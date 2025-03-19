@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { useBanner } from "@/context/BannerContext";
 import { BannerType } from "@/types/BannerType";
+import Image from "next/image";
 
 interface ProfilProps {
   onClose: any;
@@ -429,9 +430,12 @@ export default function Profil({ onClose }: ProfilProps) {
             <div className="grid grid-cols-3 gap-2">
               {photos.map((photo, index) => (
                 <div key={index} className="relative group">
-                  <img
+                  <Image
                     src={photo.preview}
                     alt={`Portfolio ${index + 1}`}
+                    width={100}
+                    height={100}
+                    quality={75}
                     className="w-full h-full object-cover rounded"
                   />
                   <button

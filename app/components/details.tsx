@@ -1,11 +1,13 @@
 import { useState, useCallback } from "react"
-import { Globe, Instagram, X, ChevronLeft, ChevronRight, MapPin } from "lucide-react"
+import { Globe, Instagram, X, ChevronLeft, ChevronRight, MapPin, Mail } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useSwipeable } from "react-swipeable"
+import Image from "next/image"
 
 interface DetailsProps {
   onClose: () => void
   name: string
+  email: string
   craft: string
   location: string
   website: string
@@ -20,6 +22,7 @@ interface DetailsProps {
 export default function Details({
   onClose,
   name,
+  email,
   craft,
   location,
   website,
@@ -57,9 +60,12 @@ export default function Details({
         className="relative w-full lg:w-1/2 h-[270px] sm:h-[300px] lg:h-full"
         {...handlers}
       >
-        <img
+        <Image
           src={photos[currentPhotoIndex] || `/placeholder.svg?height=600&width=600`}
           alt={`${name}'s work`}
+          width={400}
+          height={400}
+          quality={100}
           className="w-full h-full object-cover"
         />
         <button
@@ -128,9 +134,12 @@ export default function Details({
                     onClick={() => handleThumbnailClick(index)}
                     className="w-full h-24 relative overflow-hidden rounded group"
                   >
-                    <img
+                    <Image
                       src={image}
                       alt={`Portfolio ${index + 1}`}
+                      width={80}
+                      height={80}
+                      quality={75}
                       className="w-full h-full object-cover transition-transform group-hover:scale-110"
                     />
                     <div
@@ -175,6 +184,12 @@ export default function Details({
                   >
                     <MapPin className="h-5 w-5 mr-1" />
                     Google Bewertungen
+                  </a>
+                )}
+                {email && (
+                  <a href={`mailto:${email}`} className="text-blue-600 hover:underline flex items-center">
+                    <Mail className="h-5 w-5 mr-1" />
+                    E-Mail
                   </a>
                 )}
               </div>

@@ -20,10 +20,9 @@ import {
   ChevronDownIcon,
   Hash,
 } from "lucide-react"
-import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/context/AuthContext"
-import { register } from "module"
+import Image from "next/image"
 
 interface PhotoItem {
   id?: string;
@@ -34,14 +33,17 @@ interface PhotoItem {
 interface ProfileFormProps {
   initialData?: {
     name: string;
+    rechtsform_name: string;
+    rechtsform_explain_name: string;
+    email: string;
+    telefon: string;
     craft: string;
     experience: string;
     location: string;
-    bio: string;
-    register_number: string;
     website: string;
     instagram: string;
-    google_ratings: string;
+    bio: string;
+    handwerks_karten_nummer: string;
     skills: string[];
     photos?: { id?: string; url: string }[];
     profile_id?: string;
@@ -49,7 +51,7 @@ interface ProfileFormProps {
   isEditing?: boolean;
 }
 
-export default function ProfileForm({ initialData, isEditing = false}: ProfileFormProps) {
+export default function ProfileForm({ initialData, isEditing = false }: ProfileFormProps) {
   const router = useRouter()
   const totalSteps = 5
   const [step, setStep] = useState(1)
@@ -64,26 +66,30 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [formData, setFormData] = useState({
     name: initialData?.name || "",
+    rechtsform: initialData?.rechtsform_explain_name || "",
+    email: initialData?.email || "",
+    telefon: initialData?.telefon || "",
     craft: initialData?.craft || "",
     experience: initialData?.experience || "1",
     location: initialData?.location || "",
-    bio: initialData?.bio || "",
-    register_number: initialData?.register_number || "",
     website: initialData?.website || "",
     instagram: initialData?.instagram || "",
-    google_ratings: initialData?.google_ratings || "",
+    bio: initialData?.bio || "",
+    handwerks_karten_nummer: initialData?.handwerks_karten_nummer || "",
     skills: initialData?.skills || ([] as string[]),
   })
 
   const [nameError, setNameError] = useState("")
+  const [rechtsformError, setRechtsFormError] = useState("")
+  const [emailError, setEmailError] = useState("")
+  const [telefonError, setTelefonError] = useState("")
   const [craftError, setCraftError] = useState("")
   const [experienceError, setExperienceError] = useState("")
   const [locationError, setLocationError] = useState("")
-  const [bioError, setBioError] = useState("")
-  const [registerNumberError, setRegisterNumberError] = useState("")
   const [websiteError, setWebsiteError] = useState("")
   const [instagramError, setInstagramError] = useState("")
-  const [googleRatingsError, setGoogleRatingsError] = useState("")
+  const [bioError, setBioError] = useState("")
+  const [handwerksKartenNummerError, setHandwerksKartenNummerError] = useState("")
   const [skillsError, setSkillsError] = useState("")
   const [photosError, setPhotosError] = useState("")
   const [missingFieldsError, setMissingFieldsError] = useState("")
@@ -93,7 +99,9 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
   const [availableSkills, setAvailableSkills] = useState<string[]>([])
   const [loadingSkills, setLoadingSkills] = useState(true)
   const [availableCrafts, setAvailableCrafts] = useState<string[]>([])
+  const [availableRechtsformen, setAvailableRechtsformen] = useState<string[]>([])
   const [loadingCrafts, setLoadingCrafts] = useState(true)
+  const [loadingRechtsformen, setLoadingRechtsformen] = useState(true)
 
   const { setHasProfile } = useAuth()
 
@@ -108,31 +116,31 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
 
     console.log("PHOTOS: ", photos)
 
-    setLoadingSkills(true)
-    fetch("/api/skills")
+    setLoadingRechtsformen(true)
+    fetch("/api/rechtsformen/explain")
       .then((res) => {
         if (!res.ok) {
-          throw new Error("Failed to fetch skills")
+          throw new Error("Laden der Rechtsformen fehlgeschlagen.")
         }
         return res.json()
       })
       .then((data) => {
-        const skillsArray = data.data.map((item: { name: string }) => item.name)
-        setAvailableSkills(skillsArray)
+        const rechtsformenArray = data.data.map((item: { explain_name: string }) => item.explain_name)
+        setAvailableRechtsformen(rechtsformenArray)
       })
       .catch((error) => {
         console.error(error)
-        setSkillsError("Failed to load skills")
+        setRechtsFormError("Laden der Rechtsformen fehlgeschlagen.")
       })
       .finally(() => {
-        setLoadingSkills(false)
+        setLoadingRechtsformen(false)
       })
 
     setLoadingCrafts(true)
     fetch("/api/crafts")
       .then((res) => {
         if (!res.ok) {
-          throw new Error("Failed to fetch crafts")
+          throw new Error("Laden der Handwerke fehlgeschlagen.")
         }
         return res.json()
       })
@@ -142,10 +150,30 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
       })
       .catch((error) => {
         console.error(error)
-        setCraftError("Failed to load skills")
+        setCraftError("Laden der Handwerke fehlgeschlagen.")
       })
       .finally(() => {
         setLoadingCrafts(false)
+      })
+
+    setLoadingSkills(true)
+    fetch("/api/skills")
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Laden der Fähigkeiten fehlgeschlagen.")
+        }
+        return res.json()
+      })
+      .then((data) => {
+        const skillsArray = data.data.map((item: { name: string }) => item.name)
+        setAvailableSkills(skillsArray)
+      })
+      .catch((error) => {
+        console.error(error)
+        setSkillsError("Laden der Fähigkeiten fehlgeschlagen.")
+      })
+      .finally(() => {
+        setLoadingSkills(false)
       })
   }, [])
 
@@ -154,6 +182,18 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
     let field_count = 0
     if (nameError) {
       fields.push("Name")
+      field_count += 1
+    }
+    if (rechtsformError) {
+      fields.push("Rechtsform")
+      field_count += 1
+    }
+    if (emailError) {
+      fields.push("E-Mail")
+      field_count += 1
+    }
+    if (telefonError) {
+      fields.push("Telefon-Nummer")
       field_count += 1
     }
     if (craftError) {
@@ -172,8 +212,8 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
       fields.push("Beschreibung")
       field_count += 1
     }
-    if (registerNumberError) {
-      fields.push("Handelsregisternummer")
+    if (handwerksKartenNummerError) {
+      fields.push("Handwerks-Karten-Nummer")
       field_count += 1
     }
     if (skillsError) {
@@ -199,10 +239,6 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
       fields.push("Instagram")
       field_count += 1
     }
-    if (googleRatingsError) {
-      fields.push("Google Bewertungen")
-      field_count += 1
-    }
     if (field_count === 1) {
       message = "Folgender Link ist noch inkorrekt: " + fields.join(", ") + "."
     } else if (field_count > 1) {
@@ -211,14 +247,16 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
     setInvalidURLSError(message)
   }, [
     nameError,
+    rechtsformError,
+    emailError,
+    telefonError,
     craftError,
     experienceError,
     locationError,
     bioError,
-    registerNumberError,
+    handwerksKartenNummerError,
     websiteError,
     instagramError,
-    googleRatingsError,
     skillsError,
   ])
 
@@ -240,9 +278,9 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
       setPhotos((prevPhotos) => {
         const totalAllowed = 9;
         const remainingSlots = totalAllowed - prevPhotos.length;
-        
+
         if (remainingSlots <= 0) {
-          return prevPhotos; 
+          return prevPhotos;
         }
 
         const newPhotos = Array.from(files)
@@ -264,6 +302,11 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
 
     if (!formData.name || formData.name.length < 2) {
       setNameError("Der Name muss mindestens 2 Charktere enthalten.")
+      isValid = false
+    }
+
+    if (formData.email && !formData.email.match(/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/)) {
+      setEmailError("Bitte geben Sie eine korrekte E-Mail-Adresse an.")
       isValid = false
     }
 
@@ -294,8 +337,8 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
       isValid = false
     }
 
-    if (!formData.register_number) {
-      setRegisterNumberError("Bitte geben Sie eine Handelsregisternummer an.")
+    if (!formData.handwerks_karten_nummer) {
+      setHandwerksKartenNummerError("Bitte geben Sie eine Handelsregisternummer an.")
       isValid = false
     }
 
@@ -307,14 +350,6 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
 
     if (formData.website && !formData.website.match(/^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w-./?%&=]*)?$/)) {
       setWebsiteError("Bitte geben Sie eine korrekte URL an.")
-      isValid = false
-    }
-
-    if (
-      formData.google_ratings &&
-      !formData.google_ratings.match(/^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w-./?%&=]*)?$/)
-    ) {
-      setGoogleRatingsError("Bitte geben Sie eine korrekte URL an.")
       isValid = false
     }
 
@@ -353,6 +388,14 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
       case "name":
         setNameError("")
         break
+      case "rechtsform":
+        setRechtsFormError("")
+        break
+      case "email":
+        setEmailError("")
+      case "telefon":
+        setTelefonError("")
+        break
       case "craft":
         setCraftError("")
         break
@@ -365,17 +408,14 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
       case "bio":
         setBioError("")
         break
-      case "register_number":
-        setRegisterNumberError("")
+      case "handwerks_karten_nummer":
+        setHandwerksKartenNummerError("")
         break
       case "website":
         setWebsiteError("")
         break
       case "instagram":
         setInstagramError("")
-        break
-      case "google_ratings":
-        setGoogleRatingsError("")
         break
       case "skills":
         setSkillsError("")
@@ -437,13 +477,15 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
     try {
       const data = new FormData()
       data.append("name", formData.name)
+      data.append("rechtsform", formData.rechtsform)
+      data.append("email", formData.email)
+      data.append("telefon", formData.telefon)
       data.append("craft", formData.craft)
       data.append("location", formData.location)
       data.append("website", formData.website)
-      data.append("google_ratings", formData.google_ratings)
       data.append("instagram", formData.instagram)
       data.append("bio", formData.bio)
-      data.append("register_number", formData.register_number)
+      data.append("handwerks_karten_nummer", formData.handwerks_karten_nummer)
       data.append("experience", formData.experience)
       data.append("skills", JSON.stringify(formData.skills))
 
@@ -506,6 +548,28 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
         <p className="text-center text-muted-foreground">
           {isEditing ? "Ihr Profil wurde erfolgreich aktualisiert." : "Ihr Profil wurde erfolgreich erstellt."}
         </p>
+        {!isEditing && (
+          <div className="flex flex-col items-center px-8">
+            <p className="text-center">
+              Wir überprüfen ihr Profil und gleichen es im Handelsregister ab.
+            </p>
+            <p className="text-center">
+              In weniger als 24 Stunden sollte ihr Profil überprüft sein.
+            </p>
+            <p className="text-center">
+              Wir schicken Ihnen eine E-Mail bei Unklarheiten.
+            </p>
+            <p className="text-center">
+              Falls sie noch Änderungen machen wollen,
+            </p>
+            <p className="text-center">
+              können Sie dies jederzeit unter:
+            </p>
+            <p className="text-center">
+              Profil {'>'} Profil bearbeiten.
+            </p>
+          </div>
+        )}
 
         <Button
           onClick={() => {
@@ -568,7 +632,7 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
             <>
               <div className="space-y-3">
                 <Label htmlFor="name" className="text-base font-medium flex items-center">
-                  Name <span className="text-red-500 ml-1">*</span>
+                  Firmen-Name <span className="text-red-500 ml-1">*</span>
                 </Label>
                 <div className="relative">
                   <Input
@@ -576,7 +640,7 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
                     id="name"
                     name="name"
                     maxLength={100}
-                    placeholder="Geben Sie Ihren Namen ein"
+                    placeholder="Geben Sie Ihren Firmen-Name ein"
                     value={formData.name}
                     onChange={handleChange}
                     className={`text-[16px] rounded-md bg-white border-2 h-12 pl-4 ${nameError ? "border-red-300 focus-visible:ring-red-300" : "focus-visible:border-primary"
@@ -589,7 +653,91 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
                   )}
                 </div>
                 {nameError && <p className="text-sm text-red-500 flex items-center gap-1">{nameError}</p>}
-                <p className="text-sm text-muted-foreground">Dies ist Ihr öffentlicher Anzeigename.</p>
+              </div>
+
+              <div className="space-y-3 pt-2 flex flex-col">
+                <Label htmlFor="rechtsform" className="text-base font-medium">
+                  Rechtsform <span className="text-red-500">*</span>
+                </Label>
+                <div className="relative">
+                  {loadingRechtsformen ? (
+                    <p> Rechtsformen laden... </p>
+                  ) : (
+                    <select
+                      id="rechtsform"
+                      name="rechtsform"
+                      value={formData.rechtsform}
+                      onChange={handleChange}
+                      className={`block w-full appearance-none rounded-md bg-white border-2 h-12 pl-4 pr-10 ${rechtsformError ? "border-red-300 focus-visible:ring-red-300" : "focus:border-black"
+                        } focus:ring-0 focus:outline-none`}
+                    >
+                      <option value="">Rechtsform auswählen</option>
+                      {availableRechtsformen.map((option, index) => (
+                        <option key={index} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  {rechtsformError ? (
+                    <div className="absolute right-3 top-3 text-red-500">
+                      <AlertCircle className="h-5 w-5" />
+                    </div>
+                  ) : (
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                      <ChevronDownIcon className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                  )}
+                </div>
+                {rechtsformError && <p className="text-sm text-red-500 flex items-center gap-1">{rechtsformError}</p>}
+              </div>
+
+              <div className="space-y-3">
+                <Label htmlFor="email" className="text-base font-medium flex items-center">
+                  Geschäfts-E-Mail <span className="text-red-500 ml-1">*</span>
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="email"
+                    name="email"
+                    maxLength={100}
+                    placeholder="Geben Sie Ihre Geschäfts-E-Mail ein"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className={`text-[16px] rounded-md bg-white border-2 h-12 pl-4 ${emailError ? "border-red-300 focus-visible:ring-red-300" : "focus-visible:border-primary"
+                      }`}
+                  />
+                  {emailError && (
+                    <div className="absolute right-3 top-3 text-red-500">
+                      <AlertCircle className="h-5 w-5" />
+                    </div>
+                  )}
+                </div>
+                {emailError && <p className="text-sm text-red-500 flex items-center gap-1">{emailError}</p>}
+              </div>
+
+              <div className="space-y-3">
+                <Label htmlFor="telefon" className="text-base font-medium flex items-center">
+                  Telefon-Nummer<span className="text-red-500 ml-1">*</span>
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="telefon"
+                    name="telefon"
+                    maxLength={100}
+                    placeholder="Geben Sie Ihre Telefon-Nummer ein"
+                    value={formData.telefon}
+                    onChange={handleChange}
+                    className={`text-[16px] rounded-md bg-white border-2 h-12 pl-4 ${telefonError ? "border-red-300 focus-visible:ring-red-300" : "focus-visible:border-primary"
+                      }`}
+                  />
+                  {telefonError && (
+                    <div className="absolute right-3 top-3 text-red-500">
+                      <AlertCircle className="h-5 w-5" />
+                    </div>
+                  )}
+                </div>
+                {telefonError && <p className="text-sm text-red-500 flex items-center gap-1">{telefonError}</p>}
               </div>
 
               <div className="space-y-3 pt-2 flex flex-col">
@@ -598,7 +746,7 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
                 </Label>
                 <div className="relative">
                   {loadingCrafts ? (
-                    <p> Fähigkeiten laden... </p>
+                    <p> Handwerke laden... </p>
                   ) : (
                     <select
                       id="craft"
@@ -725,28 +873,28 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
               </div>
 
               <div className="space-y-3 pt-2">
-                <Label htmlFor="register_number" className="text-base font-medium">
-                  Handelsregisternummer<span className="text-red-500 ml-1">*</span>
+                <Label htmlFor="handwerks_karten_nummer" className="text-base font-medium">
+                  Handwerks-Karten-Nummer<span className="text-red-500 ml-1">*</span>
                 </Label>
                 <div className="relative">
                   <Hash className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
                   <Input
-                    id="register_number"
-                    name="register_number"
+                    id="handwerks_karten_nummer"
+                    name="handwerks_karten_nummer"
                     maxLength={100}
-                    placeholder="Geben Sie Ihre Handelsregisternummer an"
-                    value={formData.register_number}
+                    placeholder="Geben Sie Ihre Handwerks-Karten-Nummer an"
+                    value={formData.handwerks_karten_nummer}
                     onChange={handleChange}
-                    className={`text-[16px] rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${registerNumberError ? "border-red-300 focus-visible:ring-red-300" : "focus-visible:border-primary"
+                    className={`text-[16px] rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${handwerksKartenNummerError ? "border-red-300 focus-visible:ring-red-300" : "focus-visible:border-primary"
                       }`}
                   />
-                  {registerNumberError && (
+                  {handwerksKartenNummerError && (
                     <div className="absolute right-3 top-3.5 text-red-500">
                       <AlertCircle className="h-5 w-5" />
                     </div>
                   )}
                 </div>
-                {registerNumberError && <p className="text-sm text-red-500 flex items-center gap-1">{registerNumberError}</p>}
+                {handwerksKartenNummerError && <p className="text-sm text-red-500 flex items-center gap-1">{handwerksKartenNummerError}</p>}
               </div>
 
               <div className="flex justify-between gap-4">
@@ -808,32 +956,6 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
                   />
                 </div>
               </div>
-              <div className="space-y-3 pt-2">
-                <Label htmlFor="google_ratings" className="text-base font-medium">
-                  Google Bewertungen <span className="text-sm font-normal text-muted-foreground">(Optional)</span>
-                </Label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
-                  <Input
-                    id="google_ratings"
-                    name="google_ratings"
-                    maxLength={100}
-                    placeholder="https://ratings.google.com/..."
-                    value={formData.google_ratings}
-                    onChange={handleChange}
-                    className={`text-[16px] rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${googleRatingsError ? "border-red-300 focus-visible:ring-red-300" : "focus-visible:border-primary"
-                      }`}
-                  />
-                  {googleRatingsError && (
-                    <div className="absolute right-3 top-3.5 text-red-500">
-                      <AlertCircle className="h-5 w-5" />
-                    </div>
-                  )}
-                </div>
-                {googleRatingsError && (
-                  <p className="text-sm text-red-500 flex items-center gap-1">{googleRatingsError}</p>
-                )}
-              </div>
 
               <div className="flex justify-between gap-4">
                 <Button onClick={prevStep} variant="outline" className="h-12" disabled={isSubmitting}>
@@ -881,7 +1003,7 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
                   <ChevronLeft className="w-4 h-4 mr-2" /> Zurück
                 </Button>
                 <Button type="submit" className="w-full h-12 text-base" disabled={isSubmitting}
->
+                >
                   Weiter
                 </Button>
               </div>
@@ -893,24 +1015,27 @@ export default function ProfileForm({ initialData, isEditing = false}: ProfileFo
               <h3 className="font-semibold">Portfolio</h3>
               <div className="grid grid-cols-3 gap-2">
                 {photos.map((photo, index) => (
-                  <div key={index} className="relative group w-[130px] h-[130px]">
+                  <div key={index} className="relative group w-[130px] h-[130px] rounded overflow-visible">
                     {photo.preview.startsWith("blob:") ? (
                       <img
                         src={photo.preview || "/placeholder.svg"}
                         alt={`Portfolio ${index + 1}`}
-                        className="w-full h-full object-cover rounded"
+                        className="w-full h-full object-cover"
                       />
                     ) : (
-                      <img
+                      <Image
                         src={photo.preview || "/placeholder.svg"}
                         alt={`Portfolio ${index + 1}`}
-                        className="object-cover rounded"
+                        width={130}
+                        height={130}
+                        quality={75}
+                        className="w-[130px] h-[130px] object-cover"
                       />
                     )}
                     <button
                       type="button"
                       disabled={isSubmitting}
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                       onClick={() => removePhoto(photo)}
                     >
                       <X className="w-4 h-4" />

@@ -12,13 +12,16 @@ interface PhotoObject {
 
 interface ProfileData {
   name: string
+  rechtsform_name: string
+  rechtsform_explain_name: string
+  email: string
+  telefon: string
   craft: string
   experience: string
   location: string
   bio: string
   website: string
   instagram: string
-  google_ratings: string
   skills: string[]
   photos: PhotoObject[]
   profile_id: string

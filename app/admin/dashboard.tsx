@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useProfiles } from "@/context/ProfilesContext"
 import { useRouter } from "next/navigation"
+import { useAuth } from "@/context/AuthContext"
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("crafts")
@@ -34,7 +35,8 @@ export default function AdminDashboard() {
 
   const [loadingSkills, setLoadingSkills] = useState(true)
   const [loadingCrafts, setLoadingCrafts] = useState(true)
-  const [loadingProfiles, setLoadingProfiles] = useState(true)
+  const [loadingUnacceptedProfiles, setLoadingUnacceptedProfiles] = useState(true)
+  const [loadingUnverifiedProfiles, setLoadingUnverifiedProfiles] = useState(true)
 
   const [skillsError, setSkillsError] = useState("")
   const [craftError, setCraftError] = useState("")
@@ -45,9 +47,11 @@ export default function AdminDashboard() {
   const [editedCraftName, setEditedCraftName] = useState("")
   const [editedSkillName, setEditedSkillName] = useState("")
 
+
   const router = useRouter();
 
-  const { profiles, setProfiles } = useProfiles();
+  const [unacceptedProfiles, setUnacceptedProfiles] = useState([])
+  const [unverifiedProfiles, setUnverifiedProfiles] = useState([])
 
   useEffect(() => {
     setLoadingSkills(true)
@@ -90,13 +94,14 @@ export default function AdminDashboard() {
         setLoadingCrafts(false)
       })
 
-    setLoadingProfiles(true)
-    get_profiles()
+    get_unverified_profiles()
+    get_unaccepted_profiles()
   }, [])
 
-  const get_profiles = async () => {
+  const get_unaccepted_profiles = async () => {
+    setLoadingUnacceptedProfiles(true)
     try {
-      const response = await fetch("http://localhost/api/profiles", {
+      const response = await fetch("http://localhost/api/profiles/unaccepted", {
         method: "GET",
       });
 
@@ -112,6 +117,7 @@ export default function AdminDashboard() {
           id: profile_object.id,
           viewer_id: profile_object.viewer_id,
           name: profile_object.name,
+          email: profile_object.email,
           craft: profile_object.craft,
           location: profile_object.location,
           website: profile_object.website,
@@ -120,74 +126,72 @@ export default function AdminDashboard() {
           bio: profile_object.bio,
           experience: profile_object.experience,
           skills: profile_object.skills,
-          photos: [],
         }),
       );
 
-      setProfiles(initialProfiles);
-
-      initialProfiles.forEach((profile) => {
-        load_profile_photos(profile.id);
-      });
+      setUnacceptedProfiles(initialProfiles);
 
       console.log("Profiles fetched successfully.");
-      setLoadingProfiles(false)
+      setLoadingUnacceptedProfiles(false)
     } catch (error) {
       console.error("Error occurred in get_profiles: ", error);
-      setLoadingProfiles(false)
+      setLoadingUnacceptedProfiles(false)
     }
   };
 
-  const load_profile_photos = async (profileId: string) => {
+  const get_unverified_profiles = async () => {
+    setLoadingUnverifiedProfiles(true)
     try {
-      const response = await fetch(
-        `http://localhost/api/profile-photos/${profileId}`,
-        {
-          method: "GET",
-        },
-      );
+      const response = await fetch("http://localhost/api/profiles/unverified", {
+        method: "GET",
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to get profile photos");
+        throw new Error("Failed to get profiles");
       }
 
       const result = await response.json();
-      const photoUrls = result.data;
+      const data = result.data;
 
-      const photoObjectUrls: string[] = await Promise.all(
-        photoUrls.map(async (url: string) => {
-          const response = await fetch(url, {
-            method: "GET",
-          });
-
-          if (!response.ok) {
-            throw new Error("Failed to get profile photo");
-          }
-
-          const photoBlob = await response.blob();
-          const photoObjectUrl = URL.createObjectURL(photoBlob);
-          return photoObjectUrl;
+      const initialProfiles: ProfileModel[] = data.map(
+        (profile_object: any) => ({
+          id: profile_object.id,
+          viewer_id: profile_object.viewer_id,
+          name: profile_object.name,
+          email: profile_object.email,
+          craft: profile_object.craft,
+          location: profile_object.location,
+          website: profile_object.website,
+          google_ratings: profile_object.google_ratings,
+          instagram: profile_object.instagram,
+          bio: profile_object.bio,
+          experience: profile_object.experience,
+          skills: profile_object.skills,
         }),
       );
+      setUnverifiedProfiles(initialProfiles);
 
-      setProfiles((prevProfiles: ProfileModel[]) =>
-        prevProfiles.map((profile: ProfileModel) => {
-          if (profile.id === profileId) {
-            return {
-              ...profile,
-              photos: photoObjectUrls,
-            };
-          }
-          return profile;
-        }),
-      );
+      console.log("Profiles fetched successfully.");
+      setLoadingUnverifiedProfiles(false)
     } catch (error) {
-      console.error(
-        `Error occurred while fetching photos for profile ${profileId}:`,
-        error,
-      );
+      console.error("Error occurred in get_profiles: ", error);
+      setLoadingUnverifiedProfiles(false)
     }
   };
+
+
+  // Updated handler with a confirmation prompt
+  const handleAcceptProfile = async (profileId: string) => {
+    if (!window.confirm("Bist du sicher, dass du dieses Profil akzeptieren willst?")) return;
+    try {
+      const response = await fetch(`/api/profile/accept/${profileId}`, { method: "POST" });
+      if (!response.ok) throw new Error("Failed to accept profile");
+      setUnacceptedProfiles((prev) => prev.filter((profile) => profile.id !== profileId));
+    } catch (error) {
+      console.error("Error accepting profile:", error);
+    }
+  };
+
 
   const handleAddCraft = async () => {
     if (!newCraft.trim()) return
@@ -507,32 +511,72 @@ export default function AdminDashboard() {
           <TabsContent value="users" className="space-y-4">
             <Card>
               <CardHeader>
+                <CardTitle>Profile im Prüfstand</CardTitle>
+                <CardDescription>Überprüfe Profile so schnell wie möglich.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loadingUnacceptedProfiles ? (
+                  <p> Profile laden... </p>
+                ) : (
+                <div className="grid gap-4">
+                  {unacceptedProfiles.map((profile) => (
+                    <div key={profile.id} className="flex items-center justify-between p-3 border-2 rounded-md border-red-500">
+                      <div className="flex flex-col">
+                        <span className="font-medium">{profile.name}</span>
+                        <span className="text-sm text-muted-foreground">{profile.craft}</span>
+                        <span className="text-sm text-muted-foreground">{profile.email}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"                            
+                          title="Profil akzeptieren"
+                          onClick={() => handleAcceptProfile(profile.id)}
+                        >
+                          <CheckCircle className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          title="Profil bearbeiten"
+                          onClick={() => router.push(`/edit-profile/${profile.id}`)}
+                        >
+                          <Settings className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                )}
+                {profileError && (
+                  <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                    Profile konnten nicht geladen werden.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
                 <CardTitle>Profilliste</CardTitle>
                 <CardDescription>Verwalte die Profile im System.</CardDescription>
               </CardHeader>
               <CardContent>
-                {loadingProfiles ? (
+                {loadingUnverifiedProfiles? (
                   <p> Profile laden... </p>
                 ) : (
                 <div className="grid gap-4">
-                  {profiles.map((profile) => (
+                  {unverifiedProfiles.map((profile) => (
                     <div key={profile.id} className="flex items-center justify-between p-3 border rounded-md">
                       <div className="flex flex-col">
                         <span className="font-medium">{profile.name}</span>
                         <span className="text-sm text-muted-foreground">{profile.craft}</span>
+                        <span className="text-sm text-muted-foreground">{profile.email}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        {profile.viewer_id ? (
-                          <div className="flex items-center gap-1 text-sm px-2 py-1 bg-green-100 text-green-800 rounded-md">
-                            <CheckCircle className="h-4 w-4 text-green-600" />
-                            Verifiziert
-                          </div>
-                        ) : (
-                          <span className="text-sm px-2 py-1 bg-muted rounded-md">Nicht Verifiziert</span>
-                        )}
                         <Button
                           variant="ghost"
                           size="sm"
+                          title="Profil bearbeiten"
                           onClick={() => router.push(`/edit-profile/${profile.id}`)}
                         >
                           <Settings className="h-4 w-4" />

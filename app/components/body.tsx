@@ -6,6 +6,7 @@ import Modal from "./modal";
 import Details from "./details";
 import { useProfiles } from "@/context/ProfilesContext";
 import ProfileSkeleton from "./BodySkeleton";
+import Image from "next/image";
 
 export default function Body() {
   const { profiles, setProfiles } = useProfiles();
@@ -33,6 +34,7 @@ export default function Body() {
           id: profile_object.id,
           viewer_id: profile_object.viewer_id,
           name: profile_object.name,
+          email: profile_object.email,
           craft: profile_object.craft,
           location: profile_object.location,
           website: profile_object.website,
@@ -118,7 +120,7 @@ const load_profile_photos = async (profileId: string) => {
                       setIsDetailsModalOpen(true)
                     }}
                   >
-                    <img src={profile.photos[0] || "/placeholder.svg"} alt="" className="w-full h-48 object-cover" />
+                    <Image src={profile.photos[0] || "/placeholder.svg"} width={100} height={100} quality={75} alt="" className="w-full h-48 object-cover" />
                     <CardContent className="p-4">
                       <h3 className="font-semibold mb-2">{profile.name}</h3>
                       <p className="text-sm text-gray-600 mb-2">{profile.craft}</p>
@@ -145,6 +147,7 @@ const load_profile_photos = async (profileId: string) => {
           <Details
             onClose={() => setIsDetailsModalOpen(false)}
             name={selectedprofile.name}
+            email={selectedprofile.email}
             craft={selectedprofile.craft}
             location={selectedprofile.location}
             website={selectedprofile.website}
