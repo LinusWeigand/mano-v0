@@ -1,54 +1,18 @@
-// pages/address.js
+"use client"
 
-import { useState, useRef, useEffect } from "react";
-import Script from "next/script";
+import { useState } from "react"
+import Script from "next/script"
+import { AddressAutocomplete } from "./address-autocomplete"
 
-function AddressAutocomplete({ onSelect }) {
-  const inputRef = useRef(null);
-
-  useEffect(() => {
-    if (window.google && window.google.maps && inputRef.current) {
-      // Initialize the autocomplete functionality on the input field.
-      const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
-        types: ["address"], // Restrict results to addresses
-        // Optionally, restrict to a specific country:
-        // componentRestrictions: { country: "us" },
-      });
-
-      // Add listener to handle when the user selects an address.
-      autocomplete.addListener("place_changed", () => {
-        const place = autocomplete.getPlace();
-        if (!place.geometry) {
-          console.error("No details available for input: ", place.name);
-          return;
-        }
-        const lat = place.geometry.location.lat();
-        const lng = place.geometry.location.lng();
-
-        // Pass the selected address details back to the parent component.
-        onSelect({
-          address: place.formatted_address,
-          lat,
-          lng,
-        });
-      });
-    }
-  }, [onSelect]);
-
-  return (
-    <input
-      ref={inputRef}
-      type="text"
-      placeholder="Enter your address"
-      className="border p-2 rounded w-full"
-    />
-  );
+interface AddressData {
+  address: string
+  lat: number
+  lng: number
 }
 
 export default function AddressPage() {
-  const [selectedAddress, setSelectedAddress] = useState(null);
-
-  const apiKey = "AIzaSyD1D5qzwgPA5guVgv6QWJFjtdhRUpqAwus";
+  const [selectedAddress, setSelectedAddress] = useState<AddressData | null>(null)
+  const apiKey = "AIzaSyD1D5qzwgPA5guVgv6QWJFjtdhRUpqAwus"
 
   return (
     <>
@@ -63,15 +27,16 @@ export default function AddressPage() {
         <AddressAutocomplete onSelect={(data) => setSelectedAddress(data)} />
 
         {selectedAddress && (
-          <div className="mt-4">
+          <div className="mt-4 p-4 bg-gray-50 rounded-lg">
             <h2 className="text-lg font-semibold">Selected Address</h2>
-            <p>{selectedAddress.address}</p>
-            <p>
-              Latitude: {selectedAddress.lat}, Longitude: {selectedAddress.lng}
+            <p className="text-gray-700">{selectedAddress.address}</p>
+            <p className="text-sm text-gray-500 mt-2">
+              Latitude: {selectedAddress.lat.toFixed(6)}, Longitude: {selectedAddress.lng.toFixed(6)}
             </p>
           </div>
         )}
       </div>
     </>
-  );
+  )
 }
+
