@@ -1,6 +1,6 @@
 "use client"
-import { Card, CardContent } from "@/components/ui/card"
-import { AlertCircle, ChevronLeft, ChevronRight, Heart, RefreshCw} from "lucide-react"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { AlertCircle, ChevronLeft, ChevronRight, Heart, RefreshCw } from "lucide-react"
 import { useEffect, useState } from "react"
 import Modal from "./modal"
 import Details from "./details"
@@ -12,14 +12,106 @@ import type { BackendReference } from "@/types/BackendReference"
 import { cn, getBaseUrl, myLoader } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
+// A new component for the carousel-enabled profile card
+function ProfileCard({ profile }) {
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [isFavorite, setIsFavorite] = useState(false)
+
+  // Use photos if available, otherwise a default placeholder image
+  const images =
+    profile.photos && profile.photos.length > 0
+      ? profile.photos
+      : ["/placeholder.svg?height=400&width=600"]
+
+  const handlePrev = (e) => {
+    e.stopPropagation()
+    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
+  }
+
+  const handleNext = (e) => {
+    e.stopPropagation()
+    setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
+  }
+
+  return (
+    <Card className="w-full max-w-md border-0">
+      <div className="relative">
+        {/* Image carousel */}
+        <div className="relative w-full overflow-hidden" style={{ aspectRatio: "1/1" }}>
+          <Image
+            loader={myLoader}
+            src={images[currentIndex] || "/placeholder.svg"}
+            width={600}
+            height={400}
+            quality={75}
+            alt={profile.name}
+            className="h-full w-full object-cover rounded-t-xl"
+          />
+
+          {/* Navigation buttons */}
+          <button
+            onClick={handlePrev}
+            className="absolute left-4 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 shadow-md"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button
+            onClick={handleNext}
+            className="absolute right-4 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 shadow-md"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+
+          {/* Favorite button */}
+          <button
+            className="absolute right-4 top-4 text-white"
+            onClick={(e) => {
+              e.stopPropagation()
+              setIsFavorite(!isFavorite)
+            }}
+          >
+            <Heart className={cn("h-7 w-7", isFavorite ? "fill-white" : "")} />
+          </button>
+
+          {/* Pagination dots */}
+          <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-1">
+            {images.map((_, i) => (
+              <div
+                key={i}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setCurrentIndex(i)
+                }}
+                className={cn(
+                  "h-2 w-2 rounded-full cursor-pointer",
+                  i === currentIndex ? "bg-white" : "bg-white/60"
+                )}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between">
+          <h3 className="text-lg font-semibold">{profile.name || "Schneizlreuth, Deutschland"}</h3>
+          <div className="flex items-center gap-1">
+            <span className="text-xs">★</span>
+            <span className="text-xs font-medium">4,84</span>
+          </div>
+        </div>
+        <p className="text-sm text-muted-foreground">{profile.craft || "Gewerbliche:r Vermieter:in"}</p>
+      </CardContent>
+    </Card>
+  )
+}
+
 export default function Body() {
   const { profiles, setProfiles } = useProfiles()
 
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null)
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
-
   const [isLoading, setIsLoading] = useState(true)
-  const [isFavorite, setIsFavorite] = useState(false)
 
   const get_profiles = async () => {
     try {
@@ -35,13 +127,16 @@ export default function Body() {
           throw new Error(`Failed to fetch full profile from URL ${selfUrl}`)
         }
         const profileResult = await res.json()
-        // Return the nested profile object
         return profileResult.data.profile
       })
       const fullProfiles: ProfileModel[] = await Promise.all(profileFetches)
       setProfiles(fullProfiles)
 
-      await Promise.all(fullProfiles.filter((profile) => profile.id).map((profile) => load_profile_photos(profile.id!)))
+      await Promise.all(
+        fullProfiles
+          .filter((profile) => profile.id)
+          .map((profile) => load_profile_photos(profile.id!))
+      )
 
       setIsLoading(false)
     } catch (error) {
@@ -62,7 +157,6 @@ export default function Body() {
 
       const result = await response.json()
       const photos = result.data
-
       const photoUrls: string[] = photos.map((photo: BackendReference) => photo._links.self)
 
       setProfiles((prevProfiles: ProfileModel[]) =>
@@ -74,17 +168,14 @@ export default function Body() {
             }
           }
           return profile
-        }),
+        })
       )
     } catch (error) {
       console.error(`Error occurred while fetching photos for profile ${profileId}:`, error)
     }
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    console.log("baseURL: ", getBaseUrl())
-    console.log("ENV VAR URL: ", process.env.URL)
     get_profiles()
   }, [])
 
@@ -92,7 +183,6 @@ export default function Body() {
     .fill(0)
     .map((_, index) => <ProfileSkeleton key={`skeleton-${index}`} />)
 
-  // No profiles found component
   const NoProfilesFound = () => (
     <div className="w-full flex flex-col items-center justify-center py-4">
       <Card className="w-full max-w-md overflow-hidden border-dashed border-2 bg-muted/50">
@@ -129,79 +219,17 @@ export default function Body() {
           ) : profiles.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {profiles.map((profile, index) => (
-
-<Card
-  key={index}
-  className="w-full max-w-md border-0 cursor-pointer"
-  onClick={() => {
-    setSelectedProfileId(profile.id);
-    setIsDetailsModalOpen(true);
-  }}
->
-  <div className="relative">
-    {/* Image carousel */}
-    <div className="relative w-full overflow-hidden" style={{ aspectRatio: "1/1" }}>
-      {profile.photos && profile.photos.length > 0 && profile.photos[0] ? (
-        <Image
-          loader={myLoader}
-          src={profile.photos[0] || "/placeholder.svg"}
-          width={600}
-          height={400}
-          quality={75}
-          alt={profile.name}
-          className="h-full w-full object-cover rounded-t-xl"
-        />
-      ) : (
-       
-                    <div className="w-full h-48 flex items-center justify-center bg-gray-300">
-                      <div className="flex gap-[6px]">
-                        <div className="h-2 w-2 bg-white rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                        <div className="h-2 w-2 bg-white rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                        <div className="h-2 w-2 bg-white rounded-full animate-bounce"></div>
-                      </div>
-                    </div>
-      )}
-
-      {/* Navigation buttons */}
-      <button className="absolute left-4 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 shadow-md">
-        <ChevronLeft className="h-5 w-5" />
-      </button>
-      <button className="absolute right-4 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 shadow-md">
-        <ChevronRight className="h-5 w-5" />
-      </button>
-
-      {/* Favorite button */}
-      <button
-        className="absolute right-4 top-4 text-white"
-        onClick={(e) => {
-          // Prevent the onClick from triggering the modal
-          e.stopPropagation();
-          // setIsFavorite(!isFavorite);
-        }}
-      >
-        <Heart className={cn("h-7 w-7", isFavorite ? "fill-white" : "")} />
-      </button>
-
-      {/* Pagination dots */}
-      <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-1">
-        {[0, 1, 2, 3, 4].map((i) => (
-          <div key={i} className={cn("h-2 w-2 rounded-full", i === 0 ? "bg-white" : "bg-white/60")} />
-        ))}
-      </div>
-    </div>
-  </div>
-
-  <CardContent className="p-4">
-    <div className="flex items-start justify-between">
-      <h3 className="text-lg font-semibold">{profile.name || "Schneizlreuth, Deutschland"}</h3>
-      <div className="flex items-center gap-1">
-        <span className="text-xs">★</span>
-        <span className="text-xs font-medium">{"4,84"}</span>
-      </div>
-    </div>
-    <p className="text-sm text-muted-foreground">{profile.craft || "Gewerbliche:r Vermieter:in"}</p>
-  </CardContent>
-</Card>
+                // Wrap each card in a container that opens the modal on click
+                <div
+                  key={index}
+                  className="cursor-pointer"
+                  onClick={() => {
+                    setSelectedProfileId(profile.id)
+                    setIsDetailsModalOpen(true)
+                  }}
+                >
+                  <ProfileCard profile={profile} />
+                </div>
               ))}
             </div>
           ) : (
@@ -220,4 +248,3 @@ export default function Body() {
     </main>
   )
 }
-
