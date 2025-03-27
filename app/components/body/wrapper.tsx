@@ -5,6 +5,7 @@ import { List, Map } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import MapBody from "./Map"
 import ListBody from "./ListBody"
+import AddressPage from "./Address"
 
 export default function BodyWrapper() {
   const [viewMode, setViewMode] = useState<"list" | "map">("list")
@@ -35,10 +36,11 @@ export default function BodyWrapper() {
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+       // {viewMode === "list" ? <ListBody /> : <MapBody />}
 
   return (
     <div className="relative">
-      {viewMode === "list" ? <ListBody /> : <MapBody />}
+      <AddressPage />
 
       {!isAtBottom && (
         <div className="fixed bottom-9 left-1/2 transform -translate-x-1/2 z-50">
