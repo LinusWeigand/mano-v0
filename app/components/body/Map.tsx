@@ -1,9 +1,7 @@
-import { Suspense, useRef, useEffect, useState } from "react";
-import { useLoadScript } from "@react-google-maps/api";
+import { Suspense, useState } from "react";
+import { GoogleMap, OverlayView, useLoadScript } from "@react-google-maps/api";
 import { Plus, Minus, Navigation } from "lucide-react";
-import { useMapResize } from "@/hooks/use-map-resize";
 
-// Sample location data
 const sampleLocations = [
   { id: "1", lat: 47.3769, lng: 8.5417, price: 121 }, // Zurich
   { id: "2", lat: 46.8182, lng: 8.2275, price: 177 }, // Central Switzerland
@@ -41,89 +39,59 @@ interface AirbnbMapProps {
   onShowListClick?: () => void;
 }
 
-// const PriceMarker = ({ price }: { price: number }) => {
-//   return (
-//     <div className="relative flex items-center justify-center bg-white rounded-full px-3 py-1 shadow-md min-w-[60px] h-[30px] font-medium text-sm hover:z-10 hover:scale-105 transition-transform cursor-pointer">
-//       {price} €
-//     </div>
-//   );
-// };
-
 function AirbnbMap({
   apiKey,
   center = { lat: 47.3769, lng: 8.5417 },
   zoom = 8,
   locations = [],
   onMarkerClick,
-  onShowListClick,
 }: AirbnbMapProps) {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const [mapLoaded, setMapLoaded] = useState(false);
-  const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
+  const { isLoaded } = useLoadScript({ googleMapsApiKey: apiKey });
+  const [map, setMap] = useState<google.maps.Map | null>(null);
 
-  // useLoadScript handles loading the API and provides the isLoaded flag
-  const { isLoaded } = useLoadScript({
-    googleMapsApiKey: apiKey,
-  });
+  if (!isLoaded) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        Loading map...
+      </div>
+    );
+  }
 
-  // Initialize map once the API is loaded
-  useEffect(() => {
-    if (isLoaded && mapRef.current && !mapInstance) {
-      const map = new window.google.maps.Map(mapRef.current, {
-        center,
-        zoom,
-        mapId: "298cbf7b9c015966",
-        disableDefaultUI: true,
-        clickableIcons: false,
-        mapTypeControl: false,
-        fullscreenControl: false,
-        streetViewControl: false,
-        zoomControl: false,
-      });
-      setMapInstance(map);
-      setMapLoaded(true);
-
-      // Add markers for each location
-      locations.forEach((location) => {
-  const svgMarker = {
-    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-      `<svg xmlns="http://www.w3.org/2000/svg" width="80" height="40">
-         <rect x="0" y="0" width="80" height="40" rx="20" ry="20" fill="white" stroke="gray" stroke-width="1"/>
-         <text x="40" y="25" text-anchor="middle" font-size="16" fill="black">${location.price} €</text>
-       </svg>`
-    )}`,
-    scaledSize: new window.google.maps.Size(80, 40)
-  };
-
-  const marker = new window.google.maps.Marker({
-    position: { lat: location.lat, lng: location.lng },
-    map,
-    icon: svgMarker
-  });
-  marker.addListener("click", () => {
-    if (onMarkerClick) onMarkerClick(location);
-  });
-});
-    }
-  }, [isLoaded, mapInstance, center, zoom, locations, onMarkerClick]);
-
-  // Hook to handle resizing the map
-  useMapResize(mapInstance);
+  const containerStyle = { width: "100%", height: "100%" };
 
   return (
-    <div className="relative w-full h-full">
-      {!mapLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-          <div className="text-lg font-medium text-gray-500">Loading map...</div>
-        </div>
-      )}
-      <div ref={mapRef} className="w-full h-full" />
+    <GoogleMap
+      mapContainerStyle={containerStyle}
+      center={center}
+      zoom={zoom}
+      options={{
+        mapId: "298cbf7b9c015966", // Your published Map ID
+        disableDefaultUI: true,
+        clickableIcons: false,
+      }}
+      onLoad={(mapInstance) => setMap(mapInstance)}
+    >
+      {/* Custom price markers as overlays */}
+      {locations.map((location) => (
+        <OverlayView
+          key={location.id}
+          position={{ lat: location.lat, lng: location.lng }}
+          mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+        >
+          <div
+            onClick={() => onMarkerClick && onMarkerClick(location)}
+            className="relative flex items-center justify-center bg-white rounded-full px-3 py-1 shadow-md min-w-[60px] h-[30px] font-medium text-sm hover:z-10 hover:scale-105 transition-transform cursor-pointer"
+          >
+            {location.price} €
+          </div>
+        </OverlayView>
+      ))}
 
-      {/* Custom controls */}
-      <div className="absolute top-4 right-4 flex flex-col gap-2">
+      {/* Custom map controls */}
+      <div className="absolute top-4 right-6 flex flex-col gap-2">
         <button
           onClick={() => {
-            if (mapInstance) mapInstance.setZoom(mapInstance.getZoom() ?? 0 + 1);
+            if (map) map.setZoom(map.getZoom() ?? 0 + 1);
           }}
           className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors"
           aria-label="Zoom in"
@@ -132,7 +100,7 @@ function AirbnbMap({
         </button>
         <button
           onClick={() => {
-            if (mapInstance) mapInstance.setZoom(mapInstance.getZoom() ?? 0 - 1);
+            if (map) map.setZoom(map.getZoom() ?? 0 - 1);
           }}
           className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors"
           aria-label="Zoom out"
@@ -141,7 +109,7 @@ function AirbnbMap({
         </button>
         <button
           onClick={() => {
-            // Implement custom navigation logic if needed
+            // Add navigation logic if needed
           }}
           className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors"
           aria-label="Navigate"
@@ -149,8 +117,7 @@ function AirbnbMap({
           <Navigation className="w-5 h-5 text-gray-700" />
         </button>
       </div>
-
-    </div>
+    </GoogleMap>
   );
 }
 
@@ -163,16 +130,14 @@ function MapLoading() {
 }
 
 export default function MapBody() {
-  const apiKey = "AIzaSyD1D5qzwgPA5guVgv6QWJFjtdhRUpqAwus"
+  const apiKey = "AIzaSyD1D5qzwgPA5guVgv6QWJFjtdhRUpqAwus";
 
   if (!apiKey) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center p-4">
         <div className="max-w-md text-center">
           <h1 className="text-2xl font-bold mb-4">Irgendwas ist schiefgelaufen</h1>
-          <p className="mb-4">
-            Bitte versuche es später noch einmal.
-          </p>
+          <p className="mb-4">Bitte versuche es später noch einmal.</p>
         </div>
       </div>
     );
@@ -180,14 +145,14 @@ export default function MapBody() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center">
-      {/* No additional LoadScript wrapper is needed here because useLoadScript is used in AirbnbMap */}
       <Suspense fallback={<MapLoading />}>
         <div className="w-full h-screen">
           <AirbnbMap
             apiKey={apiKey}
             locations={sampleLocations}
-            onMarkerClick={(location) => console.log("Clicked location:", location)}
-            onShowListClick={() => console.log("Show list clicked")}
+            onMarkerClick={(location) =>
+              console.log("Clicked location:", location)
+            }
           />
         </div>
       </Suspense>
