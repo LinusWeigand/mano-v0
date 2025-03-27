@@ -314,6 +314,11 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
       isValid = false
     }
 
+    if (!formData.rechtsform) {
+      setRechtsFormError("Bitte wählen Sie Ihre Rechtsform aus.")
+      isValid = false
+    }
+
     if (formData.email && !formData.email.match(/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/)) {
       setEmailError("Bitte geben Sie eine korrekte E-Mail-Adresse an.")
       isValid = false
@@ -324,38 +329,22 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
       isValid = false
     }
 
-    const exp = Number(formData.experience)
-    if (!formData.experience || isNaN(exp) || exp <= 0) {
-      setExperienceError("Bitte geben Sie eine positive Zahl an.")
-      isValid = false
-    }
-
     return isValid
   }
 
   const validateStep2 = () => {
     let isValid = true
 
+    const exp = Number(formData.experience)
+    if (!formData.experience || isNaN(exp) || exp <= 0) {
+      setExperienceError("Bitte geben Sie eine positive Zahl an.")
+      isValid = false
+    }
+
     if (!formData.location) {
       setLocationError("Bitte geben Sie einen Standort an.")
       isValid = false
     }
-
-    if (!formData.bio) {
-      setBioError("Bitte geben Sie eine Beschreibung an.")
-      isValid = false
-    }
-
-    if (!formData.handwerks_karten_nummer) {
-      setHandwerksKartenNummerError("Bitte geben Sie eine Handelsregisternummer an.")
-      isValid = false
-    }
-
-    return isValid
-  }
-
-  const validateStep3 = () => {
-    let isValid = true
 
     if (formData.website && !formData.website.match(/^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w-./?%&=]*)?$/)) {
       setWebsiteError("Bitte geben Sie eine korrekte URL an.")
@@ -365,8 +354,9 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
     return isValid
   }
 
-  const validateStep4 = () => {
+  const validateStep3 = () => {
     let isValid = true
+
 
     if (formData.skills.length < 1) {
       setSkillsError("Bitte geben Sie mindestens eine Fähigkeit an.")
@@ -376,13 +366,27 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
     return isValid
   }
 
-  const validateStep5 = () => {
+  const validateStep4 = () => {
     let isValid = true
 
     if (photos.length < 1) {
       setPhotosError("Bitte laden Sie mindestens ein Foto hoch.")
       isValid = false
     }
+
+    return isValid
+  }
+
+  const validateStep5 = () => {
+    let isValid = true
+
+
+    if (!formData.handwerks_karten_nummer) {
+      setHandwerksKartenNummerError("Bitte geben Sie eine Handelsregisternummer an.")
+      isValid = false
+    }
+
+    
 
     return isValid
   }
@@ -895,7 +899,125 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
             </>
           )}
 
+
           {step === 3 && (
+            <>
+              <div className="pt-2">
+                <Label className="text-base font-medium mb-2">
+                  Fähigkeiten <span className="text-red-500 ml-1">*</span>
+                </Label>
+                {loadingSkills ? (
+                  <p> Fähigkeiten laden... </p>
+                ) : (
+                  <div className="flex flex-wrap gap-3">
+                    {availableSkills.map((skill) => {
+                      const isSelected = formData.skills.includes(skill)
+                      return (
+                        <Button
+                          key={skill}
+                          disabled={isSubmitting}
+                          type="button"
+                          variant={isSelected ? "default" : "outline"}
+                          onClick={() => handleSkillToggle(skill)}
+                          className="px-4 py-2"
+                        >
+                          {skill}
+                        </Button>
+                      )
+                    })}
+                  </div>
+                )}
+                {skillsError && <p className="text-sm text-red-500 flex items-center gap-1 mt-1">{skillsError}</p>}
+              </div>
+
+              <div className="flex justify-between gap-4">
+                <Button onClick={prevStep} variant="outline" className="h-12" disabled={isSubmitting}>
+                  <ChevronLeft className="w-4 h-4 mr-2" /> Zurück
+                </Button>
+                <Button type="submit" className="w-full h-12 text-base" disabled={isSubmitting}
+                >
+                  Weiter
+                </Button>
+              </div>
+            </>
+          )}
+
+          {step === 4 && (
+            <div className="space-y-4">
+              <h3 className="font-semibold">Portfolio</h3>
+              <div className="grid grid-cols-3 gap-2">
+                {photos.map((photo, index) => (
+                  <div key={index} className="relative group w-[130px] h-[130px] rounded overflow-visible">
+                    <Image
+                      loader={myLoader}
+                      src={photo.preview}
+                      alt={`Portfolio ${index + 1}`}
+                      width={130}
+                      height={130}
+                      quality={75}
+                      className="w-[130px] h-[130px] object-cover"
+                    />
+                    <button
+                      type="button"
+                      disabled={isSubmitting}
+                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => removePhoto(photo)}
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+                {photos.length < 9 && (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`${photosError ? "!border-red-500" : "hover:border-gray-400"}  border-gray-200 relative w-[130px] h-[130px] flex items-center justify-center bg-gray-200 rounded cursor-pointer border-2 `}
+                  >
+                    {photosError && (
+                      <div className="absolute right-3 top-3 text-red-500">
+                        <AlertCircle className="text-red-500 h-5 w-5" />
+                      </div>
+                    )}
+                    <Plus className="w-6 h-6 text-gray-600" />
+                  </div>
+                )}
+              </div>
+              <p className="text-sm text-red-500 flex items-center gap-1">{photosError}</p>
+              <p className="text-sm text-red-500 flex items-center gap-1">{missingFieldsError}</p>
+              <p className="text-sm text-red-500 flex items-center gap-1">{invalidURLSError}</p>
+
+              {showInternalError && (
+                <div className="bg-white rounded-lg shadow-md p-4 mb-4 flex items-start">
+                  <div className="bg-red-400 rounded-full mr-3 flex-shrink-0 border-transparent">
+                    <AlertCircle className="h-12 w-12 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gray-800">Irgendwas ist schiefgelaufen.</h4>
+                    <p className="text-gray-600">Versuche es später noch einmal.</p>
+                  </div>
+                </div>
+              )}
+              <input
+                type="file"
+                ref={fileInputRef}
+                disabled={isSubmitting}
+                className="hidden"
+                accept="image/*"
+                multiple
+                onChange={handlePhotoUpload}
+              />
+              <div className="flex justify-between gap-4">
+                <Button onClick={prevStep} variant="outline" className="h-12" disabled={isSubmitting}>
+                  <ChevronLeft className="w-4 h-4 mr-2" /> Zurück
+                </Button>
+
+                <Button type="submit" className="w-full h-12 text-base" disabled={isSubmitting}>
+                  Weiter
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {step === 5 && (
             <>
 
               <div className="space-y-3">
@@ -976,122 +1098,7 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
                 <Button onClick={prevStep} variant="outline" className="h-12" disabled={isSubmitting}>
                   <ChevronLeft className="w-4 h-4 mr-2" /> Zurück
                 </Button>
-                <Button type="submit" className="w-full h-12 text-base" disabled={isSubmitting}>
-                  Weiter
-                </Button>
-              </div>
-            </>
-          )}
 
-          {step === 4 && (
-            <>
-              <div className="pt-2">
-                <Label className="text-base font-medium mb-2">
-                  Fähigkeiten <span className="text-red-500 ml-1">*</span>
-                </Label>
-                {loadingSkills ? (
-                  <p> Fähigkeiten laden... </p>
-                ) : (
-                  <div className="flex flex-wrap gap-3">
-                    {availableSkills.map((skill) => {
-                      const isSelected = formData.skills.includes(skill)
-                      return (
-                        <Button
-                          key={skill}
-                          disabled={isSubmitting}
-                          type="button"
-                          variant={isSelected ? "default" : "outline"}
-                          onClick={() => handleSkillToggle(skill)}
-                          className="px-4 py-2"
-                        >
-                          {skill}
-                        </Button>
-                      )
-                    })}
-                  </div>
-                )}
-                {skillsError && <p className="text-sm text-red-500 flex items-center gap-1 mt-1">{skillsError}</p>}
-              </div>
-
-              <div className="flex justify-between gap-4">
-                <Button onClick={prevStep} variant="outline" className="h-12" disabled={isSubmitting}>
-                  <ChevronLeft className="w-4 h-4 mr-2" /> Zurück
-                </Button>
-                <Button type="submit" className="w-full h-12 text-base" disabled={isSubmitting}
-                >
-                  Weiter
-                </Button>
-              </div>
-            </>
-          )}
-
-          {step === 5 && (
-            <div className="space-y-4">
-              <h3 className="font-semibold">Portfolio</h3>
-              <div className="grid grid-cols-3 gap-2">
-                {photos.map((photo, index) => (
-                  <div key={index} className="relative group w-[130px] h-[130px] rounded overflow-visible">
-                    <Image
-                      loader={myLoader}
-                      src={photo.preview}
-                      alt={`Portfolio ${index + 1}`}
-                      width={130}
-                      height={130}
-                      quality={75}
-                      className="w-[130px] h-[130px] object-cover"
-                    />
-                    <button
-                      type="button"
-                      disabled={isSubmitting}
-                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => removePhoto(photo)}
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-                {photos.length < 9 && (
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    className={`${photosError ? "!border-red-500" : "hover:border-gray-400"}  border-gray-200 relative w-[130px] h-[130px] flex items-center justify-center bg-gray-200 rounded cursor-pointer border-2 `}
-                  >
-                    {photosError && (
-                      <div className="absolute right-3 top-3 text-red-500">
-                        <AlertCircle className="text-red-500 h-5 w-5" />
-                      </div>
-                    )}
-                    <Plus className="w-6 h-6 text-gray-600" />
-                  </div>
-                )}
-              </div>
-              <p className="text-sm text-red-500 flex items-center gap-1">{photosError}</p>
-              <p className="text-sm text-red-500 flex items-center gap-1">{missingFieldsError}</p>
-              <p className="text-sm text-red-500 flex items-center gap-1">{invalidURLSError}</p>
-
-              {showInternalError && (
-                <div className="bg-white rounded-lg shadow-md p-4 mb-4 flex items-start">
-                  <div className="bg-red-400 rounded-full mr-3 flex-shrink-0 border-transparent">
-                    <AlertCircle className="h-12 w-12 text-white" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-gray-800">Irgendwas ist schiefgelaufen.</h4>
-                    <p className="text-gray-600">Versuche es später noch einmal.</p>
-                  </div>
-                </div>
-              )}
-              <input
-                type="file"
-                ref={fileInputRef}
-                disabled={isSubmitting}
-                className="hidden"
-                accept="image/*"
-                multiple
-                onChange={handlePhotoUpload}
-              />
-              <div className="flex justify-between gap-4">
-                <Button onClick={prevStep} variant="outline" className="h-12" disabled={isSubmitting}>
-                  <ChevronLeft className="w-4 h-4 mr-2" /> Zurück
-                </Button>
                 <Button type="submit" className="w-full h-12 text-base" disabled={isSubmitting}>
                   {isSubmitting
                     ? isEditing
@@ -1102,7 +1109,7 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
                       : "Profil erstellen"}
                 </Button>
               </div>
-            </div>
+            </>
           )}
         </form>
       </CardContent>
