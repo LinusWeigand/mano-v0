@@ -1,7 +1,7 @@
 "use client";
 import { AlertCircle, X } from "lucide-react";
 import "./start.css";
-import { Card, CardHeader } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { useEffect, useRef, useState } from "react";
 
 interface StartProps {
@@ -30,18 +30,15 @@ const Start = ({ on_close, to_login, to_register }: StartProps) => {
       return;
     }
     setLoading(true);
-    console.log("handle_next email:", email);
     try {
-      const response = await fetch(`http://localhost/api/viewers/${email}`, {
+      const response = await fetch(`/api/viewers/${email}`, {
         method: "GET",
       });
 
       if (!response.ok) {
-        console.log("Viewer not found.");
         to_register(email);
         return;
       }
-      console.log("Viewer found.");
       to_login(email)
     } catch (error) {
       setShowInternalError(true);

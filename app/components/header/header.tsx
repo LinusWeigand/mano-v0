@@ -4,31 +4,43 @@ import { Button } from "@/components/ui/button";
 import { AlertCircle, Check, Mail, Menu, User, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import Modal from "./modal";
-import Auth from "./auth/page";
-import Profil from "./profil";
-import { useSearchParams } from "next/navigation";
+import Modal from "../modal";
+import Auth from "../auth/auth";
 import { useBanner } from "@/context/BannerContext";
 import { BannerType } from "@/types/BannerType";
 import { useAuth } from "@/context/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
 
-export default function Header() {
+interface HeaderProps {
+  verification_code: string;
+  email: string;
+}
+
+export default function Header({ verification_code, email }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [isProfilModalOpen, setIsProfilModalOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const { banner, clearBanner, setBanner, bannerEmail } = useBanner();
   const router = useRouter();
 
-  const searchParams = useSearchParams();
-  const verification_code = decodeURIComponent(searchParams.get("vc") || "");
-  const email = decodeURIComponent(searchParams.get("e") || "");
-
   const { isLoggedIn, setIsLoggedIn, hasProfile, setHasProfile, setAuthEmail, getFirstLetter, isLoading, setIsLoading } = useAuth();
+
+  useEffect(() => {
+    if (verification_code !== "" && email != "") {
+      handle_email_verification();
+    }
+    setTimeout(async () => {
+      await checkAuthStatus();
+      setIsLoading(false);
+    }, 1);
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   const handle_email_verification = async () => {
     if (typeof window !== "undefined") {
@@ -36,7 +48,7 @@ export default function Header() {
       window.history.replaceState(null, "", urlWithoutQueryParams);
     }
     try {
-      const response = await fetch("http://localhost/api/register", {
+      const response = await fetch("/api/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -51,7 +63,8 @@ export default function Header() {
       }
       on_close();
       setBanner(BannerType.EmailVerified);
-      console.log("E-Mail verified.");
+      await checkAuthStatus();
+      setIsLoading(false);
     } catch (error) {
       console.error("Error occured in handle_email_verification: ", error);
     }
@@ -100,19 +113,6 @@ export default function Header() {
     }
   };
 
-  useEffect(() => {
-    if (verification_code !== "" && email != "") {
-      handle_email_verification();
-    }
-    setTimeout(async () => {
-      await checkAuthStatus();
-      setIsLoading(false);
-    }, 300);
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -189,60 +189,60 @@ export default function Header() {
             </Link>
           </div>
 
-      {isLoading ? (
-         
-  <div className="">
-    <div className="flex items-center space-x-4">
-      {/* Placeholder for "Als Handwerker loslegen" text */}
-      {/* <div className="h-4 w-40 bg-gray-200 rounded animate-pulse hidden sm:block"></div> */}
+          {isLoading ? (
 
-      {/* Button skeleton with matching dimensions */}
-      <div className="flex items-center space-x-3 rounded-full border border-gray-300 shadow-sm py-2 px-3 sm:px-4 animate-pulse gap-1">
-        {/* Menu icon placeholder */}
-        <div className="h-5 w-5 bg-gray-200 rounded mr-2"></div>
-        
-        {/* Avatar placeholder with matching dimensions */}
-        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-gray-300 to-gray-200 flex items-center justify-center">
-          <div className="h-5 w-5 bg-gray-300 rounded-full opacity-50"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-        ) : (
-          // Actual content
-          <div className="">
-            <div className="flex items-center space-x-4">
-              {!hasProfile && (
-                <a
-                  onClick={handleProfil}
-                  className="text-gray-600 hover:text-gray-900 hover:cursor-pointer hidden sm:block"
-                >
-                  Als Handwerker loslegen
-                </a>
-              )}
+            <div className="">
+              <div className="flex items-center space-x-4">
+                {/* Placeholder for "Als Handwerker loslegen" text */}
+                {/* <div className="h-4 w-40 bg-gray-200 rounded animate-pulse hidden sm:block"></div> */}
 
-              <Button
-                variant="outline"
-                className="flex items-center space-x-3 rounded-full border border-gray-300 shadow-sm hover:shadow-md transition-all duration-200 py-6 px-3 sm:px-4"
-                onClick={toggleMenu}
-              >
-                <Menu className="h-5 w-5 mr-2" />
-                <div className="h-8 w-8 rounded-full overflow-hidden flex items-center justify-center bg-gradient-to-br from-[#555] to-[#444]">
-                  {typeof window !== "undefined" &&
-                    isLoggedIn === true && getFirstLetter() ? (
-                    <Avatar className="h-full w-full">
-                      <AvatarFallback className="text-primary-foreground text-md font-semibold bg-gradient-to-br from-[#555] to-[#444]">
-                        {getFirstLetter()}
-                      </AvatarFallback>
-                    </Avatar>
-                  ) : (
-                    <User className="h-5 w-5 text-white" />
-                  )}
+                {/* Button skeleton with matching dimensions */}
+                <div className="flex items-center space-x-3 rounded-full border border-gray-300 shadow-sm py-2 px-3 sm:px-4 animate-pulse gap-1">
+                  {/* Menu icon placeholder */}
+                  <div className="h-5 w-5 bg-gray-200 rounded mr-2"></div>
+
+                  {/* Avatar placeholder with matching dimensions */}
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-gray-300 to-gray-200 flex items-center justify-center">
+                    <div className="h-5 w-5 bg-gray-300 rounded-full opacity-50"></div>
+                  </div>
                 </div>
-              </Button>
+              </div>
             </div>
-          </div>
-        )}
+          ) : (
+            // Actual content
+            <div className="">
+              <div className="flex items-center space-x-4">
+                {!hasProfile && (
+                  <a
+                    onClick={handleProfil}
+                    className="text-gray-600 hover:text-gray-900 hover:cursor-pointer hidden sm:block"
+                  >
+                    Als Handwerker loslegen
+                  </a>
+                )}
+
+                <Button
+                  variant="outline"
+                  className="flex items-center space-x-3 rounded-full border border-gray-300 shadow-sm hover:shadow-md transition-all duration-200 py-6 px-3 sm:px-4"
+                  onClick={toggleMenu}
+                >
+                  <Menu className="h-5 w-5 mr-2" />
+                  <div className="h-8 w-8 rounded-full overflow-hidden flex items-center justify-center bg-gradient-to-br from-[#555] to-[#444]">
+                    {typeof window !== "undefined" &&
+                      isLoggedIn === true && getFirstLetter() ? (
+                      <Avatar className="h-full w-full">
+                        <AvatarFallback className="text-primary-foreground text-md font-semibold bg-gradient-to-br from-[#555] to-[#444]">
+                          {getFirstLetter()}
+                        </AvatarFallback>
+                      </Avatar>
+                    ) : (
+                      <User className="h-5 w-5 text-white" />
+                    )}
+                  </div>
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
         {showMenu && (
           <div

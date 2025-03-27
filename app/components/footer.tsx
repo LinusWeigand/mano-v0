@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 export default function Footer() {
+  const currentYear = new Date().getFullYear();
   return (
     <footer className="bg-gray-900 text-white py-8">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -29,7 +30,7 @@ export default function Footer() {
             <h3 className="font-semibold mb-4">Über Mano</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="#" className="text-gray-300 hover:text-white">
+                <Link href="/about" className="text-gray-300 hover:text-white">
                   Unsere Geschichte
                 </Link>
               </li>
@@ -38,7 +39,7 @@ export default function Footer() {
         </div>
         <div className="mt-8 pt-8 border-t border-gray-700 flex flex-col sm:flex-row justify-between items-center">
           <p className="text-sm text-gray-400">
-            &copy; 2024 Mano, Inc. Alle Rechte vorbehalten.
+            &copy; {currentYear} Mano, Inc. Alle Rechte vorbehalten.
           </p>
           <div className="flex space-x-6 mt-4 sm:mt-0">
             <Link href="#" className="text-gray-400 hover:text-white">

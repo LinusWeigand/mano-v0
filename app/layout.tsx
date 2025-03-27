@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { BannerProvider } from "@/context/BannerContext";
-import Header from "./components/header";
 import { ProfilesProvider } from "@/context/ProfilesContext";
 import { AuthProvider } from "@/context/AuthContext";
+import WrappedHeader from "./components/header/wrapper";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -35,7 +35,7 @@ export default function RootLayout({
         <BannerProvider>
           <ProfilesProvider>
             <AuthProvider>
-              <Header />
+              <WrappedHeader />
               {children}
             </AuthProvider>
           </ProfilesProvider>

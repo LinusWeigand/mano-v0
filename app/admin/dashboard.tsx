@@ -18,9 +18,9 @@ import {
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useProfiles } from "@/context/ProfilesContext"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/context/AuthContext"
+import { ProfileModel } from "@/types/ProfileModel"
+import { BackendReference } from "@/types/BackendReference"
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("crafts")
@@ -40,7 +40,6 @@ export default function AdminDashboard() {
 
   const [skillsError, setSkillsError] = useState("")
   const [craftError, setCraftError] = useState("")
-  const [profileError, setProfileError] = useState("")
 
   const [editingCraft, setEditingCraft] = useState<string | null>(null)
   const [editingSkill, setEditingSkill] = useState<string | null>(null)
@@ -50,8 +49,8 @@ export default function AdminDashboard() {
 
   const router = useRouter();
 
-  const [unacceptedProfiles, setUnacceptedProfiles] = useState([])
-  const [unverifiedProfiles, setUnverifiedProfiles] = useState([])
+  const [unacceptedProfiles, setUnacceptedProfiles] = useState<ProfileModel[]>([])
+  const [unverifiedProfiles, setUnverifiedProfiles] = useState<ProfileModel[]>([])
 
   useEffect(() => {
     setLoadingSkills(true)
@@ -99,9 +98,9 @@ export default function AdminDashboard() {
   }, [])
 
   const get_unaccepted_profiles = async () => {
-    setLoadingUnacceptedProfiles(true)
+    setLoadingUnacceptedProfiles(true);
     try {
-      const response = await fetch("http://localhost/api/profiles/unaccepted", {
+      const response = await fetch("/api/profiles/unaccepted", {
         method: "GET",
       });
 
@@ -110,39 +109,31 @@ export default function AdminDashboard() {
       }
 
       const result = await response.json();
-      const data = result.data;
 
-      const initialProfiles: ProfileModel[] = data.map(
-        (profile_object: any) => ({
-          id: profile_object.id,
-          viewer_id: profile_object.viewer_id,
-          name: profile_object.name,
-          email: profile_object.email,
-          craft: profile_object.craft,
-          location: profile_object.location,
-          website: profile_object.website,
-          google_ratings: profile_object.google_ratings,
-          instagram: profile_object.instagram,
-          bio: profile_object.bio,
-          experience: profile_object.experience,
-          skills: profile_object.skills,
-        }),
-      );
+      const profileFetches = result.data.map(async (profile: BackendReference) => {
+        const selfUrl = profile._links.self;
+        const res = await fetch(selfUrl);
+        if (!res.ok) {
+          throw new Error(`Failed to fetch full profile from URL ${selfUrl}`);
+        }
+        const profileResult = await res.json();
+        return profileResult.data.profile;
+      });
 
-      setUnacceptedProfiles(initialProfiles);
-
-      console.log("Profiles fetched successfully.");
-      setLoadingUnacceptedProfiles(false)
+      const fullProfiles = await Promise.all(profileFetches);
+      setUnacceptedProfiles(fullProfiles);
+      setLoadingUnacceptedProfiles(false);
     } catch (error) {
       console.error("Error occurred in get_profiles: ", error);
-      setLoadingUnacceptedProfiles(false)
+    } finally {
+      setLoadingUnacceptedProfiles(false);
     }
   };
 
   const get_unverified_profiles = async () => {
     setLoadingUnverifiedProfiles(true)
     try {
-      const response = await fetch("http://localhost/api/profiles/unverified", {
+      const response = await fetch("/api/profiles/unverified", {
         method: "GET",
       });
 
@@ -150,28 +141,20 @@ export default function AdminDashboard() {
         throw new Error("Failed to get profiles");
       }
 
-      const result = await response.json();
-      const data = result.data;
+    const result = await response.json();
 
-      const initialProfiles: ProfileModel[] = data.map(
-        (profile_object: any) => ({
-          id: profile_object.id,
-          viewer_id: profile_object.viewer_id,
-          name: profile_object.name,
-          email: profile_object.email,
-          craft: profile_object.craft,
-          location: profile_object.location,
-          website: profile_object.website,
-          google_ratings: profile_object.google_ratings,
-          instagram: profile_object.instagram,
-          bio: profile_object.bio,
-          experience: profile_object.experience,
-          skills: profile_object.skills,
-        }),
-      );
-      setUnverifiedProfiles(initialProfiles);
+      const profileFetches = result.data.map(async (profile: BackendReference) => {
+        const selfUrl = profile._links.self;
+        const res = await fetch(selfUrl);
+        if (!res.ok) {
+          throw new Error(`Failed to fetch full profile from URL ${selfUrl}`);
+        }
+        const profileResult = await res.json();
+        return profileResult.data.profile;
+      });
 
-      console.log("Profiles fetched successfully.");
+      const fullProfiles: ProfileModel[] = await Promise.all(profileFetches)
+      setUnverifiedProfiles(fullProfiles)
       setLoadingUnverifiedProfiles(false)
     } catch (error) {
       console.error("Error occurred in get_profiles: ", error);
@@ -216,7 +199,13 @@ export default function AdminDashboard() {
       setCraftDialogOpen(false)
     } catch (error) {
       console.error("Failed to add craft:", error)
-      setCraftError(error.message)
+      let errorMessage = "An unknown error occurred";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === "string") {
+        errorMessage = error;
+      }
+      setCraftError(errorMessage)
     } finally {
       setIsSubmittingCraft(false)
     }
@@ -245,13 +234,19 @@ export default function AdminDashboard() {
       setSkillDialogOpen(false)
     } catch (error) {
       console.error("Failed to add skill:", error)
-      setSkillsError(error.message)
+      let errorMessage = "An unknown error occurred";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === "string") {
+        errorMessage = error;
+      }
+      setSkillsError(errorMessage)
     } finally {
       setIsSubmittingSkill(false)
     }
   }
 
-  const handleUpdateCraft = async (oldName, newName) => {
+  const handleUpdateCraft = async (oldName: string, newName: string) => {
     try {
       const response = await fetch("/api/crafts", {
         method: "PUT",
@@ -268,12 +263,18 @@ export default function AdminDashboard() {
       setCrafts((prev) => prev.map((craft) => (craft === oldName ? result.data.name : craft)))
     } catch (error) {
       console.error("Failed to update craft:", error)
-      setCraftError(error.message)
+      let errorMessage = "An unknown error occurred";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === "string") {
+        errorMessage = error;
+      }
+      setCraftError(errorMessage)
     }
   }
 
   // Similarly, implement handleUpdateSkill
-  const handleUpdateSkill = async (oldName, newName) => {
+  const handleUpdateSkill = async (oldName: string, newName: string) => {
     try {
       const response = await fetch("/api/skills", {
         method: "PUT",
@@ -290,7 +291,13 @@ export default function AdminDashboard() {
       setSkills((prev) => prev.map((skill) => (skill === oldName ? result.data.name : skill)))
     } catch (error) {
       console.error("Failed to update skill:", error)
-      setSkillsError(error.message)
+      let errorMessage = "An unknown error occurred";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === "string") {
+        errorMessage = error;
+      }
+      setSkillsError(errorMessage)
     }
   }
   return (
@@ -518,40 +525,35 @@ export default function AdminDashboard() {
                 {loadingUnacceptedProfiles ? (
                   <p> Profile laden... </p>
                 ) : (
-                <div className="grid gap-4">
-                  {unacceptedProfiles.map((profile) => (
-                    <div key={profile.id} className="flex items-center justify-between p-3 border-2 rounded-md border-red-500">
-                      <div className="flex flex-col">
-                        <span className="font-medium">{profile.name}</span>
-                        <span className="text-sm text-muted-foreground">{profile.craft}</span>
-                        <span className="text-sm text-muted-foreground">{profile.email}</span>
+                  <div className="grid gap-4">
+                    {unacceptedProfiles.map((profile) => (
+                      <div key={profile.id} className="flex items-center justify-between p-3 border-2 rounded-md border-red-500">
+                        <div className="flex flex-col">
+                          <span className="font-medium">{profile.name}</span>
+                          <span className="text-sm text-muted-foreground">{profile.craft}</span>
+                          <span className="text-sm text-muted-foreground">{profile.email}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            title="Profil akzeptieren"
+                            onClick={() => profile.id && handleAcceptProfile(profile.id)}
+                          >
+                            <CheckCircle className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            title="Profil bearbeiten"
+                            onClick={() => router.push(`/edit-profile/${profile.id}`)}
+                          >
+                            <Settings className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm"                            
-                          title="Profil akzeptieren"
-                          onClick={() => handleAcceptProfile(profile.id)}
-                        >
-                          <CheckCircle className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          title="Profil bearbeiten"
-                          onClick={() => router.push(`/edit-profile/${profile.id}`)}
-                        >
-                          <Settings className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                )}
-                {profileError && (
-                  <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
-                    Profile konnten nicht geladen werden.
-                  </p>
+                    ))}
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -561,35 +563,30 @@ export default function AdminDashboard() {
                 <CardDescription>Verwalte die Profile im System.</CardDescription>
               </CardHeader>
               <CardContent>
-                {loadingUnverifiedProfiles? (
+                {loadingUnverifiedProfiles ? (
                   <p> Profile laden... </p>
                 ) : (
-                <div className="grid gap-4">
-                  {unverifiedProfiles.map((profile) => (
-                    <div key={profile.id} className="flex items-center justify-between p-3 border rounded-md">
-                      <div className="flex flex-col">
-                        <span className="font-medium">{profile.name}</span>
-                        <span className="text-sm text-muted-foreground">{profile.craft}</span>
-                        <span className="text-sm text-muted-foreground">{profile.email}</span>
+                  <div className="grid gap-4">
+                    {unverifiedProfiles.map((profile) => (
+                      <div key={profile.id} className="flex items-center justify-between p-3 border rounded-md">
+                        <div className="flex flex-col">
+                          <span className="font-medium">{profile.name}</span>
+                          <span className="text-sm text-muted-foreground">{profile.craft}</span>
+                          <span className="text-sm text-muted-foreground">{profile.email}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            title="Profil bearbeiten"
+                            onClick={() => router.push(`/edit-profile/${profile.id}`)}
+                          >
+                            <Settings className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          title="Profil bearbeiten"
-                          onClick={() => router.push(`/edit-profile/${profile.id}`)}
-                        >
-                          <Settings className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                )}
-                {profileError && (
-                  <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
-                    Profile konnten nicht geladen werden.
-                  </p>
+                    ))}
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -599,4 +596,3 @@ export default function AdminDashboard() {
     </div>
   )
 }
-

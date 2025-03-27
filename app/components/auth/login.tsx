@@ -27,11 +27,9 @@ export default function Login({ to_start, to_forgot_password, on_close, email }:
   }, []);
 
   const handleLogin = async () => {
-    console.log("E-Mail: ", email);
-    console.log("Password: ", password);
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost/api/login", {
+      const response = await fetch("/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -49,14 +47,12 @@ export default function Login({ to_start, to_forgot_password, on_close, email }:
       setIsLoggedIn(true);
 
       const data = await response.json();
-      console.log("DATA: ", data);
       if (data.hasProfile) {
         setHasProfile(true)
       } else {
         setHasProfile(false)
       }
       setAuthEmail(email);
-      console.log("Logged in")
     } catch (error) {
       setShowInternalError(true);
       setIsLoading(false);

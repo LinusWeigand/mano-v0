@@ -1,10 +1,10 @@
 
 "use client";
 import { useRouter } from "next/navigation";
-import Login from "../components/auth/login/login";
+import Login from "../components/auth/login";
 import Start from "../components/auth/start/start";
 import { useState } from "react";
-import Register from "../components/auth/register/register";
+import Register from "../components/auth/register";
 
 enum AuthState {
   Start, Login, Register

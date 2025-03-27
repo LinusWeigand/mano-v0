@@ -1,22 +1,24 @@
 import { useState, useCallback } from "react"
-import { Globe, Instagram, X, ChevronLeft, ChevronRight, MapPin, Mail } from "lucide-react"
+import { Globe, Instagram, X, ChevronLeft, ChevronRight, Mail } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useSwipeable } from "react-swipeable"
 import Image from "next/image"
+import { myLoader } from "@/lib/utils"
 
 interface DetailsProps {
   onClose: () => void
   name: string
+  rechtsform_name: string
   email: string
+  telefon: string,
   craft: string
   location: string
   website: string
-  googleRatings: string
   instagram: string
   skills: string[]
   bio: string
   experience: number
-  photos: string[]
+  photos?: string[]
 }
 
 export default function Details({
@@ -26,12 +28,11 @@ export default function Details({
   craft,
   location,
   website,
-  googleRatings,
   instagram,
   skills,
   bio,
   experience,
-  photos,
+  photos = [],
 }: DetailsProps) {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
 
@@ -61,6 +62,7 @@ export default function Details({
         {...handlers}
       >
         <Image
+          loader={myLoader}
           src={photos[currentPhotoIndex] || `/placeholder.svg?height=600&width=600`}
           alt={`${name}'s work`}
           width={400}
@@ -135,6 +137,7 @@ export default function Details({
                     className="w-full h-24 relative overflow-hidden rounded group"
                   >
                     <Image
+                      loader={myLoader}
                       src={image}
                       alt={`Portfolio ${index + 1}`}
                       width={80}
@@ -173,17 +176,6 @@ export default function Details({
                   >
                     <Instagram className="h-5 w-5 mr-1" />
                     Instagram
-                  </a>
-                )}
-                {googleRatings && (
-                  <a
-                    href={`https://${googleRatings}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline flex items-center"
-                  >
-                    <MapPin className="h-5 w-5 mr-1" />
-                    Google Bewertungen
                   </a>
                 )}
                 {email && (

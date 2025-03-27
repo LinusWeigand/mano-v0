@@ -37,7 +37,7 @@ export default function ForgotPassword({ back_to_login, on_close }: LoginProps) 
     }
     setLoading(true);
     try {
-      const response = await fetch("http://localhost/api/pre-reset-password", {
+      const response = await fetch("/api/pre-reset-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, ChevronLeft, X } from "lucide-react";
+import { AlertCircle, ChevronLeft } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useEffect, useRef, useState } from "react";
 import { useBanner } from "@/context/BannerContext";
@@ -34,8 +34,6 @@ export default function Register({ to_start, on_close, email }: RegisterProps) {
   const { setBanner, setBannerEmail } = useBanner();
 
   const handle_pre_register = async () => {
-    console.log("E-Mail: ", email);
-    console.log("Password: ", password);
     if (password !== passwordVerify) {
       return;
     }
@@ -46,7 +44,7 @@ export default function Register({ to_start, on_close, email }: RegisterProps) {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost/api/pre-register", {
+      const response = await fetch("/api/pre-register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -63,7 +61,6 @@ export default function Register({ to_start, on_close, email }: RegisterProps) {
       setBannerEmail(email);
       setBanner(BannerType.VerifyEmail)
 
-      console.log("E-Mail sent.");
       on_close();
     } catch (error) {
       setShowInternalError(true);

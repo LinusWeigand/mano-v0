@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import Start from "./start/start";
-import Login from "./login/login";
-import Register from "./register/register";
-import ForgotPassword from "./forgot_password/forgot_password";
+import Login from "./login";
+import Register from "./register";
+import ForgotPassword from "./forgot_password";
 
 interface AuthProps {
   on_close: () => void;

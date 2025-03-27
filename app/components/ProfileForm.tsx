@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { myLoader } from "@/lib/utils"
 import {
   User,
   CheckCircle2,
@@ -23,6 +24,7 @@ import {
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/context/AuthContext"
 import Image from "next/image"
+import { BackendReference } from "@/types/BackendReference"
 
 interface PhotoItem {
   id?: string;
@@ -32,6 +34,7 @@ interface PhotoItem {
 
 interface ProfileFormProps {
   initialData?: {
+    id: string;
     name: string;
     rechtsform_name: string;
     rechtsform_explain_name: string;
@@ -45,8 +48,7 @@ interface ProfileFormProps {
     bio: string;
     handwerks_karten_nummer: string;
     skills: string[];
-    photos?: { id?: string; url: string }[];
-    profile_id?: string;
+    photos: BackendReference[];
   };
   isEditing?: boolean;
 }
@@ -57,14 +59,16 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
   const [step, setStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
-  const existingPhotos = initialData?.photos?.map(old => ({
-    id: old.id,
-    preview: old.url,
-  })) || [];
-  const [photos, setPhotos] = useState<PhotoItem[]>(existingPhotos);
+  const initialPhotos: PhotoItem[] =
+  initialData?.photos?.map((photo: BackendReference) => ({
+    id: photo.id,
+    preview: photo._links.self,
+  })) ?? [];
+  const [photos, setPhotos] = useState<PhotoItem[]>(initialPhotos);
   const [removedPhotos, setRemovedPhotos] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [formData, setFormData] = useState({
+    id: initialData?.id || "",
     name: initialData?.name || "",
     rechtsform: initialData?.rechtsform_explain_name || "",
     email: initialData?.email || "",
@@ -110,11 +114,14 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
   const websiteInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
+    console.log("form photos: ", photos)
+  }, [photos])
+
+  useEffect(() => {
     if (nameInputRef.current) {
       nameInputRef.current.focus()
     }
 
-    console.log("PHOTOS: ", photos)
 
     setLoadingRechtsformen(true)
     fetch("/api/rechtsformen/explain")
@@ -260,10 +267,11 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
     skillsError,
   ])
 
-  const removePhoto = (photoToRemove: { file?: File; preview: string }) => {
-    if (photoToRemove.id) {
+  const removePhoto = (photoToRemove: PhotoItem) => {
+    if ('id' in photoToRemove && photoToRemove.id) {
       setRemovedPhotos((prev) => [...prev, photoToRemove.id!]);
     }
+
     setPhotos((prevPhotos) => {
       if (photoToRemove.file) URL.revokeObjectURL(photoToRemove.preview);
       return prevPhotos.filter((photo) => photo.preview !== photoToRemove.preview);
@@ -498,7 +506,7 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
 
       data.append("deleted_photos", JSON.stringify(removedPhotos));
 
-      const endpoint = isEditing ? `/api/profile/${initialData?.profile_id}` : "/api/profile"
+      const endpoint = isEditing ? `/api/profile/${initialData?.id}` : "/api/profile"
       const method = isEditing ? "PUT" : "POST"
 
       const response = await fetch(endpoint, {
@@ -515,7 +523,7 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
       setHasProfile(true)
       setIsSuccess(true)
 
-    } catch (error) {
+    } catch {
       setShowInternalError(true)
     } finally {
       setIsSubmitting(false)
@@ -1016,22 +1024,15 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
               <div className="grid grid-cols-3 gap-2">
                 {photos.map((photo, index) => (
                   <div key={index} className="relative group w-[130px] h-[130px] rounded overflow-visible">
-                    {photo.preview.startsWith("blob:") ? (
-                      <img
-                        src={photo.preview || "/placeholder.svg"}
-                        alt={`Portfolio ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <Image
-                        src={photo.preview || "/placeholder.svg"}
-                        alt={`Portfolio ${index + 1}`}
-                        width={130}
-                        height={130}
-                        quality={75}
-                        className="w-[130px] h-[130px] object-cover"
-                      />
-                    )}
+                    <Image
+                      loader={myLoader}
+                      src={photo.preview}
+                      alt={`Portfolio ${index + 1}`}
+                      width={130}
+                      height={130}
+                      quality={75}
+                      className="w-[130px] h-[130px] object-cover"
+                    />
                     <button
                       type="button"
                       disabled={isSubmitting}

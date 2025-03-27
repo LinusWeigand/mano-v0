@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, MapPin, Hammer } from "lucide-react";
 import { useProfiles } from "@/context/ProfilesContext";
+import { ProfileModel } from "@/types/ProfileModel";
+import { BackendReference } from "@/types/BackendReference";
 
 export default function SearchBar() {
   const [activeField, setActiveField] = useState<string | null>(null);
@@ -24,14 +26,11 @@ export default function SearchBar() {
 
   const [skills, setAvailableSkills] = useState<string[] | null>(null);
   const [crafts, setAvailableCrafts] = useState<string[] | null>(null);
-  const [loadingSkills, setLoadingSkills] = useState(true);
-  const [loadingCrafts, setLoadingCrafts] = useState(true);
 
   const { setProfiles } = useProfiles();
 
   useEffect(() => {
     // Fetch skills
-    setLoadingSkills(true);
     fetch("/api/skills")
       .then((res) => {
         if (!res.ok) {
@@ -48,11 +47,9 @@ export default function SearchBar() {
         console.error(error);
       })
       .finally(() => {
-        setLoadingSkills(false);
       });
 
     // Fetch crafts
-    setLoadingCrafts(true);
     fetch("/api/crafts")
       .then((res) => {
         if (!res.ok) {
@@ -69,27 +66,23 @@ export default function SearchBar() {
         console.error(error);
       })
       .finally(() => {
-        setLoadingCrafts(false);
       });
   }, []);
 
   const handleSubmit = async () => {
-    const payload: any = {};
+    const payload: Record<string, string> = {};
 
-    // Only send fields that have actual values
     if (name.trim()) payload.name = name;
     if (craft.trim()) payload.craft = craft;
     if (location.trim()) payload.location = location;
     if (skill.trim()) payload.skill = skill;
 
-    // If nothing is filled out, just return (or handle differently if you want)
     if (Object.keys(payload).length === 0) {
       console.log("No search parameters provided.");
       return;
     }
 
     try {
-      // Use relative path so it matches your Next.js api route domain
       const response = await fetch("/api/profiles/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -101,28 +94,25 @@ export default function SearchBar() {
       }
 
       const result = await response.json();
-      const profiles = result.data.map((profile: any) => ({
-        id: profile.id,
-        viewer_id: profile.viewer_id,
-        name: profile.name,
-        craft: profile.craft,
-        location: profile.location,
-        website: profile.website,
-        instagram: profile.instagram,
-        bio: profile.bio,
-        experience: profile.experience,
-        google_ratings: profile.google_ratings,
-        skills: profile.skills || [],
-        photos: [], // initially empty; will be filled by `load_profile_photos`
-      }));
 
-      // Immediately set the profiles from search
-      setProfiles(profiles);
-
-      // Now, fetch the photos for each profile
-      profiles.forEach((profile) => {
-        load_profile_photos(profile.id);
+      const profileFetches = result.data.map(async (profile: BackendReference) => {
+        const selfUrl = profile._links.self;
+        const res = await fetch(selfUrl);
+        if (!res.ok) {
+          throw new Error(`Failed to fetch full profile from URL ${selfUrl}`);
+        }
+        const profileResult = await res.json();
+        return profileResult.data.profile;
       });
+      const fullProfiles = await Promise.all(profileFetches);
+
+      setProfiles(fullProfiles);
+
+      await Promise.all(
+        fullProfiles
+          .filter((profile) => profile.id)
+          .map((profile) => load_profile_photos(profile.id!))
+      );
     } catch (error) {
       console.error("Error fetching profiles:", error);
     }
@@ -130,7 +120,6 @@ export default function SearchBar() {
 
   const load_profile_photos = async (profileId: string) => {
     try {
-      // Use relative fetch again (avoid mixing localhost if you are deployed):
       const response = await fetch(`/api/profile-photos/${profileId}`, {
         method: "GET",
       });
@@ -139,34 +128,26 @@ export default function SearchBar() {
         throw new Error("Failed to get profile photos");
       }
 
-      // The backend returns: { data: [ { id, url }, { id, url }... ] }
       const result = await response.json();
       const photos = result.data;
 
-      // Convert each URL to a Blob → object URL
-      const photoObjectUrls: string[] = await Promise.all(
-        photos.map(async (photo: { id: string; url: string }) => {
-          const photoRes = await fetch(photo.url);
-          if (!photoRes.ok) {
-            throw new Error("Failed to get profile photo");
-          }
-          const photoBlob = await photoRes.blob();
-          return URL.createObjectURL(photoBlob);
-        }),
-      );
+      const photoUrls: string[] = photos.map((photo: BackendReference) => photo._links.self);
 
-      // Update the correct profile in context
       setProfiles((prevProfiles: ProfileModel[]) =>
-        prevProfiles.map((profile: ProfileModel) =>
-          profile.id === profileId
-            ? { ...profile, photos: photoObjectUrls }
-            : profile
-        )
+        prevProfiles.map((profile: ProfileModel) => {
+          if (profile.id === profileId) {
+            return {
+              ...profile,
+              photos: photoUrls,
+            };
+          }
+          return profile;
+        }),
       );
     } catch (error) {
       console.error(
         `Error occurred while fetching photos for profile ${profileId}:`,
-        error
+        error,
       );
     }
   };
@@ -224,40 +205,40 @@ export default function SearchBar() {
                           : "bg-muted hover:bg-[#dddddd]"
                       }`}
                     onClick={() => setActiveField("craft")}
-                    >
-                  {!crafts ? (
-                    <div className="flex-1 flex flex-col  transition-colors pt-2 pl-8 lg:pr-8 w-[265px]">
-                      <div className="h-3 w-24 bg-gray-200 rounded animate-pulse "></div>
-                      <div className="flex items-center mt-[1px] w-full h-9">
-                        <div className="h-5 w-5 bg-gray-200 rounded-full animate-pulse mr-2"></div>
-                        <div className="h-5 w-40 bg-gray-200 rounded animate-pulse"></div>
+                  >
+                    {!crafts ? (
+                      <div className="flex-1 flex flex-col  transition-colors pt-2 pl-8 lg:pr-8 w-[265px]">
+                        <div className="h-3 w-24 bg-gray-200 rounded animate-pulse "></div>
+                        <div className="flex items-center mt-[1px] w-full h-9">
+                          <div className="h-5 w-5 bg-gray-200 rounded-full animate-pulse mr-2"></div>
+                          <div className="h-5 w-40 bg-gray-200 rounded animate-pulse"></div>
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="flex-1 flex flex-col p-2 transition-colors py-4 pl-8 lg:pr-8 w-[265px]">
-                      <label htmlFor="craft" className="block text-sm font-medium text-foreground h-full">
-                        Handwerk
-                      </label>
-                      <Select onOpenChange={() => setActiveField("craft")} onValueChange={(value) => setCraft(value)}>
-                        <SelectTrigger className="mt-[1px] w-full border-none bg-transparent focus:ring-0 text-[16px]">
-                          <div className="flex items-center">
-                            <Hammer className="h-5 w-5 text-muted-foreground mr-2" />
-                            <SelectValue
-                              className="w-full border-none bg-transparent focus:ring-0 text-[16px] !placeholder:text-muted-foreground !text-muted-foreground"
-                              placeholder="Handwerk aussuchen"
-                            />
-                          </div>
-                        </SelectTrigger>
-                        <SelectContent>
-                          {crafts.map((item, index) => (
-                            <SelectItem key={index} value={item}>
-                              {item}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
+                    ) : (
+                      <div className="flex-1 flex flex-col p-2 transition-colors py-4 pl-8 lg:pr-8 w-[265px]">
+                        <label htmlFor="craft" className="block text-sm font-medium text-foreground h-full">
+                          Handwerk
+                        </label>
+                        <Select onOpenChange={() => setActiveField("craft")} onValueChange={(value) => setCraft(value)}>
+                          <SelectTrigger className="mt-[1px] w-full border-none bg-transparent focus:ring-0 text-[16px]">
+                            <div className="flex items-center">
+                              <Hammer className="h-5 w-5 text-muted-foreground mr-2" />
+                              <SelectValue
+                                className="w-full border-none bg-transparent focus:ring-0 text-[16px] !placeholder:text-muted-foreground !text-muted-foreground"
+                                placeholder="Handwerk aussuchen"
+                              />
+                            </div>
+                          </SelectTrigger>
+                          <SelectContent>
+                            {crafts.map((item, index) => (
+                              <SelectItem key={index} value={item}>
+                                {item}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                   </div>
 
                   {/* Location input */}
@@ -343,8 +324,8 @@ export default function SearchBar() {
                     {/* Add type="submit" so the form is actually submitted */}
                     <div
                       className={`p-2 md:p-2 ${activeField === null
-                          ? "rounded-b-[4rem] md:rounded-r-[4rem] md:rounded-bl-none"
-                          : ""
+                        ? "rounded-b-[4rem] md:rounded-r-[4rem] md:rounded-bl-none"
+                        : ""
                         }`}
                     >
                       <Button
