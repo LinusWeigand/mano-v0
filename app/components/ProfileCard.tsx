@@ -1,3 +1,4 @@
+
 "use client"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn, myLoader } from "@/lib/utils"
@@ -35,7 +36,7 @@ export default function ProfileCard({ profile }) {
   }
 
   return (
-    <Card className="w-full max-w-md border-0">
+    <Card className="w-full max-w-md border-0 shadow-none">
       <div className="relative group">
         {/* Image carousel */}
         <div className="relative w-full overflow-hidden" style={{ aspectRatio: "1/1" }}>
@@ -46,7 +47,7 @@ export default function ProfileCard({ profile }) {
             height={400}
             quality={75}
             alt={profile.name}
-            className="h-full w-full object-cover rounded-t-xl"
+            className="h-full w-full object-cover rounded-xl"  // Fully rounded image
           />
 
           {/* Navigation buttons (only visible on hover) */}
@@ -69,13 +70,13 @@ export default function ProfileCard({ profile }) {
 
           {/* Favorite button */}
           <button
-            className="absolute right-4 top-4 text-white"
+            className="absolute hover:right-[14px] hover:top-[14px] right-4 top-4 text-white"
             onClick={(e) => {
               e.stopPropagation()
               setIsFavorite(!isFavorite)
             }}
           >
-            <Heart className={cn("h-7 w-7", isFavorite ? "fill-white" : "")} />
+            <Heart className={cn("h-7 w-7 fill-black/20 hover:h-8 hover:w-8", isFavorite ? "fill-white" : "")} />
           </button>
 
           {/* Pagination dots (container remains at the bottom) */}
@@ -110,17 +111,13 @@ export default function ProfileCard({ profile }) {
 
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
-          <h3 className="text-lg font-semibold">
-            {profile.name}
-          </h3>
+          <h3 className="text-lg font-semibold">{profile.name}</h3>
           <div className="flex items-center justify-center gap-1">
             <span className="text-lg mb-1">★</span>
             <span className="text-md font-medium">4,84</span>
           </div>
         </div>
-        <p className="text-md text-muted-foreground">
-          {profile.craft}
-        </p>
+        <p className="text-md text-muted-foreground">{profile.craft}</p>
       </CardContent>
     </Card>
   )
