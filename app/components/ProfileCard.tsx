@@ -1,4 +1,3 @@
-
 "use client"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn, myLoader } from "@/lib/utils"
@@ -37,7 +36,7 @@ export default function ProfileCard({ profile }) {
 
   return (
     <Card className="w-full max-w-md border-0">
-      <div className="relative">
+      <div className="relative group">
         {/* Image carousel */}
         <div className="relative w-full overflow-hidden" style={{ aspectRatio: "1/1" }}>
           <Image
@@ -50,19 +49,23 @@ export default function ProfileCard({ profile }) {
             className="h-full w-full object-cover rounded-t-xl"
           />
 
-          {/* Navigation buttons */}
-          <button
-            onClick={handlePrev}
-            className="absolute left-4 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 shadow-md"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <button
-            onClick={handleNext}
-            className="absolute right-4 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 shadow-md"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
+          {/* Navigation buttons (only visible on hover) */}
+          {currentIndex > 0 && (
+            <button
+              onClick={handlePrev}
+              className="absolute left-4 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 hover:bg-white/90 shadow-md invisible group-hover:visible"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+          )}
+          {currentIndex < totalImages - 1 && (
+            <button
+              onClick={handleNext}
+              className="absolute right-4 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 hover:bg-white/90 shadow-md invisible group-hover:visible"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          )}
 
           {/* Favorite button */}
           <button
@@ -108,15 +111,15 @@ export default function ProfileCard({ profile }) {
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
           <h3 className="text-lg font-semibold">
-            {profile.name || "Schneizlreuth, Deutschland"}
+            {profile.name}
           </h3>
-          <div className="flex items-center gap-1">
-            <span className="text-xs">★</span>
-            <span className="text-xs font-medium">4,84</span>
+          <div className="flex items-center justify-center gap-1">
+            <span className="text-lg mb-1">★</span>
+            <span className="text-md font-medium">4,84</span>
           </div>
         </div>
-        <p className="text-sm text-muted-foreground">
-          {profile.craft || "Gewerbliche:r Vermieter:in"}
+        <p className="text-md text-muted-foreground">
+          {profile.craft}
         </p>
       </CardContent>
     </Card>
