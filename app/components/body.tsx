@@ -1,110 +1,16 @@
 "use client"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { AlertCircle, ChevronLeft, ChevronRight, Heart, RefreshCw } from "lucide-react"
+import { Card, CardContent,  } from "@/components/ui/card"
+import { AlertCircle,  RefreshCw } from "lucide-react"
 import { useEffect, useState } from "react"
 import Modal from "./modal"
 import Details from "./details"
 import { useProfiles } from "@/context/ProfilesContext"
 import ProfileSkeleton from "./BodySkeleton"
-import Image from "next/image"
 import type { ProfileModel } from "@/types/ProfileModel"
 import type { BackendReference } from "@/types/BackendReference"
-import { cn, getBaseUrl, myLoader } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import ProfileCard from "./ProfileCard"
 
-// A new component for the carousel-enabled profile card
-function ProfileCard({ profile }) {
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [isFavorite, setIsFavorite] = useState(false)
-
-  // Use photos if available, otherwise a default placeholder image
-  const images =
-    profile.photos && profile.photos.length > 0
-      ? profile.photos
-      : ["/placeholder.svg?height=400&width=600"]
-
-  const handlePrev = (e) => {
-    e.stopPropagation()
-    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
-  }
-
-  const handleNext = (e) => {
-    e.stopPropagation()
-    setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
-  }
-
-  return (
-    <Card className="w-full max-w-md border-0">
-      <div className="relative">
-        {/* Image carousel */}
-        <div className="relative w-full overflow-hidden" style={{ aspectRatio: "1/1" }}>
-          <Image
-            loader={myLoader}
-            src={images[currentIndex] || "/placeholder.svg"}
-            width={600}
-            height={400}
-            quality={75}
-            alt={profile.name}
-            className="h-full w-full object-cover rounded-t-xl"
-          />
-
-          {/* Navigation buttons */}
-          <button
-            onClick={handlePrev}
-            className="absolute left-4 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 shadow-md"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <button
-            onClick={handleNext}
-            className="absolute right-4 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 shadow-md"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
-
-          {/* Favorite button */}
-          <button
-            className="absolute right-4 top-4 text-white"
-            onClick={(e) => {
-              e.stopPropagation()
-              setIsFavorite(!isFavorite)
-            }}
-          >
-            <Heart className={cn("h-7 w-7", isFavorite ? "fill-white" : "")} />
-          </button>
-
-          {/* Pagination dots */}
-          <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-1">
-            {images.map((_, i) => (
-              <div
-                key={i}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setCurrentIndex(i)
-                }}
-                className={cn(
-                  "h-2 w-2 rounded-full cursor-pointer",
-                  i === currentIndex ? "bg-white" : "bg-white/60"
-                )}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between">
-          <h3 className="text-lg font-semibold">{profile.name || "Schneizlreuth, Deutschland"}</h3>
-          <div className="flex items-center gap-1">
-            <span className="text-xs">★</span>
-            <span className="text-xs font-medium">4,84</span>
-          </div>
-        </div>
-        <p className="text-sm text-muted-foreground">{profile.craft || "Gewerbliche:r Vermieter:in"}</p>
-      </CardContent>
-    </Card>
-  )
-}
 
 export default function Body() {
   const { profiles, setProfiles } = useProfiles()
