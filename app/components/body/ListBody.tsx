@@ -1,18 +1,18 @@
 "use client"
-import { Card, CardContent,  } from "@/components/ui/card"
-import { AlertCircle,  RefreshCw } from "lucide-react"
+import { Card, CardContent, } from "@/components/ui/card"
+import { AlertCircle, RefreshCw } from "lucide-react"
 import { useEffect, useState } from "react"
-import Modal from "./modal"
-import Details from "./details"
+import Modal from "../modal"
+import Details from "../details"
 import { useProfiles } from "@/context/ProfilesContext"
-import ProfileSkeleton from "./BodySkeleton"
+import ProfileSkeleton from "../BodySkeleton"
 import type { ProfileModel } from "@/types/ProfileModel"
 import type { BackendReference } from "@/types/BackendReference"
 import { Button } from "@/components/ui/button"
-import ProfileCard from "./ProfileCard"
+import ProfileCard from "../ProfileCard"
 
 
-export default function Body() {
+export default function ListBody() {
   const { profiles, setProfiles } = useProfiles()
 
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null)
@@ -118,7 +118,7 @@ export default function Body() {
 
   return (
     <main className="flex-grow">
-      <section className="py-16">
+      <section className="pt-8 pb-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           {isLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">{skeletons}</div>
