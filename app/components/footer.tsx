@@ -20,7 +20,7 @@ export default function Footer() {
             <h3 className="font-semibold mb-4">Für Handwerker</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="#" className="text-gray-300 hover:text-white">
+                <Link href="/create-profile" className="text-gray-300 hover:text-white">
                   Als Handwerker beitreten
                 </Link>
               </li>
