@@ -10,16 +10,13 @@ export default function ProfileCard({ profile }) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isFavorite, setIsFavorite] = useState(false)
 
-  // Use available photos or fallback to a placeholder image.
   const images =
     profile.photos && profile.photos.length > 0
       ? profile.photos
       : ["/placeholder.svg?height=400&width=600"]
 
   const totalImages = images.length
-  // Only show 5 dots if there are more than 5 images; otherwise, show all dots.
   const dotsCount = totalImages > 5 ? 5 : totalImages
-  // Calculate a sliding window that always includes the active image.
   const windowStart =
     totalImages > 5
       ? Math.max(0, Math.min(currentIndex - Math.floor(dotsCount / 2), totalImages - dotsCount))
@@ -44,7 +41,7 @@ export default function ProfileCard({ profile }) {
             loader={myLoader}
             src={images[currentIndex] || "/placeholder.svg"}
             width={600}
-            height={400}
+            height={600}
             quality={75}
             alt={profile.name}
             className="h-full w-full object-cover rounded-xl"  // Fully rounded image
@@ -109,7 +106,7 @@ export default function ProfileCard({ profile }) {
         </div>
       </div>
 
-      <CardContent className="p-4">
+      <CardContent className="!py-3 p-0 w-full">
         <div className="flex items-start justify-between">
           <h3 className="text-lg font-semibold">{profile.name}</h3>
           <div className="flex items-center justify-center gap-1">
