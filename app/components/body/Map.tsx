@@ -1,3 +1,4 @@
+
 import { Suspense, useState } from "react";
 import { GoogleMap, OverlayView, useLoadScript } from "@react-google-maps/api";
 import { Plus, Minus, Navigation } from "lucide-react";
@@ -80,7 +81,7 @@ function AirbnbMap({
         >
           <div
             onClick={() => onMarkerClick && onMarkerClick(location)}
-            className="relative flex items-center justify-center bg-white rounded-full px-3 py-1 shadow-md min-w-[60px] h-[30px] font-medium text-sm hover:z-10 hover:scale-105 transition-transform cursor-pointer"
+            className="relative flex items-center justify-center bg-white rounded-full px-3 py-1 shadow-md min-w-[60px] h-[30px] font-semibold text-sm hover:z-10 hover:scale-105 transition-transform cursor-pointer"
           >
             {location.price} €
           </div>
@@ -88,10 +89,13 @@ function AirbnbMap({
       ))}
 
       {/* Custom map controls */}
-      <div className="absolute top-4 right-6 flex flex-col gap-2">
+      <div className="absolute top-12 right-6 flex flex-col gap-2">
         <button
           onClick={() => {
-            if (map) map.setZoom(map.getZoom() ?? 0 + 1);
+            if (map) {
+              // Increase zoom level by 1
+              map.setZoom((map.getZoom() ?? 0) + 1);
+            }
           }}
           className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors"
           aria-label="Zoom in"
@@ -100,7 +104,10 @@ function AirbnbMap({
         </button>
         <button
           onClick={() => {
-            if (map) map.setZoom(map.getZoom() ?? 0 - 1);
+            if (map) {
+              // Decrease zoom level by 1
+              map.setZoom((map.getZoom() ?? 0) - 1);
+            }
           }}
           className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors"
           aria-label="Zoom out"
@@ -109,7 +116,23 @@ function AirbnbMap({
         </button>
         <button
           onClick={() => {
-            // Add navigation logic if needed
+            if (navigator.geolocation) {
+              navigator.geolocation.getCurrentPosition(
+                (position) => {
+                  const { latitude, longitude } = position.coords;
+                  if (map) {
+                    // Pan to the user's current location and adjust zoom if desired
+                    map.panTo({ lat: latitude, lng: longitude });
+                    map.setZoom(12);
+                  }
+                },
+                (error) => {
+                  console.error("Error fetching location:", error);
+                }
+              );
+            } else {
+              console.error("Geolocation is not supported by this browser.");
+            }
           }}
           className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors"
           aria-label="Navigate"
