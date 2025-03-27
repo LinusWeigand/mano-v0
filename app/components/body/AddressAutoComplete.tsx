@@ -43,91 +43,123 @@ export default function ReliableAddressAutocomplete() {
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.addedNodes.length) {
-          const pacItems = document.querySelectorAll(".pac-item")
+          const pacItems = document.querySelectorAll(".pac-item");
           pacItems.forEach((item) => {
+            // Insert custom pin icon only once
             if (!item.querySelector(".custom-pin-container")) {
-              const pinContainer = document.createElement("div")
-              pinContainer.className = "custom-pin-container"
+              const pinContainer = document.createElement("div");
+              pinContainer.className = "custom-pin-container";
 
-              const pinIcon = document.createElement("div")
-              pinIcon.className = "custom-pin-icon"
+              const pinIcon = document.createElement("div");
+              pinIcon.className = "custom-pin-icon";
               pinIcon.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin" style="color: #333;">
-                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
-                </svg>
-              `
-
-              pinContainer.appendChild(pinIcon)
-              item.insertBefore(pinContainer, item.firstChild)
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                   viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                   class="lucide lucide-map-pin" style="color: #333;">
+                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+            `;
+              pinContainer.appendChild(pinIcon);
+              item.insertBefore(pinContainer, item.firstChild);
             }
-          })
-        }
-      })
-    })
 
-    observer.observe(document.body, { childList: true, subtree: true })
+            // Wrap Google spans into one div for controlled layout
+            if (!item.querySelector(".pac-item-text-wrapper")) {
+              const textWrapper = document.createElement("div");
+              textWrapper.className = "pac-item-text-wrapper";
+
+              const children = Array.from(item.childNodes).filter(
+                (node) => node.nodeType === Node.ELEMENT_NODE && !(node as Element).classList.contains("custom-pin-container")
+              );
+
+              children.forEach((child) => textWrapper.appendChild(child));
+              item.appendChild(textWrapper);
+            }
+          });
+        }
+      });
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
   }
 
   useEffect(() => {
     const style = document.createElement("style")
     style.textContent = `
-      .pac-container {
-        border-radius: 12px;
-        border: none;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        margin-top: 8px;
-        padding: 8px;
-        background: white;
-        font-family: inherit;
-      }
-      .pac-item {
-        display: flex;
-        align-items: center;
-        padding: 12px;
-        border: none;
-        border-radius: 8px;
-        margin-bottom: 4px;
-        cursor: pointer;
-        background-color: #f2f2f2;
-      }
-      .pac-item:hover {
-        background-color: #e9e9e9;
-      }
-      .pac-icon {
-        display: none;
-      }
-      .pac-item-query {
-        font-size: 16px;
-        color: #333;
-        padding-right: 4px;
-      }
-      .pac-matched {
-        font-weight: 500;
-      }
-      .pac-item span:not(.pac-item-query) {
-        font-size: 16px;
-        color: #444;
-      }
-      .pac-container:after {
-        font-size: 10px;
-        color: #999;
-        padding: 4px 8px;
-        text-align: right;
-        opacity: 0.7;
-      }
-      .custom-pin-container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 48px;
-        height: 48px;
-        min-width: 48px;
-        background-color: #e0e0e0;
-        border-radius: 12px;
-        margin-right: 16px;
-      }
-    `
+.pac-container {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin-top: 8px;
+  padding: 8px;
+  background: white;
+  font-family: inherit;
+}
+
+.pac-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  cursor: pointer;
+  background-color: #f2f2f2;
+  white-space: normal !important;
+}
+
+.pac-item:hover {
+  background-color: #e9e9e9;
+}
+
+.pac-icon {
+  display: none;
+}
+
+.pac-item-text-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 16px;
+  color: #333;
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+
+/* Ensure consistent styling */
+.pac-item-query,
+.pac-item span:not(.pac-item-query) {
+  font-size: 16px;
+  color: #333;
+  font-weight: 400 !important; /* explicitly normal weight */
+  white-space: normal !important;
+}
+
+.pac-matched {
+  font-weight: 500 !important; /* make matched query slightly bold */
+}
+
+.pac-container:after {
+  font-size: 10px;
+  color: #999;
+  padding: 4px 8px;
+  text-align: right;
+  opacity: 0.7;
+}
+
+.custom-pin-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  background-color: #e0e0e0;
+  border-radius: 12px;
+}
+      `
     document.head.appendChild(style)
 
     return () => {

@@ -607,10 +607,10 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
               : step === 2
                 ? "Zusätzliche Details"
                 : step === 3
-                  ? "Soziale Links"
+                  ? "Fähigkeiten"
                   : step === 4
-                    ? "Fähigkeiten"
-                    : "Portfolio"}
+                    ? "Portfolio"
+                    : "Zusätzliche Details"}
         </CardTitle>
         <CardDescription className="text-center pt-1">
           {isEditing
@@ -620,10 +620,10 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
               : step === 2
                 ? "Geben Sie zusätzliche Details zu Ihrem Profil an."
                 : step === 3
-                  ? "Fügen Sie Ihre sozialen Links hinzu."
+                  ? "Wählen Sie die für Ihre Handwerk relevanten Fähigkeiten aus."
                   : step === 4
-                    ? "Wählen Sie die für Ihre Handwerk relevanten Fähigkeiten aus."
-                    : "Laden Sie Fotos Ihrer letzten Arbeiten hoch."}
+                    ? "Laden Sie Fotos Ihrer letzten Arbeiten hoch."
+                    : "Geben Sie zusätzliche Details zu Ihrem Profil an."}
         </CardDescription>
         <div className="flex justify-between mt-2">
           {Array.from({ length: totalSteps }).map((_, index) => (
