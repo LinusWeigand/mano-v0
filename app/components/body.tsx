@@ -1,6 +1,6 @@
 "use client"
 import { Card, CardContent } from "@/components/ui/card"
-import { AlertCircle, ChevronLeft, ChevronRight, Heart, RefreshCw, Star } from "lucide-react"
+import { AlertCircle, ChevronLeft, ChevronRight, Heart, RefreshCw} from "lucide-react"
 import { useEffect, useState } from "react"
 import Modal from "./modal"
 import Details from "./details"
@@ -140,7 +140,7 @@ export default function Body() {
 >
   <div className="relative">
     {/* Image carousel */}
-    <div className="relative w-full overflow-hidden" style={{ aspectRatio: "4/3" }}>
+    <div className="relative w-full overflow-hidden" style={{ aspectRatio: "1/1" }}>
       {profile.photos && profile.photos.length > 0 && profile.photos[0] ? (
         <Image
           loader={myLoader}
@@ -202,45 +202,6 @@ export default function Body() {
     <p className="text-sm text-muted-foreground">{profile.craft || "Gewerbliche:r Vermieter:in"}</p>
   </CardContent>
 </Card>
-                // <Card
-                //   key={index}
-                //   className="overflow-hidden cursor-pointer"
-                //   onClick={() => {
-                //     setSelectedProfileId(profile.id)
-                //     setIsDetailsModalOpen(true)
-                //   }}
-                // >
-                //   {profile.photos && profile.photos.length > 0 && profile.photos[0] ? (
-                //     <Image
-                //       loader={myLoader}
-                //       src={profile.photos[0] || "/placeholder.svg"}
-                //       width={100}
-                //       height={100}
-                //       quality={75}
-                //       alt=""
-                //       className="w-full h-48 object-cover"
-                //     />
-                //   ) : (
-                //     <div className="w-full h-48 flex items-center justify-center bg-gray-300">
-                //       <div className="flex gap-[6px]">
-                //         <div className="h-2 w-2 bg-white rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                //         <div className="h-2 w-2 bg-white rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                //         <div className="h-2 w-2 bg-white rounded-full animate-bounce"></div>
-                //       </div>
-                //     </div>
-                //   )}
-                //   <CardContent className="p-4">
-                //     <h3 className="font-semibold mb-2">{profile.name}</h3>
-                //     <p className="text-sm text-gray-600 mb-2">{profile.craft}</p>
-                //     <div className="flex items-center">
-                //       <Star className="h-4 w-4 text-yellow-400 mr-1" />
-                //       <span className="font-semibold mr-2">{(Math.random() * (4.9 - 4.4) + 4.4).toFixed(1)}</span>
-                //       <span className="text-sm text-gray-600">
-                //         ({Math.floor(Math.random() * (200 - 50 + 1)) + 50} reviews)
-                //       </span>
-                //     </div>
-                //   </CardContent>
-                // </Card>
               ))}
             </div>
           ) : (
