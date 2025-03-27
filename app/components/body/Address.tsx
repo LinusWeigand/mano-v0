@@ -22,8 +22,7 @@ export default function AddressPage() {
         strategy="beforeInteractive"
       />
 
-      <div className="max-w-md mx-auto p-4">
-        <h1 className="text-xl font-bold mb-4">Enter Your Address</h1>
+      <div className="relative">
         <AddressAutocomplete onSelect={(data) => setSelectedAddress(data)} />
 
         {selectedAddress && (

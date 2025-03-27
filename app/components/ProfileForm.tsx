@@ -25,6 +25,7 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "@/context/AuthContext"
 import Image from "next/image"
 import { BackendReference } from "@/types/BackendReference"
+import ReliableAddressAutocomplete from "./body/AddressAutoComplete"
 
 interface PhotoItem {
   id?: string;
@@ -56,7 +57,7 @@ interface ProfileFormProps {
 export default function ProfileForm({ initialData, isEditing = false }: ProfileFormProps) {
   const router = useRouter()
   const totalSteps = 5
-  const [step, setStep] = useState(1)
+  const [step, setStep] = useState(2)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const initialPhotos: PhotoItem[] =
@@ -724,29 +725,6 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
                 {emailError && <p className="text-sm text-red-500 flex items-center gap-1">{emailError}</p>}
               </div>
 
-              <div className="space-y-3">
-                <Label htmlFor="telefon" className="text-base font-medium flex items-center">
-                  Telefon-Nummer<span className="text-red-500 ml-1">*</span>
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="telefon"
-                    name="telefon"
-                    maxLength={100}
-                    placeholder="Geben Sie Ihre Telefon-Nummer ein"
-                    value={formData.telefon}
-                    onChange={handleChange}
-                    className={`text-[16px] rounded-md bg-white border-2 h-12 pl-4 ${telefonError ? "border-red-300 focus-visible:ring-red-300" : "focus-visible:border-primary"
-                      }`}
-                  />
-                  {telefonError && (
-                    <div className="absolute right-3 top-3 text-red-500">
-                      <AlertCircle className="h-5 w-5" />
-                    </div>
-                  )}
-                </div>
-                {telefonError && <p className="text-sm text-red-500 flex items-center gap-1">{telefonError}</p>}
-              </div>
 
               <div className="space-y-3 pt-2 flex flex-col">
                 <Label htmlFor="craft" className="text-base font-medium">
@@ -785,6 +763,15 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
                 {craftError && <p className="text-sm text-red-500 flex items-center gap-1">{craftError}</p>}
               </div>
 
+
+              <Button type="submit" className="w-full h-12 text-base mt-6" disabled={isSubmitting}>
+                Weiter
+              </Button>
+            </>
+          )}
+
+          {step === 2 && (
+            <>
               <div className="space-y-3">
                 <Label htmlFor="experience" className="text-base font-medium flex items-center">
                   Jahre der Erfahrung <span className="text-red-500 ml-1">*</span>
@@ -821,15 +808,7 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
                 </div>
                 {experienceError && <p className="text-sm text-red-500 flex items-center gap-1">{experienceError}</p>}
               </div>
-
-              <Button type="submit" className="w-full h-12 text-base mt-6" disabled={isSubmitting}>
-                Weiter
-              </Button>
-            </>
-          )}
-
-          {step === 2 && (
-            <>
+              <ReliableAddressAutocomplete />
               <div className="space-y-3 pt-2">
                 <Label htmlFor="location" className="text-base font-medium">
                   Standort<span className="text-red-500 ml-1">*</span>
@@ -856,68 +835,6 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
                 {locationError && <p className="text-sm text-red-500 flex items-center gap-1">{locationError}</p>}
               </div>
 
-              <div className="space-y-3">
-                <Label htmlFor="bio" className="text-base font-medium">
-                  Beschreibung<span className="text-red-500 ml-1">*</span>
-                </Label>
-                <div className="relative text-muted-foreground">
-                  <textarea
-                    id="bio"
-                    name="bio"
-                    maxLength={500}
-                    placeholder="Beschreiben Sie Ihre Arbeit..."
-                    value={formData.bio}
-                    onChange={handleChange}
-                    className={`w-full rounded-md border-2 h-24 p-2 text-muted-foreground ${bioError ? "border-red-300 focus-visible:ring-red-300" : "focus:border-black"
-                      } focus:ring-0 focus:outline-none`}
-                  />
-                  {bioError && (
-                    <div className="absolute right-3 top-3.5 text-red-500">
-                      <AlertCircle className="h-5 w-5" />
-                    </div>
-                  )}
-                </div>
-                {bioError && <p className="text-sm text-red-500 flex items-center gap-1">{bioError}</p>}
-              </div>
-
-              <div className="space-y-3 pt-2">
-                <Label htmlFor="handwerks_karten_nummer" className="text-base font-medium">
-                  Handwerks-Karten-Nummer<span className="text-red-500 ml-1">*</span>
-                </Label>
-                <div className="relative">
-                  <Hash className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
-                  <Input
-                    id="handwerks_karten_nummer"
-                    name="handwerks_karten_nummer"
-                    maxLength={100}
-                    placeholder="Geben Sie Ihre Handwerks-Karten-Nummer an"
-                    value={formData.handwerks_karten_nummer}
-                    onChange={handleChange}
-                    className={`text-[16px] rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${handwerksKartenNummerError ? "border-red-300 focus-visible:ring-red-300" : "focus-visible:border-primary"
-                      }`}
-                  />
-                  {handwerksKartenNummerError && (
-                    <div className="absolute right-3 top-3.5 text-red-500">
-                      <AlertCircle className="h-5 w-5" />
-                    </div>
-                  )}
-                </div>
-                {handwerksKartenNummerError && <p className="text-sm text-red-500 flex items-center gap-1">{handwerksKartenNummerError}</p>}
-              </div>
-
-              <div className="flex justify-between gap-4">
-                <Button onClick={prevStep} variant="outline" className="h-12" disabled={isSubmitting}>
-                  <ChevronLeft className="w-4 h-4 mr-2" /> Zurück
-                </Button>
-                <Button type="submit" className="w-full h-12 text-base" disabled={isSubmitting}>
-                  Weiter
-                </Button>
-              </div>
-            </>
-          )}
-
-          {step === 3 && (
-            <>
               <div className="space-y-3 pt-2">
                 <Label htmlFor="website" className="text-base font-medium">
                   Website <span className="text-sm font-normal text-muted-foreground">(Optional)</span>
@@ -963,6 +880,96 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
                     className="text-[16px] !border-2 !border-gray-300 !border-l-0 h-12 bg-white pl-3 rounded-r-md"
                   />
                 </div>
+              </div>
+
+
+
+              <div className="flex justify-between gap-4">
+                <Button onClick={prevStep} variant="outline" className="h-12" disabled={isSubmitting}>
+                  <ChevronLeft className="w-4 h-4 mr-2" /> Zurück
+                </Button>
+                <Button type="submit" className="w-full h-12 text-base" disabled={isSubmitting}>
+                  Weiter
+                </Button>
+              </div>
+            </>
+          )}
+
+          {step === 3 && (
+            <>
+
+              <div className="space-y-3">
+                <Label htmlFor="bio" className="text-base font-medium">
+                  Beschreibung<span className="text-red-500 ml-1">*</span>
+                </Label>
+                <div className="relative text-muted-foreground">
+                  <textarea
+                    id="bio"
+                    name="bio"
+                    maxLength={500}
+                    placeholder="Beschreiben Sie Ihre Arbeit..."
+                    value={formData.bio}
+                    onChange={handleChange}
+                    className={`w-full rounded-md border-2 h-24 p-2 text-muted-foreground ${bioError ? "border-red-300 focus-visible:ring-red-300" : "focus:border-black"
+                      } focus:ring-0 focus:outline-none`}
+                  />
+                  {bioError && (
+                    <div className="absolute right-3 top-3.5 text-red-500">
+                      <AlertCircle className="h-5 w-5" />
+                    </div>
+                  )}
+                </div>
+                {bioError && <p className="text-sm text-red-500 flex items-center gap-1">{bioError}</p>}
+              </div>
+
+
+              <div className="space-y-3">
+                <Label htmlFor="telefon" className="text-base font-medium flex items-center">
+                  Telefon-Nummer<span className="text-red-500 ml-1">*</span>
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="telefon"
+                    name="telefon"
+                    maxLength={100}
+                    placeholder="Geben Sie Ihre Telefon-Nummer ein"
+                    value={formData.telefon}
+                    onChange={handleChange}
+                    className={`text-[16px] rounded-md bg-white border-2 h-12 pl-4 ${telefonError ? "border-red-300 focus-visible:ring-red-300" : "focus-visible:border-primary"
+                      }`}
+                  />
+                  {telefonError && (
+                    <div className="absolute right-3 top-3 text-red-500">
+                      <AlertCircle className="h-5 w-5" />
+                    </div>
+                  )}
+                </div>
+                {telefonError && <p className="text-sm text-red-500 flex items-center gap-1">{telefonError}</p>}
+              </div>
+
+              <div className="space-y-3 pt-2">
+                <Label htmlFor="handwerks_karten_nummer" className="text-base font-medium">
+                  Handwerks-Karten-Nummer<span className="text-red-500 ml-1">*</span>
+                </Label>
+                <div className="relative">
+                  <Hash className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
+                  <Input
+                    id="handwerks_karten_nummer"
+                    name="handwerks_karten_nummer"
+                    maxLength={100}
+                    placeholder="Geben Sie Ihre Handwerks-Karten-Nummer an"
+                    value={formData.handwerks_karten_nummer}
+                    onChange={handleChange}
+                    className={`text-[16px] rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${handwerksKartenNummerError ? "border-red-300 focus-visible:ring-red-300" : "focus-visible:border-primary"
+                      }`}
+                  />
+                  {handwerksKartenNummerError && (
+                    <div className="absolute right-3 top-3.5 text-red-500">
+                      <AlertCircle className="h-5 w-5" />
+                    </div>
+                  )}
+                </div>
+                {handwerksKartenNummerError && <p className="text-sm text-red-500 flex items-center gap-1">{handwerksKartenNummerError}</p>}
               </div>
 
               <div className="flex justify-between gap-4">

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { cn } from "@/lib/utils"
+import { Label } from "@/components/ui/label";
 
 interface AddressAutocompleteProps {
   onSelect: (data: { address: string; lat: number; lng: number }) => void
@@ -147,6 +148,7 @@ export function AddressAutocomplete({ onSelect, className }: AddressAutocomplete
   }, [onSelect])
 
   return (
+
     <div className="relative">
       <input
         ref={inputRef}
