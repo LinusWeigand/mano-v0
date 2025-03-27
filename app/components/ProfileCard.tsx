@@ -1,3 +1,4 @@
+
 "use client"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn, myLoader } from "@/lib/utils"
@@ -74,15 +75,17 @@ export default function ProfileCard({ profile }) {
             <Heart className={cn("h-7 w-7", isFavorite ? "fill-white" : "")} />
           </button>
 
-          {/* Pagination dots */}
-          <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-1">
+          {/* Pagination dots (container remains at the bottom) */}
+          <div className="absolute bottom-4 left-1/2 flex items-center gap-[6px] -translate-x-1/2">
             {Array.from({ length: dotsCount }, (_, i) => {
               // Each dot represents an image with index = windowStart + i.
               const dotIndex = windowStart + i
               // Calculate the difference from the active dot.
               const diff = Math.abs(currentIndex - dotIndex)
-              // Define sizes: active dot is 12px, then decrease 2px per step.
-              const size = 12 - diff * 2
+              // Use a smaller base size and decrement so the dots are all smaller.
+              const baseSize = 7
+              const decrement = 0.5
+              const size = baseSize - diff * decrement
               return (
                 <div
                   key={i}
