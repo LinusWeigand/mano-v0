@@ -71,7 +71,7 @@ export default function Details({
           className="w-full h-full object-cover"
         />
         <button
-          className="absolute top-4 right-4 bg-white rounded-full p-2 z-10"
+          className="absolute top-4 right-4 bg-white/80 hover:bg-white/90 rounded-full p-2 z-10"
           onClick={onClose}
         >
           <X className="h-6 w-6 text-gray-600" />
@@ -79,14 +79,14 @@ export default function Details({
         {photos.length > 1 && (
           <>
             <button
-              className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md"
+              className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white/80 hover:bg-white/90 rounded-full p-2 shadow-md"
               onClick={prevPhoto}
               aria-label="Previous photo"
             >
               <ChevronLeft className="h-6 w-6 text-gray-600" />
             </button>
             <button
-              className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md"
+              className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-white/80 hover:bg-white/90 rounded-full p-2 shadow-md"
               onClick={nextPhoto}
               aria-label="Next photo"
             >
