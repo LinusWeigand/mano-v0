@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Script from "next/script"
-import { AddressAutocomplete } from "./address-autocomplete"
+import { AddressAutocomplete } from "./address-autocomplete-original"
 
 interface AddressData {
   address: string

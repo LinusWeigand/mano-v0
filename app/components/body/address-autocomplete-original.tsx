@@ -1,24 +1,27 @@
 "use client"
 
-import { useRef, useEffect } from "react"
-import { AlertCircle, MapPin } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { useState, useRef, useEffect } from "react"
+import { cn } from "@/lib/utils"
 
 interface AddressAutocompleteProps {
   onSelect: (data: { address: string; lat: number; lng: number }) => void
-  formData: string,
-  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void
-  locationError: string
+  className?: string
 }
 
-export function AddressAutocomplete({ onSelect, formData, handleChange, locationError }: AddressAutocompleteProps) {
+interface AddressData {
+  address: string
+  lat: number
+  lng: number
+}
+
+export function AddressAutocomplete({ onSelect, className }: AddressAutocompleteProps) {
   const inputRef = useRef<HTMLInputElement>(null)
+  const [isFocused, setIsFocused] = useState(false)
 
   useEffect(() => {
     // Add custom styles for the Google autocomplete dropdown
     const style = document.createElement("style")
     style.textContent = `
-
       .pac-container {
         border-radius: 12px;
         border: none;
@@ -144,28 +147,19 @@ export function AddressAutocomplete({ onSelect, formData, handleChange, location
   }, [onSelect])
 
   return (
-
     <div className="relative">
-      <MapPin className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
-
       <input
         ref={inputRef}
-        id="location"
-        name="location"
-        maxLength={100}
-        placeholder="Geben Sie Ihren Standort an"
-        defaultValue={formData}
-        onBlur={handleChange}
-        className={`w-full text-[16px] rounded-md bg-white border-2 h-12 pl-12 pr-4 outline-none focus:border-primary ${locationError ? "border-red-300 focus:ring-red-300" : "border-gray-200"
-          }`}
+        type="text"
+        placeholder="Enter your address"
+        className={cn(
+          "w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50",
+          isFocused ? "border-primary" : "border-gray-300",
+          className,
+        )}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
       />
-
-      {locationError && (
-        <div className="absolute right-3 top-3.5 text-red-500">
-          <AlertCircle className="h-5 w-5" />
-        </div>
-      )}
     </div>
   )
 }
-

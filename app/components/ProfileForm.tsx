@@ -25,11 +25,20 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "@/context/AuthContext"
 import Image from "next/image"
 import { BackendReference } from "@/types/BackendReference"
+import Script from "next/script"
+import { AddressAutocomplete } from "./body/address-autocomplete"
+import AddressPage from "./body/Address"
 
 interface PhotoItem {
   id?: string;
   file?: File;
   preview: string;
+}
+
+interface AddressData {
+  address: string
+  lat: number
+  lng: number
 }
 
 interface ProfileFormProps {
@@ -57,6 +66,7 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
   const router = useRouter()
   const totalSteps = 5
   const [step, setStep] = useState(1)
+  const [selectedAddress, setSelectedAddress] = useState<AddressData | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const initialPhotos: PhotoItem[] =
@@ -112,6 +122,8 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
   const nameInputRef = useRef<HTMLInputElement>(null)
   const locationInputRef = useRef<HTMLInputElement>(null)
   const websiteInputRef = useRef<HTMLInputElement>(null)
+
+  const apiKey = "AIzaSyD1D5qzwgPA5guVgv6QWJFjtdhRUpqAwus"
 
   useEffect(() => {
     console.log("form photos: ", photos)
@@ -207,6 +219,11 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
       fields.push("Handwerk")
       field_count += 1
     }
+
+    if (rechtsformError) {
+      fields.push("Rechtsform")
+      field_count += 1
+    }
     if (experienceError) {
       fields.push("Erfahrung")
       field_count += 1
@@ -254,10 +271,10 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
     setInvalidURLSError(message)
   }, [
     nameError,
-    rechtsformError,
     emailError,
     telefonError,
     craftError,
+    rechtsformError,
     experienceError,
     locationError,
     bioError,
@@ -318,16 +335,21 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
       isValid = false
     }
 
+    if (!formData.email) {
+      setEmailError("Bitte geben Sie Ihre Geschäft-E-Mail-Adresse an.")
+      isValid = false
+    }
+
     if (!formData.craft) {
       setCraftError("Bitte wählen Sie Ihr Handwerk aus.")
       isValid = false
     }
 
-    const exp = Number(formData.experience)
-    if (!formData.experience || isNaN(exp) || exp <= 0) {
-      setExperienceError("Bitte geben Sie eine positive Zahl an.")
+    if (!formData.rechtsform) {
+      setRechtsFormError("Bitte wählen Sie Ihre Rechtsform aus.")
       isValid = false
     }
+
 
     return isValid
   }
@@ -335,36 +357,28 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
   const validateStep2 = () => {
     let isValid = true
 
+    const exp = Number(formData.experience)
+    if (!formData.experience || isNaN(exp) || exp <= 0) {
+      setExperienceError("Bitte geben Sie eine positive Zahl an.")
+      isValid = false
+    }
+
     if (!formData.location) {
       setLocationError("Bitte geben Sie einen Standort an.")
       isValid = false
     }
-
-    if (!formData.bio) {
-      setBioError("Bitte geben Sie eine Beschreibung an.")
-      isValid = false
-    }
-
-    if (!formData.handwerks_karten_nummer) {
-      setHandwerksKartenNummerError("Bitte geben Sie eine Handelsregisternummer an.")
-      isValid = false
-    }
-
-    return isValid
-  }
-
-  const validateStep3 = () => {
-    let isValid = true
 
     if (formData.website && !formData.website.match(/^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w-./?%&=]*)?$/)) {
       setWebsiteError("Bitte geben Sie eine korrekte URL an.")
       isValid = false
     }
 
+    
+
     return isValid
   }
 
-  const validateStep4 = () => {
+  const validateStep3 = () => {
     let isValid = true
 
     if (formData.skills.length < 1) {
@@ -375,11 +389,27 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
     return isValid
   }
 
-  const validateStep5 = () => {
+  const validateStep4 = () => {
     let isValid = true
 
     if (photos.length < 1) {
       setPhotosError("Bitte laden Sie mindestens ein Foto hoch.")
+      isValid = false
+    }
+
+    return isValid
+  }
+
+  const validateStep5 = () => {
+    let isValid = true
+
+    if (formData.telefon && !formData.telefon.match(/^(?:\+|00)?[0-9\s()-]{7,20}$/)) {
+      setTelefonError("Bitte geben Sie eine gültige Telefonnummer an.")
+      isValid = false
+    }
+
+    if (!formData.handwerks_karten_nummer) {
+      setHandwerksKartenNummerError("Bitte geben Sie eine Handelsregisternummer an.")
       isValid = false
     }
 
@@ -406,6 +436,9 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
         break
       case "craft":
         setCraftError("")
+        break
+      case "rechtsform":
+        setRechtsFormError("")
         break
       case "experience":
         setExperienceError("")
@@ -724,29 +757,6 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
                 {emailError && <p className="text-sm text-red-500 flex items-center gap-1">{emailError}</p>}
               </div>
 
-              <div className="space-y-3">
-                <Label htmlFor="telefon" className="text-base font-medium flex items-center">
-                  Telefon-Nummer<span className="text-red-500 ml-1">*</span>
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="telefon"
-                    name="telefon"
-                    maxLength={100}
-                    placeholder="Geben Sie Ihre Telefon-Nummer ein"
-                    value={formData.telefon}
-                    onChange={handleChange}
-                    className={`text-[16px] rounded-md bg-white border-2 h-12 pl-4 ${telefonError ? "border-red-300 focus-visible:ring-red-300" : "focus-visible:border-primary"
-                      }`}
-                  />
-                  {telefonError && (
-                    <div className="absolute right-3 top-3 text-red-500">
-                      <AlertCircle className="h-5 w-5" />
-                    </div>
-                  )}
-                </div>
-                {telefonError && <p className="text-sm text-red-500 flex items-center gap-1">{telefonError}</p>}
-              </div>
 
               <div className="space-y-3 pt-2 flex flex-col">
                 <Label htmlFor="craft" className="text-base font-medium">
@@ -785,6 +795,15 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
                 {craftError && <p className="text-sm text-red-500 flex items-center gap-1">{craftError}</p>}
               </div>
 
+
+              <Button type="submit" className="w-full h-12 text-base mt-6" disabled={isSubmitting}>
+                Weiter
+              </Button>
+            </>
+          )}
+
+          {step === 2 && (
+            <>
               <div className="space-y-3">
                 <Label htmlFor="experience" className="text-base font-medium flex items-center">
                   Jahre der Erfahrung <span className="text-red-500 ml-1">*</span>
@@ -822,105 +841,25 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
                 {experienceError && <p className="text-sm text-red-500 flex items-center gap-1">{experienceError}</p>}
               </div>
 
-              <Button type="submit" className="w-full h-12 text-base mt-6" disabled={isSubmitting}>
-                Weiter
-              </Button>
-            </>
-          )}
 
-          {step === 2 && (
-            <>
+      <Script
+        src={`https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`}
+        strategy="beforeInteractive"
+      />
               <div className="space-y-3 pt-2">
                 <Label htmlFor="location" className="text-base font-medium">
                   Standort<span className="text-red-500 ml-1">*</span>
                 </Label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
-                  <Input
-                    ref={locationInputRef}
-                    id="location"
-                    name="location"
-                    maxLength={100}
-                    placeholder="Geben Sie Ihren Standort an"
-                    value={formData.location}
-                    onChange={handleChange}
-                    className={`text-[16px] rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${locationError ? "border-red-300 focus-visible:ring-red-300" : "focus-visible:border-primary"
-                      }`}
-                  />
-                  {locationError && (
-                    <div className="absolute right-3 top-3.5 text-red-500">
-                      <AlertCircle className="h-5 w-5" />
-                    </div>
-                  )}
-                </div>
+
+                  <AddressAutocomplete onSelect={(data) => setSelectedAddress(data)} formData={formData.location} handleChange={handleChange} locationError={locationError}/>
                 {locationError && <p className="text-sm text-red-500 flex items-center gap-1">{locationError}</p>}
               </div>
 
-              <div className="space-y-3">
-                <Label htmlFor="bio" className="text-base font-medium">
-                  Beschreibung<span className="text-red-500 ml-1">*</span>
-                </Label>
-                <div className="relative text-muted-foreground">
-                  <textarea
-                    id="bio"
-                    name="bio"
-                    maxLength={500}
-                    placeholder="Beschreiben Sie Ihre Arbeit..."
-                    value={formData.bio}
-                    onChange={handleChange}
-                    className={`w-full rounded-md border-2 h-24 p-2 text-muted-foreground ${bioError ? "border-red-300 focus-visible:ring-red-300" : "focus:border-black"
-                      } focus:ring-0 focus:outline-none`}
-                  />
-                  {bioError && (
-                    <div className="absolute right-3 top-3.5 text-red-500">
-                      <AlertCircle className="h-5 w-5" />
-                    </div>
-                  )}
-                </div>
-                {bioError && <p className="text-sm text-red-500 flex items-center gap-1">{bioError}</p>}
-              </div>
+              <AddressPage />
 
-              <div className="space-y-3 pt-2">
-                <Label htmlFor="handwerks_karten_nummer" className="text-base font-medium">
-                  Handwerks-Karten-Nummer<span className="text-red-500 ml-1">*</span>
-                </Label>
-                <div className="relative">
-                  <Hash className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
-                  <Input
-                    id="handwerks_karten_nummer"
-                    name="handwerks_karten_nummer"
-                    maxLength={100}
-                    placeholder="Geben Sie Ihre Handwerks-Karten-Nummer an"
-                    value={formData.handwerks_karten_nummer}
-                    onChange={handleChange}
-                    className={`text-[16px] rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${handwerksKartenNummerError ? "border-red-300 focus-visible:ring-red-300" : "focus-visible:border-primary"
-                      }`}
-                  />
-                  {handwerksKartenNummerError && (
-                    <div className="absolute right-3 top-3.5 text-red-500">
-                      <AlertCircle className="h-5 w-5" />
-                    </div>
-                  )}
-                </div>
-                {handwerksKartenNummerError && <p className="text-sm text-red-500 flex items-center gap-1">{handwerksKartenNummerError}</p>}
-              </div>
-
-              <div className="flex justify-between gap-4">
-                <Button onClick={prevStep} variant="outline" className="h-12" disabled={isSubmitting}>
-                  <ChevronLeft className="w-4 h-4 mr-2" /> Zurück
-                </Button>
-                <Button type="submit" className="w-full h-12 text-base" disabled={isSubmitting}>
-                  Weiter
-                </Button>
-              </div>
-            </>
-          )}
-
-          {step === 3 && (
-            <>
               <div className="space-y-3 pt-2">
                 <Label htmlFor="website" className="text-base font-medium">
-                  Website <span className="text-sm font-normal text-muted-foreground">(Optional)</span>
+                  Webseite <span className="text-sm font-normal text-muted-foreground">(Optional)</span>
                 </Label>
                 <div className="relative">
                   <Globe className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
@@ -942,7 +881,6 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
                   )}
                 </div>
                 {websiteError && <p className="text-sm text-red-500 flex items-center gap-1">{websiteError}</p>}
-                <p className="text-sm text-muted-foreground">Ihre persönliche oder berufliche Webseite.</p>
               </div>
 
               <div className="space-y-3 pt-2">
@@ -965,6 +903,7 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
                 </div>
               </div>
 
+
               <div className="flex justify-between gap-4">
                 <Button onClick={prevStep} variant="outline" className="h-12" disabled={isSubmitting}>
                   <ChevronLeft className="w-4 h-4 mr-2" /> Zurück
@@ -976,7 +915,8 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
             </>
           )}
 
-          {step === 4 && (
+
+          {step === 3 && (
             <>
               <div className="pt-2">
                 <Label className="text-base font-medium mb-2">
@@ -1018,7 +958,7 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
             </>
           )}
 
-          {step === 5 && (
+          {step === 4 && (
             <div className="space-y-4">
               <h3 className="font-semibold">Portfolio</h3>
               <div className="grid grid-cols-3 gap-2">
@@ -1058,8 +998,106 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
                 )}
               </div>
               <p className="text-sm text-red-500 flex items-center gap-1">{photosError}</p>
+             
+              <input
+                type="file"
+                ref={fileInputRef}
+                disabled={isSubmitting}
+                className="hidden"
+                accept="image/*"
+                multiple
+                onChange={handlePhotoUpload}
+              />
+              <div className="flex justify-between gap-4">
+                <Button onClick={prevStep} variant="outline" className="h-12" disabled={isSubmitting}>
+                  <ChevronLeft className="w-4 h-4 mr-2" /> Zurück
+                </Button>
+
+                <Button type="submit" className="w-full h-12 text-base" disabled={isSubmitting}>
+                  Weiter
+                </Button>
+
+              </div>
+            </div>
+          )}
+
+          {step === 5 && (
+            <>
+
+              <div className="space-y-3">
+                <Label htmlFor="bio" className="text-base font-medium">
+                  Beschreibung <span className="text-sm font-normal text-muted-foreground">(Optional)</span>
+                </Label>
+                <div className="relative text-muted-foreground">
+                  <textarea
+                    id="bio"
+                    name="bio"
+                    maxLength={500}
+                    placeholder="Beschreiben Sie Ihre Arbeit..."
+                    value={formData.bio}
+                    onChange={handleChange}
+                    className={`w-full rounded-md border-2 h-24 p-2 text-muted-foreground ${bioError ? "border-red-300 focus-visible:ring-red-300" : "focus:border-black"
+                      } focus:ring-0 focus:outline-none`}
+                  />
+                  {bioError && (
+                    <div className="absolute right-3 top-3.5 text-red-500">
+                      <AlertCircle className="h-5 w-5" />
+                    </div>
+                  )}
+                </div>
+                {bioError && <p className="text-sm text-red-500 flex items-center gap-1">{bioError}</p>}
+              </div>
+
+              <div className="space-y-3">
+                <Label htmlFor="telefon" className="text-base font-medium flex items-center">
+                  Telefon-Nummer <span className="ml-1 text-sm font-normal text-muted-foreground">(Optional)</span>
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="telefon"
+                    name="telefon"
+                    maxLength={100}
+                    placeholder="Geben Sie Ihre Telefon-Nummer ein"
+                    value={formData.telefon}
+                    onChange={handleChange}
+                    className={`text-[16px] rounded-md bg-white border-2 h-12 pl-4 ${telefonError ? "border-red-300 focus-visible:ring-red-300" : "focus-visible:border-primary"
+                      }`}
+                  />
+                  {telefonError && (
+                    <div className="absolute right-3 top-3 text-red-500">
+                      <AlertCircle className="h-5 w-5" />
+                    </div>
+                  )}
+                </div>
+                {telefonError && <p className="text-sm text-red-500 flex items-center gap-1">{telefonError}</p>}
+              </div>
+
+              <div className="space-y-3 pt-2">
+                <Label htmlFor="handwerks_karten_nummer" className="text-base font-medium">
+                  Handwerks-Karten-Nummer<span className="text-red-500 ml-1">*</span>
+                </Label>
+                <div className="relative">
+                  <Hash className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
+                  <Input
+                    id="handwerks_karten_nummer"
+                    name="handwerks_karten_nummer"
+                    maxLength={100}
+                    placeholder="Geben Sie Ihre Handwerks-Karten-Nummer an"
+                    value={formData.handwerks_karten_nummer}
+                    onChange={handleChange}
+                    className={`text-[16px] rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${handwerksKartenNummerError ? "border-red-300 focus-visible:ring-red-300" : "focus-visible:border-primary"
+                      }`}
+                  />
+                  {handwerksKartenNummerError && (
+                    <div className="absolute right-3 top-3.5 text-red-500">
+                      <AlertCircle className="h-5 w-5" />
+                    </div>
+                  )}
+                </div>
+                {handwerksKartenNummerError && <p className="text-sm text-red-500 flex items-center gap-1">{handwerksKartenNummerError}</p>}
               <p className="text-sm text-red-500 flex items-center gap-1">{missingFieldsError}</p>
               <p className="text-sm text-red-500 flex items-center gap-1">{invalidURLSError}</p>
+              <p className="text-sm text-red-500 flex items-center gap-1">{photosError}</p>
 
               {showInternalError && (
                 <div className="bg-white rounded-lg shadow-md p-4 mb-4 flex items-start">
@@ -1072,15 +1110,7 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
                   </div>
                 </div>
               )}
-              <input
-                type="file"
-                ref={fileInputRef}
-                disabled={isSubmitting}
-                className="hidden"
-                accept="image/*"
-                multiple
-                onChange={handlePhotoUpload}
-              />
+              </div>
               <div className="flex justify-between gap-4">
                 <Button onClick={prevStep} variant="outline" className="h-12" disabled={isSubmitting}>
                   <ChevronLeft className="w-4 h-4 mr-2" /> Zurück
@@ -1095,7 +1125,7 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
                       : "Profil erstellen"}
                 </Button>
               </div>
-            </div>
+            </>
           )}
         </form>
       </CardContent>
