@@ -28,30 +28,17 @@ export default function ReliableAddressAutocomplete({
     let interval: NodeJS.Timer | null = null;
 
     function maybeInitAutocomplete() {
-      console.log("Polling for window.google.maps...");
-
-      // 1) If google.maps isn't there yet, skip
-      if (!window.google || !window.google.maps) {
-        return;
-      }
-      // 2) If there's no input, skip
+      if (!window.google || !window.google.maps) return;
       if (!inputRef.current) return;
 
-      // 3) We only want to init once
-      console.log("Initializing Autocomplete now (no onLoad needed).");
+      // Only want to init once
       const autocomplete = new window.google.maps.places.Autocomplete(
         inputRef.current,
         { types: ["address"] }
       );
-
       autocomplete.addListener("place_changed", () => {
         const place = autocomplete.getPlace();
-        if (
-          !place.geometry ||
-          !place.formatted_address ||
-          !place.geometry.location
-        ) {
-          console.error("Invalid place data:", place);
+        if (!place.geometry?.location || !place.formatted_address) {
           return;
         }
         onChange(
@@ -60,6 +47,52 @@ export default function ReliableAddressAutocomplete({
           place.geometry.location.lng()
         );
       });
+
+      // ----- Here is the observer logic from your old code -----
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.addedNodes.length) {
+            const pacItems = document.querySelectorAll(".pac-item");
+            pacItems.forEach((item) => {
+              // Insert the custom icon container if not present
+              if (!item.querySelector(".custom-pin-container")) {
+                const pinContainer = document.createElement("div");
+                pinContainer.className = "custom-pin-container";
+
+                const pinIcon = document.createElement("div");
+                pinIcon.className = "custom-pin-icon";
+                pinIcon.innerHTML = `
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                       viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                       class="lucide lucide-map-pin" style="color: #333;">
+                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                `;
+                pinContainer.appendChild(pinIcon);
+                item.insertBefore(pinContainer, item.firstChild);
+              }
+
+              // Wrap the existing text nodes in a .pac-item-text-wrapper
+              if (!item.querySelector(".pac-item-text-wrapper")) {
+                const textWrapper = document.createElement("div");
+                textWrapper.className = "pac-item-text-wrapper";
+                
+                const children = Array.from(item.childNodes).filter(
+                  (node) =>
+                    node.nodeType === Node.ELEMENT_NODE &&
+                    !(node as Element).classList.contains("custom-pin-container")
+                );
+                children.forEach((child) => textWrapper.appendChild(child));
+                item.appendChild(textWrapper);
+              }
+            });
+          }
+        });
+      });
+
+      observer.observe(document.body, { childList: true, subtree: true });
 
       setHasInitialized(true);
     }
@@ -76,7 +109,7 @@ export default function ReliableAddressAutocomplete({
     };
   }, [onChange, hasInitialized]);
 
-  // (Optional) Block Enter if user hasn't actually selected from the dropdown
+  // The rest of your Enter-blocking logic, etc.
   useEffect(() => {
     const el = inputRef.current;
     if (!el) return;
@@ -85,7 +118,6 @@ export default function ReliableAddressAutocomplete({
       if (e.key === "Enter") {
         const selectedItem = document.querySelector(".pac-item-selected");
         if (!selectedItem) {
-          console.log("Blocked Enter – no valid suggestion highlighted");
           e.preventDefault();
         }
       }
@@ -95,16 +127,13 @@ export default function ReliableAddressAutocomplete({
     return () => el.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Styles for .pac-* classes
+  // The style injection
   useEffect(() => {
     const styleEl = document.createElement("style");
-
     styleEl.textContent = `
-
       .pac-container {
         border-radius: 12px;
-        border: none;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         margin-top: 8px;
         padding: 8px;
         background: white;
@@ -112,40 +141,31 @@ export default function ReliableAddressAutocomplete({
       }
       .pac-item {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
+        gap: 12px;
         padding: 12px;
-        border: none;
         border-radius: 8px;
         margin-bottom: 4px;
         cursor: pointer;
         background-color: #f2f2f2;
       }
-      .pac-item:hover {
-        background-color: #e9e9e9;
-      }
-      .pac-icon {
-        display: none;
-      }
-      .pac-item-query {
+      .pac-item:hover { background-color: #e9e9e9; }
+      .pac-icon { display: none; }
+      .pac-item-text-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
         font-size: 16px;
         color: #333;
-        padding-right: 4px;
+        overflow-wrap: anywhere;
       }
-      .pac-matched {
-        font-weight: 500;
-      }
+      .pac-item-query,
       .pac-item span:not(.pac-item-query) {
         font-size: 16px;
-        color: #444;
+        color: #333;
+        font-weight: 400 !important;
       }
-      .pac-container:after {
-        /* Style the "Powered by Google" text */
-        font-size: 10px;
-        color: #999;
-        padding: 4px 8px;
-        text-align: right;
-        opacity: 0.7;
-      }
+      .pac-matched { font-weight: 500 !important; }
       .custom-pin-container {
         display: flex;
         align-items: center;
@@ -155,7 +175,6 @@ export default function ReliableAddressAutocomplete({
         min-width: 48px;
         background-color: #e0e0e0;
         border-radius: 12px;
-        margin-right: 16px;
       }
     `;
     document.head.appendChild(styleEl);
