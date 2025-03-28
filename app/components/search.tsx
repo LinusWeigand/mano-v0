@@ -267,7 +267,7 @@ const handleSubmit = async () => {
 
                   {/* Location input */}
                   <div
-                    className={`flex-1 p-2 transition-colors py-4 pl-8 md:pr-12 relative location-field-container
+                    className={`flex-1 p-2 transition-colors py-[15px] pl-8 md:pr-12 relative location-field-container
                       ${
                         activeField === "location"
                           ? "bg-white hover:bg-white"
