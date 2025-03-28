@@ -50,11 +50,21 @@ interface ReliableAddressAutocompleteProps {
    * Whether to show the small MapPin icon inside the input on the left.
    */
   showIcon?: boolean;
+
+  /**
+   * Decide how the input itself is styled:
+   * - "profile": Bordered, padded, error icons, etc.
+   * - "search": Minimal, no border, etc.
+   */
+  variant?: "profile" | "search";
 }
 
 /**
  * A reusable Google-Places-powered address autocomplete input
  * that can optionally show a label, a required indicator, and an error message.
+ * 
+ * - The dropdown style & icon injection are always the same.
+ * - The input's styling changes depending on `variant`.
  */
 export default function ReliableAddressAutocomplete({
   value = "",
@@ -67,6 +77,7 @@ export default function ReliableAddressAutocomplete({
   errorMessage,
   className,
   showIcon = true,
+  variant = "profile", // "profile" or "search"
 }: ReliableAddressAutocompleteProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isFocused, setIsFocused] = useState(false);
@@ -106,7 +117,7 @@ export default function ReliableAddressAutocomplete({
 
       setHasInitialized(true);
 
-      // Inject custom styling/icons inside the suggestion dropdown.
+      // Always inject the custom icons & text-wrapper for the dropdown
       const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
           if (mutation.addedNodes.length) {
@@ -185,7 +196,8 @@ export default function ReliableAddressAutocomplete({
     };
   }, []);
 
-  // Inject the custom CSS for styling the .pac-container, etc.
+  // Inject global CSS for the .pac-container, .pac-item, etc.
+  // (So the dropdown looks the same in both profile & search.)
   useEffect(() => {
     const styleEl = document.createElement("style");
     styleEl.textContent = `
@@ -196,6 +208,7 @@ export default function ReliableAddressAutocomplete({
         padding: 8px;
         background: white;
         font-family: inherit;
+        z-index: 99999 !important; /* ensure it's on top of everything */
 
         width: 500px !important;
         min-width: 400px !important;
@@ -254,9 +267,27 @@ export default function ReliableAddressAutocomplete({
     };
   }, []);
 
+  /**
+   * Decide how the input itself is styled, depending on variant
+   */
+  const inputClasses = variant === "profile"
+    ? cn(
+      "w-full py-3 pr-4 border-2 rounded-md focus:outline-none focus:ring-0 transition-colors",
+      showIcon ? "pl-12" : "pl-4",
+      isFocused
+        ? "border-primary"
+        : errorMessage
+          ? "border-red-300 focus-visible:ring-red-300"
+          : "border-gray-300"
+    )
+    : cn(
+      // For "search" variant: simpler, more minimal style
+      "w-full border-none bg-transparent focus:outline-none focus:ring-0 text-[16px]",
+      className
+    );
+
   return (
     <div className={cn("flex flex-col", className)}>
-      {/* Conditionally show label if passed in */}
       {label && (
         <label htmlFor={id} className="text-base font-medium">
           {label}
@@ -264,8 +295,9 @@ export default function ReliableAddressAutocomplete({
         </label>
       )}
 
-      <div className="relative text-base mt-2">
-        {showIcon && (
+      <div className={cn("relative text-base mt-2", variant === "search" && "mt-0")}>
+        {/* Show Icon in "profile" variant only (or show it in both if you prefer) */}
+        {showIcon && variant === "profile" && (
           <MapPin className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
         )}
 
@@ -275,29 +307,21 @@ export default function ReliableAddressAutocomplete({
           name={name}
           type="text"
           placeholder={placeholder}
-          className={cn(
-            "w-full py-3 pr-4 border-2 rounded-md focus:outline-none focus:ring-0 transition-colors",
-            showIcon ? "pl-12" : "pl-4",
-            isFocused
-              ? "border-primary"
-              : errorMessage
-                ? "border-red-300 focus-visible:ring-red-300"
-                : "border-gray-300"
-          )}
+          className={inputClasses}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
         />
 
-        {/* Error icon on the right if there's an errorMessage */}
-        {errorMessage && (
+        {/* Show error icon on the right only if "profile" variant & errorMessage exists */}
+        {errorMessage && variant === "profile" && (
           <div className="absolute right-3 top-3.5 text-red-500">
             <AlertCircle className="h-5 w-5" />
           </div>
         )}
       </div>
 
-      {/* Error message below */}
-      {errorMessage && (
+      {/* Show error text below only if variant="profile" */}
+      {errorMessage && variant === "profile" && (
         <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
           {errorMessage}
         </p>

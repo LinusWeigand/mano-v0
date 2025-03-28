@@ -44,7 +44,7 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
         <div className="relative w-full overflow-hidden" style={{ aspectRatio: "1/1" }}>
           <Image
             loader={myLoader}
-            src={images[currentIndex] || "/placeholder.svg"}
+            src={images[currentIndex]}
             width={600}
             height={600}
             quality={75}

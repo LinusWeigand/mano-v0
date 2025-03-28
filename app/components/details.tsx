@@ -63,7 +63,7 @@ export default function Details({
       >
         <Image
           loader={myLoader}
-          src={photos[currentPhotoIndex] || `/placeholder.svg?height=600&width=600`}
+          src={photos[currentPhotoIndex]}
           alt={`${name}'s work`}
           width={400}
           height={400}
