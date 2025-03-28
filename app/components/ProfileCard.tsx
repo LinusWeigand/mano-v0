@@ -49,7 +49,7 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
             height={600}
             quality={75}
             alt={profile.name}
-            className="h-full w-full object-cover rounded-xl"  // Fully rounded image
+            className="h-full w-full object-cover rounded-xl"
           />
 
           {/* Navigation buttons (only visible on hover) */}
@@ -82,33 +82,37 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
           </button>
 
           {/* Pagination dots (container remains at the bottom) */}
-          <div className="absolute bottom-4 left-1/2 flex items-center gap-[6px] -translate-x-1/2">
-            {Array.from({ length: dotsCount }, (_, i) => {
-              // Each dot represents an image with index = windowStart + i.
-              const dotIndex = windowStart + i
-              // Calculate the difference from the active dot.
-              const diff = Math.abs(currentIndex - dotIndex)
-              // Use a smaller base size and decrement so the dots are all smaller.
-              const baseSize = 7
-              const decrement = 0.5
-              const size = baseSize - diff * decrement
-              return (
-                <div
-                  key={i}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setCurrentIndex(dotIndex)
-                  }}
-                  style={{ width: `${size}px`, height: `${size}px` }}
-                  className={cn(
-                    "rounded-full cursor-pointer",
-                    dotIndex === currentIndex ? "bg-white" : "bg-white/60"
-                  )}
-                />
-              )
-            })}
-          </div>
+
+      {totalImages > 1 && (
+        <div className="absolute bottom-4 left-1/2 flex items-center gap-[6px] -translate-x-1/2">
+          {Array.from({ length: dotsCount }, (_, i) => {
+            const dotIndex = windowStart + i
+            const diff = Math.abs(currentIndex - dotIndex)
+            const baseSize = 7
+            const decrement = 0.5
+            const size = baseSize - diff * decrement
+
+            return (
+              <div
+                key={i}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setCurrentIndex(dotIndex)
+                }}
+                style={{ width: `${size}px`, height: `${size}px` }}
+                className={cn(
+                  "rounded-full cursor-pointer",
+                  dotIndex === currentIndex ? "bg-white" : "bg-white/60"
+                )}
+              />
+            )
+          })}
         </div>
+      )}
+      
+
+
+      </div>
       </div>
 
       <CardContent className="!py-3 p-0 w-full">

@@ -127,61 +127,68 @@ export default function ReliableAddressAutocomplete({
     return () => el.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // The style injection
-  useEffect(() => {
-    const styleEl = document.createElement("style");
-    styleEl.textContent = `
-      .pac-container {
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        margin-top: 8px;
-        padding: 8px;
-        background: white;
-        font-family: inherit;
-      }
-      .pac-item {
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-        padding: 12px;
-        border-radius: 8px;
-        margin-bottom: 4px;
-        cursor: pointer;
-        background-color: #f2f2f2;
-      }
-      .pac-item:hover { background-color: #e9e9e9; }
-      .pac-icon { display: none; }
-      .pac-item-text-wrapper {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        font-size: 16px;
-        color: #333;
-        overflow-wrap: anywhere;
-      }
-      .pac-item-query,
-      .pac-item span:not(.pac-item-query) {
-        font-size: 16px;
-        color: #333;
-        font-weight: 400 !important;
-      }
-      .pac-matched { font-weight: 500 !important; }
-      .custom-pin-container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 48px;
-        height: 48px;
-        min-width: 48px;
-        background-color: #e0e0e0;
-        border-radius: 12px;
-      }
-    `;
-    document.head.appendChild(styleEl);
-    return () => {
-      document.head.removeChild(styleEl);
-    };
-  }, []);
+useEffect(() => {
+  const styleEl = document.createElement("style");
+  styleEl.textContent = `
+    .pac-container {
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      margin-top: 8px;
+      padding: 8px;
+      background: white;
+      font-family: inherit;
+    }
+    .pac-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 4px;
+      cursor: pointer;
+      background-color: #f2f2f2;
+    }
+    .pac-item:hover {
+      background-color: #e9e9e9;
+    }
+    .pac-icon {
+      display: none;
+    }
+    .pac-item-text-wrapper {
+      display: flex;
+      flex-direction: row; /* changed from column */
+      flex-wrap: wrap;     /* let it wrap if too wide */
+      align-items: center;
+      gap: 4px;            /* or 2px, however much space you like */
+      font-size: 16px;
+      color: #333;
+      overflow-wrap: anywhere;
+    }
+    .pac-item-query,
+    .pac-item span:not(.pac-item-query) {
+      font-size: 16px;
+      color: #333;
+      font-weight: 400 !important;
+    }
+    .pac-matched {
+      font-weight: 500 !important;
+    }
+    .custom-pin-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      min-width: 48px;
+      background-color: #e0e0e0;
+      border-radius: 12px;
+    }
+  `;
+  document.head.appendChild(styleEl);
+  return () => {
+    document.head.removeChild(styleEl);
+  };
+}, []);
 
   return (
     <div className="space-y-3 pt-2">
