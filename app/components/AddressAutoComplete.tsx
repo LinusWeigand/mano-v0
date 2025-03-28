@@ -282,7 +282,7 @@ export default function ReliableAddressAutocomplete({
     )
     : cn(
       // For "search" variant: simpler, more minimal style
-      "w-full border-none bg-transparent focus:outline-none focus:ring-0 text-[16px]",
+      "w-full border-none bg-transparent focus:outline-none focus:ring-0 text-[16px] -py-[1px]",
       className
     );
 

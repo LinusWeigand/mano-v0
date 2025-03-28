@@ -1,6 +1,7 @@
 
 "use client"
 import { Card, CardContent } from "@/components/ui/card"
+import { useAuth } from "@/context/AuthContext"
 import { cn, myLoader } from "@/lib/utils"
 import { ProfileModel } from "@/types/ProfileModel"
 import { ChevronLeft, ChevronRight, Heart } from "lucide-react"
@@ -14,6 +15,9 @@ interface ProfileCardProps {
 export default function ProfileCard({ profile }: ProfileCardProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isFavorite, setIsFavorite] = useState(false)
+
+  const { isLoggedIn } = useAuth();
+
 
   const images =
     profile.photos && profile.photos.length > 0
@@ -78,7 +82,7 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
               setIsFavorite(!isFavorite)
             }}
           >
-            <Heart className={cn("h-7 w-7 fill-black/20 hover:h-8 hover:w-8", isFavorite ? "fill-white" : "")} />
+            <Heart className={cn("h-6 w-6 fill-black/20 hover:h-7 hover:w-7", isFavorite ? "fill-white" : "")} />
           </button>
 
           {/* Pagination dots (container remains at the bottom) */}

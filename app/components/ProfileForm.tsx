@@ -58,7 +58,7 @@ interface ProfileFormProps {
 export default function ProfileForm({ initialData, isEditing = false }: ProfileFormProps) {
   const router = useRouter()
   const totalSteps = 5
-  const [step, setStep] = useState(2)
+  const [step, setStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const initialPhotos: PhotoItem[] =
@@ -1037,7 +1037,7 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
 
               <div className="space-y-3">
                 <Label htmlFor="telefon" className="text-base font-medium flex items-center">
-                  Telefon-Nummer <span className="text-sm font-normal text-muted-foreground">(Optional)</span>
+                  Telefon-Nummer <span className="text-sm font-normal text-muted-foreground ml-1">(Optional)</span>
                 </Label>
                 <div className="relative">
                   <Input

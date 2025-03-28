@@ -8,17 +8,21 @@ import { ProfileModel } from "@/types/ProfileModel";
 
 function AirbnbMap({
   apiKey,
-  center = { lat: 48.12716675545072, lng: 11.574901781491835},
-  zoom = 11,
+  initialCenter = { lat: 48.12716675545072, lng: 11.574901781491835},
+  initialZoom = 11,
   onMarkerClick,
 }: {
   apiKey: string;
-  center?: { lat: number; lng: number };
-  zoom?: number;
+  initialCenter?: { lat: number; lng: number };
+  initialZoom?: number;
   onMarkerClick?: (profileId: string) => void;
 }) {
   const { isLoaded } = useLoadScript({ googleMapsApiKey: apiKey });
   const [map, setMap] = React.useState<google.maps.Map | null>(null);
+
+  const [center, setCenter] = React.useState(initialCenter);
+  // Keep zoom in React state as well (if you want to preserve zoom level)
+  const [zoom, setZoom] = React.useState(initialZoom);
 
   // Get profiles from context
   const { profiles, isLoading } = useProfiles();
@@ -39,6 +43,19 @@ function AirbnbMap({
       mapContainerStyle={containerStyle}
       center={center}
       zoom={zoom}
+      onDragEnd={() => {
+        if (map) {
+          const newCenter = map.getCenter();
+          if (newCenter) {
+            setCenter({ lat: newCenter.lat(), lng: newCenter.lng() });
+          }
+        }
+      }}
+      onIdle={() => {
+        if (map) {
+          setZoom(map.getZoom() ?? initialZoom);
+        }
+      }}
       options={{
         mapId: "298cbf7b9c015966",
         disableDefaultUI: true,
@@ -113,7 +130,7 @@ function AirbnbMap({
           className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors"
           aria-label="Navigate"
         >
-          <Navigation className="w-5 h-5 text-gray-700" />
+          <Navigation className="-ml-[1px] w-5 h-5 text-gray-700" />
         </button>
       </div>
     </GoogleMap>
