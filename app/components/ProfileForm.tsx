@@ -819,7 +819,6 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
               </div>
 
               <ReliableAddressAutocomplete
-                value={formData.location}
                 onChange={(address, lat, lng) => setFormData({ ...formData, location: address, lat: lat, lng: lng })}
                 locationError={locationError}
               />

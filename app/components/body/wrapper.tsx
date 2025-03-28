@@ -32,13 +32,14 @@ export default function BodyWrapper() {
     window.addEventListener("scroll", handleScroll);
     // Run initially in case the page is already scrolled
     handleScroll();
+    console.log("window.google: ", window.google);
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
     <div className="relative">
-       {viewMode === "list" ? <ListBody /> : <MapBody />}
+      {viewMode === "list" ? <ListBody /> : <MapBody />}
 
       {!isAtBottom && (
         <div className="fixed bottom-9 left-1/2 transform -translate-x-1/2 z-50">
