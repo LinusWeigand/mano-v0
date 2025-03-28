@@ -24,7 +24,7 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "@/context/AuthContext"
 import Image from "next/image"
 import { BackendReference } from "@/types/BackendReference"
-import ReliableAddressAutocomplete from "./body/AddressAutoComplete"
+import ReliableAddressAutocomplete from "./AddressAutoComplete"
 
 interface PhotoItem {
   id?: string;
@@ -818,10 +818,16 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
                 {experienceError && <p className="text-sm text-red-500 flex items-center gap-1">{experienceError}</p>}
               </div>
 
-              <ReliableAddressAutocomplete
-                onChange={(address, lat, lng) => setFormData({ ...formData, location: address, lat: lat, lng: lng })}
-                locationError={locationError}
-              />
+
+<ReliableAddressAutocomplete
+  label="Standort"
+  required
+  errorMessage={locationError}
+  value={formData.location}
+  onChange={(address, lat, lng) => {
+    setFormData({ ...formData, location: address, lat, lng });
+  }}
+/>
 
               <div className="space-y-3 pt-2">
                 <Label htmlFor="website" className="text-base font-medium">
@@ -1006,7 +1012,7 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
 
               <div className="space-y-3">
                 <Label htmlFor="bio" className="text-base font-medium">
-                  Beschreibung<span className="text-red-500 ml-1">*</span>
+                  Beschreibung <span className="text-sm font-normal text-muted-foreground">(Optional)</span>
                 </Label>
                 <div className="relative text-muted-foreground">
                   <textarea
@@ -1031,7 +1037,7 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
 
               <div className="space-y-3">
                 <Label htmlFor="telefon" className="text-base font-medium flex items-center">
-                  Telefon-Nummer<span className="text-red-500 ml-1">*</span>
+                  Telefon-Nummer <span className="text-sm font-normal text-muted-foreground">(Optional)</span>
                 </Label>
                 <div className="relative">
                   <Input

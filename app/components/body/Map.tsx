@@ -1,56 +1,30 @@
-
-import { Suspense, useState } from "react";
+import React, { Suspense } from "react";
 import { GoogleMap, OverlayView, useLoadScript } from "@react-google-maps/api";
 import { Plus, Minus, Navigation } from "lucide-react";
-
-const sampleLocations = [
-  { id: "1", lat: 47.3769, lng: 8.5417, price: 121 }, // Zurich
-  { id: "2", lat: 46.8182, lng: 8.2275, price: 177 }, // Central Switzerland
-  { id: "3", lat: 46.5197, lng: 9.8522, price: 98 }, // St. Moritz area
-  { id: "4", lat: 47.0502, lng: 9.4801, price: 1592 }, // Liechtenstein
-  { id: "5", lat: 46.6863, lng: 7.8632, price: 1180 }, // Interlaken area
-  { id: "6", lat: 47.0599, lng: 9.0587, price: 434 }, // Eastern Switzerland
-  { id: "7", lat: 47.2692, lng: 11.4041, price: 159 }, // Innsbruck area
-  { id: "8", lat: 47.5622, lng: 13.6493, price: 227 }, // Salzburg area
-  { id: "9", lat: 47.2667, lng: 11.3833, price: 308 }, // Innsbruck
-  { id: "10", lat: 47.4245, lng: 10.9801, price: 413 }, // Garmisch area
-  { id: "11", lat: 47.0502, lng: 10.2677, price: 477 }, // Tyrol
-  { id: "12", lat: 46.4908, lng: 11.3398, price: 334 }, // Bolzano area
-  { id: "13", lat: 46.6406, lng: 14.3095, price: 494 }, // Carinthia
-  { id: "14", lat: 47.8095, lng: 13.055, price: 104 }, // Salzburg
-  { id: "15", lat: 46.7712, lng: 12.8882, price: 132 }, // Lienz area
-  { id: "16", lat: 46.6228, lng: 14.2692, price: 153 }, // Klagenfurt area
-  { id: "17", lat: 46.7224, lng: 13.8469, price: 127 }, // Spittal area
-  { id: "18", lat: 46.2214, lng: 10.1699, price: 190 }, // Stelvio National Park
-];
-
-interface Location {
-  id: string;
-  lat: number;
-  lng: number;
-  price: number;
-}
-
-interface AirbnbMapProps {
-  apiKey: string;
-  center?: { lat: number; lng: number };
-  zoom?: number;
-  locations?: Location[];
-  onMarkerClick?: (location: Location) => void;
-  onShowListClick?: () => void;
-}
+import { useProfiles } from "@/context/ProfilesContext";
+import Modal from "../modal";
+import Details from "../details";
+import { ProfileModel } from "@/types/ProfileModel";
 
 function AirbnbMap({
   apiKey,
-  center = { lat: 47.3769, lng: 8.5417 },
-  zoom = 8,
-  locations = [],
+  center = { lat: 48.12716675545072, lng: 11.574901781491835},
+  zoom = 11,
   onMarkerClick,
-}: AirbnbMapProps) {
+}: {
+  apiKey: string;
+  center?: { lat: number; lng: number };
+  zoom?: number;
+  onMarkerClick?: (profileId: string) => void;
+}) {
   const { isLoaded } = useLoadScript({ googleMapsApiKey: apiKey });
-  const [map, setMap] = useState<google.maps.Map | null>(null);
+  const [map, setMap] = React.useState<google.maps.Map | null>(null);
 
-  if (!isLoaded) {
+  // Get profiles from context
+  const { profiles, isLoading } = useProfiles();
+
+
+  if (!isLoaded || isLoading) {
     return (
       <div className="w-full h-full flex items-center justify-center">
         Loading map...
@@ -66,34 +40,36 @@ function AirbnbMap({
       center={center}
       zoom={zoom}
       options={{
-        mapId: "298cbf7b9c015966", // Your published Map ID
+        mapId: "298cbf7b9c015966",
         disableDefaultUI: true,
         clickableIcons: false,
       }}
       onLoad={(mapInstance) => setMap(mapInstance)}
     >
-      {/* Custom price markers as overlays */}
-      {locations.map((location) => (
-        <OverlayView
-          key={location.id}
-          position={{ lat: location.lat, lng: location.lng }}
-          mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-        >
-          <div
-            onClick={() => onMarkerClick && onMarkerClick(location)}
-            className="relative flex items-center justify-center bg-white rounded-full px-3 py-1 shadow-md min-w-[60px] h-[30px] font-semibold text-sm hover:z-10 hover:scale-105 transition-transform cursor-pointer"
+      {profiles.map((profile) => {
+        const { id, lat, lng, craft } = profile;
+        if (!lat || !lng) return null;
+        return (
+          <OverlayView
+            key={id}
+            position={{ lat, lng }}
+            mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
           >
-            {location.price} €
-          </div>
-        </OverlayView>
-      ))}
+            <div
+              onClick={() => onMarkerClick && onMarkerClick(id)}
+              className="relative flex items-center justify-center bg-white rounded-full px-12 py-1 shadow-md min-w-[60px] h-[30px] font-semibold text-sm hover:z-10 hover:scale-105 transition-transform cursor-pointer"
+            >
+              {craft}
+            </div>
+          </OverlayView>
+        );
+      })}
 
       {/* Custom map controls */}
       <div className="absolute top-12 right-6 flex flex-col gap-2">
         <button
           onClick={() => {
             if (map) {
-              // Increase zoom level by 1
               map.setZoom((map.getZoom() ?? 0) + 1);
             }
           }}
@@ -105,7 +81,6 @@ function AirbnbMap({
         <button
           onClick={() => {
             if (map) {
-              // Decrease zoom level by 1
               map.setZoom((map.getZoom() ?? 0) - 1);
             }
           }}
@@ -121,8 +96,9 @@ function AirbnbMap({
                 (position) => {
                   const { latitude, longitude } = position.coords;
                   if (map) {
-                    // Pan to the user's current location and adjust zoom if desired
                     map.panTo({ lat: latitude, lng: longitude });
+                    console.log("latitude: ", latitude)
+                    console.log("longitude: ", longitude)
                     map.setZoom(12);
                   }
                 },
@@ -155,6 +131,10 @@ function MapLoading() {
 export default function MapBody() {
   const apiKey = "AIzaSyD1D5qzwgPA5guVgv6QWJFjtdhRUpqAwus";
 
+  const [selectedProfileId, setSelectedProfileId] = React.useState<string | null>(null)
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = React.useState(false)
+  const { profiles} = useProfiles();
+
   if (!apiKey) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center p-4">
@@ -172,13 +152,21 @@ export default function MapBody() {
         <div className="w-full h-screen">
           <AirbnbMap
             apiKey={apiKey}
-            locations={sampleLocations}
-            onMarkerClick={(location) =>
-              console.log("Clicked location:", location)
-            }
+            onMarkerClick={(profileId: string) => {
+              setSelectedProfileId(profileId)
+              setIsDetailsModalOpen(true)
+            }}
           />
         </div>
       </Suspense>
+      {isDetailsModalOpen && selectedProfileId && (
+        <Modal isOpen={isDetailsModalOpen} onClose={() => setIsDetailsModalOpen(false)}>
+          <Details
+            {...profiles.find((p: ProfileModel) => p.id === selectedProfileId)!}
+            onClose={() => setIsDetailsModalOpen(false)}
+          />
+        </Modal>
+      )}
     </main>
   );
 }

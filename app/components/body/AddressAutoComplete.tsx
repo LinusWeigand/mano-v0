@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { MapPin, AlertCircle } from "lucide-react";
 
 interface ReliableAddressAutocompleteProps {
+  value?: string;
   onChange: (address: string, lat: number, lng: number) => void;
   id?: string;
   name?: string;
@@ -14,6 +15,7 @@ interface ReliableAddressAutocompleteProps {
 }
 
 export default function ReliableAddressAutocomplete({
+  value = "",
   onChange,
   id = "location",
   name = "location",
@@ -25,7 +27,13 @@ export default function ReliableAddressAutocomplete({
   const [hasInitialized, setHasInitialized] = useState(false);
 
   useEffect(() => {
-    let interval: NodeJS.Timer | null = null;
+    if (inputRef.current && value !== inputRef.current.value) {
+      inputRef.current.value = value;
+    }
+  }, [value]);
+
+  useEffect(() => {
+    let interval: number | null = null;
 
     function maybeInitAutocomplete() {
       if (!window.google || !window.google.maps) return;
@@ -47,6 +55,8 @@ export default function ReliableAddressAutocomplete({
           place.geometry.location.lng()
         );
       });
+
+    setHasInitialized(true);
 
       // ----- Here is the observer logic from your old code -----
       const observer = new MutationObserver((mutations) => {
@@ -98,7 +108,7 @@ export default function ReliableAddressAutocomplete({
     }
 
     // Poll every 300ms until google.maps is defined
-    interval = setInterval(() => {
+    interval = window.setInterval(() => {
       if (!hasInitialized) {
         maybeInitAutocomplete();
       }

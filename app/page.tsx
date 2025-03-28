@@ -7,7 +7,6 @@ import BodyWrapper from "./components/body/wrapper";
 import { useProfiles } from "@/context/ProfilesContext";
 import { BackendReference } from "@/types/BackendReference";
 import { ProfileModel } from "@/types/ProfileModel";
-import Script from "next/script";
 
 
 export default function ManoLandingPage() {

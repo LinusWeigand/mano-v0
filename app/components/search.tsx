@@ -15,6 +15,7 @@ import { Search, MapPin, Hammer } from "lucide-react";
 import { useProfiles } from "@/context/ProfilesContext";
 import { ProfileModel } from "@/types/ProfileModel";
 import { BackendReference } from "@/types/BackendReference";
+import ReliableAddressAutocomplete from "./AddressAutoComplete";
 
 export default function SearchBar() {
   const [activeField, setActiveField] = useState<string | null>(null);
@@ -252,23 +253,23 @@ export default function SearchBar() {
                       }`}
                     onClick={() => setActiveField("location")}
                   >
+
                     <label
                       htmlFor="location"
                       className="block text-sm font-medium h-full text-forground"
                     >
                       Standort
                     </label>
-                    <div className="flex items-center mt-[1px] w-full">
-                      <MapPin className="h-5 w-5 text-muted-foreground mr-2" />
-                      <Input
-                        id="location"
-                        type="text"
-                        placeholder="Ort suchen"
-                        className="w-full border-none bg-transparent focus:ring-0 text-[16px]"
-                        onFocus={() => setActiveField("location")}
-                        onChange={(e) => setLocation(e.target.value)}
-                      />
-                    </div>
+
+<ReliableAddressAutocomplete
+  placeholder="Ort suchen"
+  value={location}
+  onChange={(address, lat, lng) => {
+    // For a search bar, maybe you only need the address string
+    // but you could also store lat/lng if relevant
+    setLocation(address);
+  }}
+/>
                   </div>
 
                   {/* Skills select + submit button */}

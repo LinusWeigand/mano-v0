@@ -6,6 +6,7 @@ import { ProfilesProvider } from "@/context/ProfilesContext";
 import { AuthProvider } from "@/context/AuthContext";
 import WrappedHeader from "./components/header/wrapper";
 import { GoogleScriptContextProvider } from "@/context/GoogleMapsContext";
+import Script from "next/script";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -30,17 +31,18 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      {/* 1) Insert a <head> section manually */}
-      <head>
-        {/* 2) A raw <script> tag that always appears in final HTML */}
-        <script
-          src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1D5qzwgPA5guVgv6QWJFjtdhRUpqAwus&libraries=places"
-        ></script>
-      </head>
+      {/* If you need something in <head>, just place it here, but do not use raw <script> */}
+      <head />
 
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        {/* Load Google Maps script after the page is interactive (or change strategy to 'beforeInteractive' if absolutely necessary) */}
+        <Script
+          src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1D5qzwgPA5guVgv6QWJFjtdhRUpqAwus&libraries=places"
+          strategy="afterInteractive"
+        />
+
         <BannerProvider>
           <ProfilesProvider>
             <AuthProvider>
