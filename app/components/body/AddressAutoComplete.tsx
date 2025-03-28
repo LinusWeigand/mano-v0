@@ -98,55 +98,64 @@ export default function ReliableAddressAutocomplete({
   // Styles for .pac-* classes
   useEffect(() => {
     const styleEl = document.createElement("style");
+
     styleEl.textContent = `
+
       .pac-container {
-        border-radius: 12px; 
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        margin-top: 8px; 
-        padding: 8px; 
-        background: white; 
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        margin-top: 8px;
+        padding: 8px;
+        background: white;
         font-family: inherit;
-        z-index: 9999;
       }
       .pac-item {
-        display: flex; 
-        align-items: flex-start; 
-        gap: 12px;
-        padding: 12px; 
-        border-radius: 8px; 
-        margin-bottom: 4px; 
-        cursor: pointer; 
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        margin-bottom: 4px;
+        cursor: pointer;
         background-color: #f2f2f2;
       }
       .pac-item:hover {
-        background-color: #e9e9e9; 
+        background-color: #e9e9e9;
       }
-      .pac-icon { display: none; }
-      .pac-item-text-wrapper {
-        display: flex; 
-        flex-direction: column; 
-        gap: 2px; 
-        font-size: 16px; 
-        color: #333; 
-        overflow-wrap: anywhere;
+      .pac-icon {
+        display: none;
       }
-      .pac-item-query, .pac-item span:not(.pac-item-query) {
-        font-size: 16px; 
-        color: #333; 
-        font-weight: 400 !important;
+      .pac-item-query {
+        font-size: 16px;
+        color: #333;
+        padding-right: 4px;
       }
       .pac-matched {
-        font-weight: 500 !important;
+        font-weight: 500;
+      }
+      .pac-item span:not(.pac-item-query) {
+        font-size: 16px;
+        color: #444;
+      }
+      .pac-container:after {
+        /* Style the "Powered by Google" text */
+        font-size: 10px;
+        color: #999;
+        padding: 4px 8px;
+        text-align: right;
+        opacity: 0.7;
       }
       .custom-pin-container {
-        display: flex; 
-        align-items: center; 
-        justify-content: center; 
-        width: 48px; 
-        height: 48px; 
-        min-width: 48px; 
-        background-color: #e0e0e0; 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        background-color: #e0e0e0;
         border-radius: 12px;
+        margin-right: 16px;
       }
     `;
     document.head.appendChild(styleEl);
