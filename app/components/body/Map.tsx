@@ -177,12 +177,14 @@ export default function MapBody() {
         </div>
       </Suspense>
       {isDetailsModalOpen && selectedProfileId && (
-        <Modal isOpen={isDetailsModalOpen} onClose={() => setIsDetailsModalOpen(false)}>
-          <Details
-            {...profiles.find((p: ProfileModel) => p.id === selectedProfileId)!}
-            onClose={() => setIsDetailsModalOpen(false)}
-          />
-        </Modal>
+        <div className="fixed inset-0 z-[1000]">
+          <Modal isOpen={isDetailsModalOpen} onClose={() => setIsDetailsModalOpen(false)}>
+            <Details
+              {...profiles.find((p: ProfileModel) => p.id === selectedProfileId)!}
+              onClose={() => setIsDetailsModalOpen(false)}
+            />
+          </Modal>
+        </div>
       )}
     </main>
   );

@@ -1,15 +1,14 @@
 "use client";
-
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Footer from "./components/footer";
-import SearchBar from "./components/search";
 import BodyWrapper from "./components/body/wrapper";
 import { useProfiles } from "@/context/ProfilesContext";
 import { BackendReference } from "@/types/BackendReference";
 import { ProfileModel } from "@/types/ProfileModel";
-
+import HeaderSearch from "./components/search/HeaderSearch";
 
 export default function ManoLandingPage() {
+  const [viewMode, setViewMode] = useState<"list" | "map">("list");
   const { setProfiles, setIsLoading } = useProfiles();
 
   const get_profiles = async () => {
@@ -51,17 +50,14 @@ export default function ManoLandingPage() {
       const response = await fetch(`/api/profile-photos/${profileId}`, {
         method: "GET",
       });
-
       if (!response.ok) {
         throw new Error("Failed to get profile photos");
       }
-
       const result = await response.json();
       const photos = result.data;
       const photoUrls: string[] = photos.map(
         (photo: BackendReference) => photo._links.self
       );
-
       setProfiles((prevProfiles: ProfileModel[]) =>
         prevProfiles.map((profile: ProfileModel) => {
           if (profile.id === profileId) {
@@ -87,8 +83,9 @@ export default function ManoLandingPage() {
 
   return (
     <div className="flex flex-col min-h-screen relative">
-      <SearchBar />
-      <BodyWrapper />
+      {/* Render HeaderSearch only if in list mode */}
+      {viewMode === "list" && <HeaderSearch />}
+      <BodyWrapper viewMode={viewMode} setViewMode={setViewMode} />
       <Footer />
     </div>
   );

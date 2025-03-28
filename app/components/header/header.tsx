@@ -11,6 +11,7 @@ import { BannerType } from "@/types/BannerType";
 import { useAuth } from "@/context/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
+import { Router } from "next/router";
 
 interface HeaderProps {
   verification_code: string;
@@ -247,12 +248,19 @@ export default function Header({ verification_code, email }: HeaderProps) {
         {showMenu && (
           <div
             ref={menuRef}
-            className="absolute right-4 sm:right-6 top-12 z-10 mt-2 w-56 divide-y divide-gray-100 rounded-md border border-gray-100 bg-white shadow-lg"
+            className="absolute right-4 sm:right-6 top-12 z-[9999] mt-2 w-56 divide-y divide-gray-100 rounded-md border border-gray-100 bg-white shadow-lg"
             role="menu"
           >
             {typeof window !== "undefined" &&
               isLoggedIn === true ? (
               <div className="p-2">
+                <a
+                  onClick={() => router.push("/favorits")}
+                  className="block rounded-lg px-4 py-2 text-sm text-black hover:bg-gray-50 hover:text-gray-900 font-medium hover:cursor-pointer"
+                  role="menuitem"
+                >
+                  Favorits
+                </a>
                 <a
                   onClick={handleLogout}
                   className="block rounded-lg px-4 py-2 text-sm text-black hover:bg-gray-50 hover:text-gray-900 font-medium hover:cursor-pointer"

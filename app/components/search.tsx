@@ -205,7 +205,7 @@ export default function SearchBar() {
     <section className="pt-5 pb-8 border-b">
       <div className="container mx-auto px-4 lg:px-6 lg:px-8 ">
         <div className="flex flex-col lg:max-w-xl mx-auto items-center">
-          <h1 className="text-4xl font-bold text-center mb-8 w-[300px] lg:w-full">Finde erfahrene Handwerker</h1>
+        <h1 className="text-4xl font-bold text-center mb-8 w-[300px] lg:w-full">Finde erfahrene Handwerker</h1>
           <div className="flex mt-2 justify-center ">
             <Card className="self-center sm:w-full w-[300px] shadow-lg lg:rounded-[4rem]">
               <CardContent className="p-0 items-center">
