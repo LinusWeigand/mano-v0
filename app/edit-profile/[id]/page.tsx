@@ -15,6 +15,8 @@ interface ProfileData {
   craft: string
   experience: string
   location: string
+  lat: number
+  lng: number
   bio: string
   website: string
   instagram: string

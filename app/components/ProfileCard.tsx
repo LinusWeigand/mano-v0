@@ -2,11 +2,16 @@
 "use client"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn, myLoader } from "@/lib/utils"
+import { ProfileModel } from "@/types/ProfileModel"
 import { ChevronLeft, ChevronRight, Heart } from "lucide-react"
 import Image from "next/image"
 import { useState } from "react"
 
-export default function ProfileCard({ profile }) {
+interface ProfileCardProps {
+  profile: ProfileModel
+}
+
+export default function ProfileCard({ profile }: ProfileCardProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isFavorite, setIsFavorite] = useState(false)
 
@@ -22,12 +27,12 @@ export default function ProfileCard({ profile }) {
       ? Math.max(0, Math.min(currentIndex - Math.floor(dotsCount / 2), totalImages - dotsCount))
       : 0
 
-  const handlePrev = (e) => {
+  const handlePrev = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation()
     setCurrentIndex((prev) => (prev === 0 ? totalImages - 1 : prev - 1))
   }
 
-  const handleNext = (e) => {
+  const handleNext = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation()
     setCurrentIndex((prev) => (prev === totalImages - 1 ? 0 : prev + 1))
   }

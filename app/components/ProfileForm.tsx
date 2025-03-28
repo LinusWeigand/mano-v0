@@ -13,7 +13,6 @@ import {
   Globe,
   Instagram,
   AlertCircle,
-  MapPin,
   ChevronLeft,
   Minus,
   Plus,
@@ -44,6 +43,8 @@ interface ProfileFormProps {
     craft: string;
     experience: string;
     location: string;
+    lng: number;
+    lat: number;
     website: string;
     instagram: string;
     bio: string;
@@ -77,6 +78,8 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
     craft: initialData?.craft || "",
     experience: initialData?.experience || "1",
     location: initialData?.location || "",
+    lat: initialData?.lat || "",
+    lng: initialData?.lng || "",
     website: initialData?.website || "",
     instagram: initialData?.instagram || "",
     bio: initialData?.bio || "",
@@ -341,7 +344,7 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
       isValid = false
     }
 
-    if (!formData.location) {
+    if (!formData.location || !formData.lat || !formData.lng) {
       setLocationError("Bitte geben Sie einen Standort an.")
       isValid = false
     }
@@ -495,6 +498,8 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
       data.append("telefon", formData.telefon)
       data.append("craft", formData.craft)
       data.append("location", formData.location)
+      data.append("lng", String(formData.lng))
+      data.append("lat", String(formData.lat))
       data.append("website", formData.website)
       data.append("instagram", formData.instagram)
       data.append("bio", formData.bio)
@@ -812,32 +817,12 @@ export default function ProfileForm({ initialData, isEditing = false }: ProfileF
                 </div>
                 {experienceError && <p className="text-sm text-red-500 flex items-center gap-1">{experienceError}</p>}
               </div>
-              <ReliableAddressAutocomplete />
-              <div className="space-y-3 pt-2">
-                <Label htmlFor="location" className="text-base font-medium">
-                  Standort<span className="text-red-500 ml-1">*</span>
-                </Label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
-                  <Input
-                    ref={locationInputRef}
-                    id="location"
-                    name="location"
-                    maxLength={100}
-                    placeholder="Geben Sie Ihren Standort an"
-                    value={formData.location}
-                    onChange={handleChange}
-                    className={`text-[16px] rounded-md bg-white border-2 focus:outline-none h-12 pl-12 ${locationError ? "border-red-300 focus-visible:ring-red-300" : "focus-visible:border-primary"
-                      }`}
-                  />
-                  {locationError && (
-                    <div className="absolute right-3 top-3.5 text-red-500">
-                      <AlertCircle className="h-5 w-5" />
-                    </div>
-                  )}
-                </div>
-                {locationError && <p className="text-sm text-red-500 flex items-center gap-1">{locationError}</p>}
-              </div>
+
+              <ReliableAddressAutocomplete
+                value={formData.location}
+                onChange={(address, lat, lng) => setFormData({ ...formData, location: address, lat: lat, lng: lng })}
+                locationError={locationError}
+              />
 
               <div className="space-y-3 pt-2">
                 <Label htmlFor="website" className="text-base font-medium">

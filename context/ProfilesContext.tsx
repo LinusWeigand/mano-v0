@@ -5,6 +5,9 @@ import { createContext, useContext, useState, ReactNode } from 'react';
 interface ProfilesContextProps {
   setProfiles: React.Dispatch<React.SetStateAction<ProfileModel[]>>;
   profiles: ProfileModel[]
+
+  isLoading: boolean;
+  setIsLoading: (value: boolean) => void;
 }
 
 const ProfilesContext = createContext<ProfilesContextProps | undefined>(undefined);
@@ -19,9 +22,10 @@ export const useProfiles = () => {
 
 export const ProfilesProvider = ({ children }: { children: ReactNode }) => {
   const [profiles, setProfiles] = useState<ProfileModel[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   return (
-    <ProfilesContext.Provider value={{ profiles, setProfiles }}>
+    <ProfilesContext.Provider value={{ profiles, setProfiles, isLoading, setIsLoading }}>
       {children}
     </ProfilesContext.Provider>
   );

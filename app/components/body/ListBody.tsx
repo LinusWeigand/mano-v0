@@ -1,23 +1,23 @@
 "use client"
 import { Card, CardContent, } from "@/components/ui/card"
 import { AlertCircle, RefreshCw } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import Modal from "../modal"
 import Details from "../details"
 import { useProfiles } from "@/context/ProfilesContext"
 import ProfileSkeleton from "../BodySkeleton"
-import type { ProfileModel } from "@/types/ProfileModel"
-import type { BackendReference } from "@/types/BackendReference"
 import { Button } from "@/components/ui/button"
 import ProfileCard from "../ProfileCard"
+import { ProfileModel } from "@/types/ProfileModel"
+import { BackendReference } from "@/types/BackendReference"
 
 
 export default function ListBody() {
-  const { profiles, setProfiles } = useProfiles()
+  const { profiles, setProfiles, isLoading, setIsLoading } = useProfiles()
 
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null)
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+
 
   const get_profiles = async () => {
     try {
@@ -81,9 +81,6 @@ export default function ListBody() {
     }
   }
 
-  useEffect(() => {
-    get_profiles()
-  }, [])
 
   const skeletons = Array(8)
     .fill(0)

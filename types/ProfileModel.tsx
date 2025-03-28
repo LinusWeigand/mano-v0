@@ -9,6 +9,8 @@ export interface ProfileModel {
   craft: string;
   experience: number;
   location: string;
+  lng: number
+  lat: number
   website: string;
   instagram: string;
   bio: string;
